@@ -1,0 +1,267 @@
+{
+  "name": "VoidAI - Competitor Monitor [Phase 3+]",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Daily 8AM ET",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "notes": "Phase 3+ workflow. Daily competitor intelligence digest. DOES NOT POST PUBLICLY."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.twitter.com/2/tweets/search/recent",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "query", "value": "(from:gtaoventures OR \"Project Rubicon\" OR \"TaoFi\" OR \"Tensorplex\") -is:retweet" },
+            { "name": "max_results", "value": "50" },
+            { "name": "tweet.fields", "value": "created_at,public_metrics,author_id" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.X_API_BEARER_TOKEN }}" }
+          ]
+        },
+        "options": { "timeout": 15000 }
+      },
+      "id": "x-search-competitors",
+      "name": "X: Competitor Tweets",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [250, -50],
+      "continueOnFail": true,
+      "notes": "Search X for competitor activity. Requires X API Basic ($200/mo)."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.twitter.com/2/tweets/search/recent",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "query", "value": "(\"VoidAI\" OR \"@v0idai\" OR \"SN106\") -from:v0idai -is:retweet" },
+            { "name": "max_results", "value": "50" },
+            { "name": "tweet.fields", "value": "created_at,public_metrics,author_id" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.X_API_BEARER_TOKEN }}" }
+          ]
+        },
+        "options": { "timeout": 15000 }
+      },
+      "id": "x-search-mentions",
+      "name": "X: VoidAI Mentions",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [250, 50],
+      "continueOnFail": true,
+      "notes": "Track what people are saying about VoidAI. Useful for sentiment monitoring."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.TAOSTATS_API_BASE }}/subnet/latest",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "netuid", "value": "106" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "={{ $env.TAOSTATS_API_KEY }}" }
+          ]
+        },
+        "options": { "timeout": 15000 }
+      },
+      "id": "taostats-sn106",
+      "name": "Taostats: SN106",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [250, 150],
+      "continueOnFail": true,
+      "notes": "Our own subnet data for comparison."
+    },
+    {
+      "parameters": {
+        "jsCode": "const competitorTweets = $('X: Competitor Tweets').first().json;\nconst mentions = $('X: VoidAI Mentions').first().json;\nconst sn106 = $('Taostats: SN106').first().json;\n\nconst digest = {\n  competitor_tweets: competitorTweets?.data || [],\n  competitor_count: competitorTweets?.data?.length || 0,\n  voidai_mentions: mentions?.data || [],\n  mention_count: mentions?.data?.length || 0,\n  sn106_data: sn106 || {},\n  generated_at: new Date().toISOString()\n};\n\nreturn [{ json: digest }];"
+      },
+      "id": "merge-intel",
+      "name": "Merge Intelligence",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [550, 50]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "={{ $env.CLAUDE_API_KEY }}" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-sonnet-4-20250514\",\n  \"max_tokens\": 1000,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Generate a brief daily competitor intelligence digest for VoidAI (Bittensor SN106).\\n\\nCompetitor tweets found: {{ $json.competitor_count }}\\nVoidAI mentions found: {{ $json.mention_count }}\\n\\nCompetitor tweet data: {{ JSON.stringify($json.competitor_tweets.slice(0, 10)) }}\\n\\nVoidAI mention data: {{ JSON.stringify($json.voidai_mentions.slice(0, 10)) }}\\n\\nFormat as a brief daily intelligence digest with sections:\\n1. Competitor Activity Summary\\n2. VoidAI Sentiment (what people are saying)\\n3. Threats & Opportunities\\n4. Recommended Actions (if any)\\n\\nKeep it concise. Under 500 words.\"\n    }\n  ]\n}",
+        "options": { "timeout": 30000 }
+      },
+      "id": "claude-summarize",
+      "name": "Claude: Daily Digest",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [800, 50],
+      "continueOnFail": true,
+      "notes": "Generate daily competitor intelligence digest using Claude."
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst digest = response?.content?.[0]?.text || 'Failed to generate digest. Check API logs.';\nconst date = new Date().toLocaleDateString('en-US', {\n  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',\n  timeZone: 'America/New_York'\n});\n\nreturn [{ json: {\n  message: `**Competitor Intel | ${date}**\\n\\n${digest}`,\n  date\n} }];"
+      },
+      "id": "format-digest",
+      "name": "Format Digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 50]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "dry-run",
+              "leftValue": "={{ $env.DRY_RUN }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "dry-run-check",
+      "name": "DRY_RUN?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1300, 50]
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs = require('fs');\nconst logDir = $env.LOG_FILE_PATH || '/data/n8n/dry-run-logs/';\nconst date = new Date().toISOString().split('T')[0];\nconst logFile = `${logDir}workflow-6-competitor-${date}.json`;\n\nfs.mkdirSync(logDir, { recursive: true });\nfs.writeFileSync(logFile, JSON.stringify({\n  workflow: 'competitor-monitor',\n  dry_run: true,\n  timestamp: new Date().toISOString(),\n  digest: $input.first().json.message\n}, null, 2));\n\nreturn [{ json: { status: 'logged', file: logFile } }];"
+      },
+      "id": "dry-run-log",
+      "name": "DRY_RUN Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1550, -50]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"{{ $json.message }}\"\n}",
+        "options": {}
+      },
+      "id": "discord-dm",
+      "name": "Discord: Intel Digest",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1550, 150],
+      "notes": "Send competitor digest to private Discord channel. NEVER posts publicly."
+    }
+  ],
+  "connections": {
+    "Daily 8AM ET": {
+      "main": [
+        [
+          { "node": "X: Competitor Tweets", "type": "main", "index": 0 },
+          { "node": "X: VoidAI Mentions", "type": "main", "index": 0 },
+          { "node": "Taostats: SN106", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "X: Competitor Tweets": {
+      "main": [
+        [{ "node": "Merge Intelligence", "type": "main", "index": 0 }]
+      ]
+    },
+    "X: VoidAI Mentions": {
+      "main": [
+        [{ "node": "Merge Intelligence", "type": "main", "index": 0 }]
+      ]
+    },
+    "Taostats: SN106": {
+      "main": [
+        [{ "node": "Merge Intelligence", "type": "main", "index": 0 }]
+      ]
+    },
+    "Merge Intelligence": {
+      "main": [
+        [{ "node": "Claude: Daily Digest", "type": "main", "index": 0 }]
+      ]
+    },
+    "Claude: Daily Digest": {
+      "main": [
+        [{ "node": "Format Digest", "type": "main", "index": 0 }]
+      ]
+    },
+    "Format Digest": {
+      "main": [
+        [{ "node": "DRY_RUN?", "type": "main", "index": 0 }]
+      ]
+    },
+    "DRY_RUN?": {
+      "main": [
+        [{ "node": "DRY_RUN Log", "type": "main", "index": 0 }],
+        [{ "node": "Discord: Intel Digest", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/New_York",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  },
+  "staticData": null,
+  "tags": [
+    { "name": "competitor" },
+    { "name": "intelligence" },
+    { "name": "phase-3" }
+  ],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "voidai-marketing"
+  }
+}

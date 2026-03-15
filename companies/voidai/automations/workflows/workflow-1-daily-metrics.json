@@ -1,0 +1,537 @@
+{
+  "name": "VoidAI - Daily Metrics Post",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Daily 9AM ET",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "notes": "Trigger: 9:00 AM ET daily. Adjust timezone in n8n settings to America/New_York."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.TAOSTATS_API_BASE }}/subnet/latest",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "netuid",
+              "value": "106"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $env.TAOSTATS_API_KEY }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "taostats-subnet",
+      "name": "Taostats Subnet 106",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [250, -100],
+      "continueOnFail": true,
+      "notes": "Fetch SN106 subnet data (emissions, registration cost, tempo)"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.TAOSTATS_API_BASE }}/dtao/pool/latest",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "netuid",
+              "value": "106"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $env.TAOSTATS_API_KEY }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "taostats-pool",
+      "name": "Taostats Pool",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [250, 0],
+      "continueOnFail": true,
+      "notes": "Fetch SN106 dTAO pool data (alpha price, TAO reserve, alpha reserve)"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.COINGECKO_API_BASE }}/simple/price",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "ids",
+              "value": "bittensor"
+            },
+            {
+              "name": "vs_currencies",
+              "value": "usd"
+            },
+            {
+              "name": "include_24hr_change",
+              "value": "true"
+            },
+            {
+              "name": "include_market_cap",
+              "value": "true"
+            },
+            {
+              "name": "include_24hr_vol",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "coingecko-tao",
+      "name": "CoinGecko TAO",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [250, 100],
+      "continueOnFail": true,
+      "notes": "Fetch TAO price, 24h change, market cap, volume from CoinGecko"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.COINGECKO_API_BASE }}/simple/price",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "ids",
+              "value": "liquidity-provisioning"
+            },
+            {
+              "name": "vs_currencies",
+              "value": "usd"
+            },
+            {
+              "name": "include_24hr_change",
+              "value": "true"
+            },
+            {
+              "name": "include_market_cap",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "coingecko-sn106",
+      "name": "CoinGecko SN106",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [250, 200],
+      "continueOnFail": true,
+      "notes": "Fetch SN106 alpha token price and 24h change from CoinGecko (coin ID: liquidity-provisioning)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge all API responses into a single data object\nconst taostatsSubnet = $('Taostats Subnet 106').first().json;\nconst taostatsPool = $('Taostats Pool').first().json;\nconst taoPrice = $('CoinGecko TAO').first().json;\nconst alphaPrice = $('CoinGecko SN106').first().json;\n\nconst data = {\n  tao_price: taoPrice?.bittensor?.usd ?? 'N/A',\n  tao_24h_change: taoPrice?.bittensor?.usd_24h_change ?? 'N/A',\n  tao_market_cap: taoPrice?.bittensor?.usd_market_cap ?? 'N/A',\n  tao_volume_24h: taoPrice?.bittensor?.usd_24h_vol ?? 'N/A',\n  alpha_price_usd: alphaPrice?.['liquidity-provisioning']?.usd ?? 'N/A',\n  alpha_24h_change: alphaPrice?.['liquidity-provisioning']?.usd_24h_change ?? 'N/A',\n  alpha_market_cap: alphaPrice?.['liquidity-provisioning']?.usd_market_cap ?? 'N/A',\n  sn106_emission: taostatsSubnet?.emission ?? 'N/A',\n  sn106_tao_reserve: taostatsPool?.tao_reserve ?? 'N/A',\n  sn106_alpha_reserve: taostatsPool?.alpha_reserve ?? 'N/A',\n  sn106_alpha_price_tao: taostatsPool?.price ?? 'N/A',\n  timestamp: new Date().toISOString(),\n  date_display: new Date().toLocaleDateString('en-US', {\n    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',\n    timeZone: 'America/New_York'\n  }),\n  api_failures: []\n};\n\nif (data.tao_price === 'N/A') data.api_failures.push('CoinGecko TAO');\nif (data.alpha_price_usd === 'N/A') data.api_failures.push('CoinGecko SN106');\nif (data.sn106_emission === 'N/A') data.api_failures.push('Taostats Subnet');\nif (data.sn106_tao_reserve === 'N/A') data.api_failures.push('Taostats Pool');\n\nreturn [{ json: data }];"
+      },
+      "id": "merge-data",
+      "name": "Merge Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 50],
+      "notes": "Merge all API responses. Track which APIs failed."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "api-fail-check",
+              "leftValue": "={{ $json.api_failures.length }}",
+              "rightValue": "2",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-api-failures",
+      "name": "Too Many API Failures?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [700, 50],
+      "notes": "If more than 2 APIs failed, skip posting and notify."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "=**Daily Metrics Workflow Failed**\\nAPIs down: {{ $json.api_failures.join(', ') }}\\nTimestamp: {{ $json.timestamp }}\\nManual post required today."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "error-notify",
+      "name": "Error: Discord Notify",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [950, -50],
+      "notes": "Notify Vew via Discord that too many APIs are down."
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\n\nconst fmtPrice = (n) => typeof n === 'number' ? `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'N/A';\nconst fmtPct = (n) => typeof n === 'number' ? `${n >= 0 ? '+' : ''}${n.toFixed(1)}%` : 'N/A';\nconst fmtMcap = (n) => {\n  if (typeof n !== 'number') return 'N/A';\n  if (n >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;\n  if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;\n  return `$${n.toLocaleString()}`;\n};\n\nconst tweet = [\n  `SN106 Daily | ${d.date_display}`,\n  ``,\n  `$TAO: ${fmtPrice(d.tao_price)} (${fmtPct(d.tao_24h_change)})`,\n  `Market Cap: ${fmtMcap(d.tao_market_cap)}`,\n  `24h Volume: ${fmtMcap(d.tao_volume_24h)}`,\n  ``,\n  `SN106 Alpha: ${fmtPrice(d.alpha_price_usd)} (${fmtPct(d.alpha_24h_change)})`,\n  `Alpha MCap: ${fmtMcap(d.alpha_market_cap)}`,\n];\n\nif (d.sn106_tao_reserve !== 'N/A') {\n  tweet.push(`Pool: ${Number(d.sn106_tao_reserve).toLocaleString()} TAO / ${Number(d.sn106_alpha_reserve).toLocaleString()} Alpha`);\n}\n\ntweet.push('');\ntweet.push('Data: Taostats + CoinGecko');\ntweet.push('#Bittensor $TAO #SN106 #VoidAI');\n\nconst tweetText = tweet.join('\\n');\n\nif (tweetText.length > 280) {\n  const short = [\n    `SN106 Daily`,\n    `$TAO: ${fmtPrice(d.tao_price)} (${fmtPct(d.tao_24h_change)})`,\n    `SN106: ${fmtPrice(d.alpha_price_usd)} (${fmtPct(d.alpha_24h_change)})`,\n    `MCap: ${fmtMcap(d.tao_market_cap)}`,\n    ``,\n    `#Bittensor $TAO #SN106`\n  ].join('\\n');\n  return [{ json: { tweet: short, full_data: d, truncated: true } }];\n}\n\nreturn [{ json: { tweet: tweetText, full_data: d, truncated: false } }];"
+      },
+      "id": "format-tweet",
+      "name": "Format Tweet",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [950, 150],
+      "notes": "Format metrics into tweet. Auto-truncate if over 280 chars. Numbers formatted for readability (hint: use Space Grotesk for manual image creation)."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "dry-run-check",
+              "leftValue": "={{ $env.DRY_RUN }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "dry-run-check",
+      "name": "DRY_RUN?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1200, 150],
+      "notes": "If DRY_RUN=true, log to file instead of posting."
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs = require('fs');\nconst logDir = $env.LOG_FILE_PATH || '/data/n8n/dry-run-logs/';\nconst date = new Date().toISOString().split('T')[0];\nconst logFile = `${logDir}workflow-1-daily-metrics-${date}.json`;\n\nconst logEntry = {\n  workflow: 'daily-metrics',\n  timestamp: new Date().toISOString(),\n  dry_run: true,\n  tweet_text: $input.first().json.tweet,\n  tweet_length: $input.first().json.tweet.length,\n  full_data: $input.first().json.full_data,\n  truncated: $input.first().json.truncated,\n  would_post_to: '@v0idai'\n};\n\nfs.mkdirSync(logDir, { recursive: true });\nfs.writeFileSync(logFile, JSON.stringify(logEntry, null, 2));\n\nreturn [{ json: { status: 'logged', file: logFile, ...logEntry } }];"
+      },
+      "id": "dry-run-log",
+      "name": "DRY_RUN Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1450, 50],
+      "notes": "Write formatted tweet + raw data to log file for review."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "api-switch-opentweet",
+              "leftValue": "={{ $env.POSTING_API }}",
+              "rightValue": "opentweet",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "api-switch",
+      "name": "Which Posting API?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1450, 250],
+      "notes": "Route to the configured posting API (opentweet, x_api, or outstand)."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.opentweet.com/v1/tweets",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.OPENTWEET_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $('Format Tweet').first().json.tweet }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "post-opentweet",
+      "name": "Post via OpenTweet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1700, 150],
+      "continueOnFail": true,
+      "notes": "Post tweet via OpenTweet API (7-day trial, then $6/mo)."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.twitter.com/2/tweets",
+        "authentication": "oAuth1",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $('Format Tweet').first().json.tweet }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "post-x-api",
+      "name": "Post via X API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1700, 300],
+      "continueOnFail": true,
+      "notes": "Post tweet via X API v2. Requires OAuth 1.0a credentials. X API Basic $200/mo."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.OUTSTAND_API_BASE }}/publish",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.OUTSTAND_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"platforms\": [\"twitter\"],\n  \"account\": \"@v0idai\",\n  \"content\": {\n    \"text\": \"{{ $('Format Tweet').first().json.tweet }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "post-outstand",
+      "name": "Post via Outstand",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1700, 450],
+      "continueOnFail": true,
+      "notes": "PLACEHOLDER: Outstand API not yet available. Update when API docs published."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"Daily metrics posted successfully.\\nTweet length: {{ $json.tweet.length }} chars\"\n}",
+        "options": {}
+      },
+      "id": "success-notify",
+      "name": "Success: Discord Notify",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1950, 150],
+      "notes": "Notify Vew of successful post."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"**ALERT: Daily Metrics Post FAILED**\\nAPI: {{ $env.POSTING_API }}\\nManual post required.\\n\\nDraft tweet:\\n```{{ $('Format Tweet').first().json.tweet }}```\"\n}",
+        "options": {}
+      },
+      "id": "failure-notify",
+      "name": "Failure: Discord Notify",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1950, 400],
+      "notes": "Alert Vew that posting failed. Includes draft tweet for manual posting."
+    }
+  ],
+  "connections": {
+    "Daily 9AM ET": {
+      "main": [
+        [
+          { "node": "Taostats Subnet 106", "type": "main", "index": 0 },
+          { "node": "Taostats Pool", "type": "main", "index": 0 },
+          { "node": "CoinGecko TAO", "type": "main", "index": 0 },
+          { "node": "CoinGecko SN106", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Taostats Subnet 106": {
+      "main": [
+        [{ "node": "Merge Data", "type": "main", "index": 0 }]
+      ]
+    },
+    "Taostats Pool": {
+      "main": [
+        [{ "node": "Merge Data", "type": "main", "index": 0 }]
+      ]
+    },
+    "CoinGecko TAO": {
+      "main": [
+        [{ "node": "Merge Data", "type": "main", "index": 0 }]
+      ]
+    },
+    "CoinGecko SN106": {
+      "main": [
+        [{ "node": "Merge Data", "type": "main", "index": 0 }]
+      ]
+    },
+    "Merge Data": {
+      "main": [
+        [{ "node": "Too Many API Failures?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Too Many API Failures?": {
+      "main": [
+        [{ "node": "Error: Discord Notify", "type": "main", "index": 0 }],
+        [{ "node": "Format Tweet", "type": "main", "index": 0 }]
+      ]
+    },
+    "Format Tweet": {
+      "main": [
+        [{ "node": "DRY_RUN?", "type": "main", "index": 0 }]
+      ]
+    },
+    "DRY_RUN?": {
+      "main": [
+        [{ "node": "DRY_RUN Log", "type": "main", "index": 0 }],
+        [{ "node": "Which Posting API?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Which Posting API?": {
+      "main": [
+        [{ "node": "Post via OpenTweet", "type": "main", "index": 0 }],
+        [{ "node": "Post via X API", "type": "main", "index": 0 }],
+        [{ "node": "Post via Outstand", "type": "main", "index": 0 }]
+      ]
+    },
+    "Post via OpenTweet": {
+      "main": [
+        [{ "node": "Success: Discord Notify", "type": "main", "index": 0 }]
+      ]
+    },
+    "Post via X API": {
+      "main": [
+        [{ "node": "Success: Discord Notify", "type": "main", "index": 0 }]
+      ]
+    },
+    "Post via Outstand": {
+      "main": [
+        [{ "node": "Success: Discord Notify", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/New_York",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  },
+  "staticData": null,
+  "tags": [
+    { "name": "daily" },
+    { "name": "metrics" },
+    { "name": "critical" }
+  ],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "voidai-marketing"
+  }
+}

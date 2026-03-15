@@ -1,0 +1,281 @@
+{
+  "name": "VoidAI - Weekly Recap Thread",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 14 * * 5"
+            }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Friday 2PM ET",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "notes": "Trigger: Friday 2:00 PM ET. Set n8n timezone to America/New_York."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.TAOSTATS_API_BASE }}/dtao/pool/history",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "netuid", "value": "106" },
+            { "name": "period", "value": "7d" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "={{ $env.TAOSTATS_API_KEY }}" }
+          ]
+        },
+        "options": { "timeout": 30000 }
+      },
+      "id": "taostats-7d",
+      "name": "Taostats 7d History",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [250, -150],
+      "continueOnFail": true,
+      "notes": "SN106 pool history for the past 7 days."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.COINGECKO_API_BASE }}/coins/bittensor/market_chart",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "vs_currency", "value": "usd" },
+            { "name": "days", "value": "7" }
+          ]
+        },
+        "options": { "timeout": 30000 }
+      },
+      "id": "coingecko-tao-7d",
+      "name": "CoinGecko TAO 7d",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [250, -50],
+      "continueOnFail": true,
+      "notes": "TAO price chart data for the past 7 days."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.COINGECKO_API_BASE }}/coins/liquidity-provisioning/market_chart",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "vs_currency", "value": "usd" },
+            { "name": "days", "value": "7" }
+          ]
+        },
+        "options": { "timeout": 30000 }
+      },
+      "id": "coingecko-sn106-7d",
+      "name": "CoinGecko SN106 7d",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [250, 50],
+      "continueOnFail": true,
+      "notes": "SN106 alpha token price chart for the past 7 days."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.BRIDGE_MONITOR_URL }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "period", "value": "7d" },
+            { "name": "aggregate", "value": "true" }
+          ]
+        },
+        "options": { "timeout": 15000 }
+      },
+      "id": "bridge-volume",
+      "name": "Bridge Volume 7d",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [250, 150],
+      "continueOnFail": true,
+      "notes": "Weekly bridge volume from Tracker/FastAPI. May not be available yet."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.github.com/orgs/{{ $env.GITHUB_ORG }}/repos?per_page=100&sort=pushed",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.GITHUB_TOKEN }}" }
+          ]
+        },
+        "options": { "timeout": 15000 }
+      },
+      "id": "github-repos",
+      "name": "GitHub Repos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [250, 250],
+      "continueOnFail": true,
+      "notes": "Fetch repo list to count active repos in last 7 days."
+    },
+    {
+      "parameters": {
+        "jsCode": "const taostats = $('Taostats 7d History').first().json;\nconst taoPrices = $('CoinGecko TAO 7d').first().json;\nconst alphaPrices = $('CoinGecko SN106 7d').first().json;\nconst bridge = $('Bridge Volume 7d').first().json;\nconst repos = $('GitHub Repos').first().json;\n\nlet taoWeeklyChange = 'N/A';\nif (taoPrices?.prices?.length >= 2) {\n  const start = taoPrices.prices[0][1];\n  const end = taoPrices.prices[taoPrices.prices.length - 1][1];\n  taoWeeklyChange = ((end - start) / start * 100).toFixed(1);\n}\n\nlet alphaWeeklyChange = 'N/A';\nif (alphaPrices?.prices?.length >= 2) {\n  const start = alphaPrices.prices[0][1];\n  const end = alphaPrices.prices[alphaPrices.prices.length - 1][1];\n  alphaWeeklyChange = ((end - start) / start * 100).toFixed(1);\n}\n\nlet activeRepos = 'N/A';\nif (Array.isArray(repos)) {\n  const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();\n  activeRepos = repos.filter(r => r.pushed_at > oneWeekAgo && !r.fork).length;\n}\n\nconst weekData = {\n  tao_current_price: taoPrices?.prices?.length ? taoPrices.prices[taoPrices.prices.length - 1][1] : 'N/A',\n  tao_weekly_change_pct: taoWeeklyChange,\n  alpha_current_price: alphaPrices?.prices?.length ? alphaPrices.prices[alphaPrices.prices.length - 1][1] : 'N/A',\n  alpha_weekly_change_pct: alphaWeeklyChange,\n  bridge_total_tao: bridge?.total_tao_bridged ?? 'N/A',\n  bridge_tx_count: bridge?.transaction_count ?? 'N/A',\n  bridge_unique_wallets: bridge?.unique_wallets ?? 'N/A',\n  bridge_chains: bridge?.chains ?? {},\n  github_active_repos: activeRepos,\n  sn106_pool_data: taostats ?? {},\n  week_ending: new Date().toLocaleDateString('en-US', {\n    year: 'numeric', month: 'long', day: 'numeric',\n    timeZone: 'America/New_York'\n  })\n};\n\nreturn [{ json: weekData }];"
+      },
+      "id": "merge-all",
+      "name": "Merge All Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [550, 50],
+      "notes": "Merge all 7-day data sources into a single object for Claude."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "={{ $env.CLAUDE_API_KEY }}" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-sonnet-4-20250514\",\n  \"max_tokens\": 2000,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"You are writing a weekly recap X thread for @v0idai (VoidAI, Bittensor SN106 subnet). Write 8-10 tweets as a thread.\\n\\nRules:\\n- First tweet is the hook. Must stop the scroll.\\n- Each tweet must be under 280 characters.\\n- Use specific numbers. No fluff.\\n- Tone: builder-credible, data-first, direct. Not hype.\\n- Include $TAO and #Bittensor hashtags naturally.\\n- Last tweet: forward-looking CTA (follow, bridge, join Discord).\\n- NEVER use: guaranteed returns, risk-free, passive income, to the moon, or any price predictions.\\n- NEVER use em dashes. Use commas, periods, or colons.\\n- Include a short disclaimer in the last tweet: 'Not financial advice. DYOR.'\\n- Do NOT use any of these phrases: 'It's worth noting', 'In the ever-evolving landscape', 'game-changer', 'paradigm shift', 'seamless integration', 'robust ecosystem', 'cutting-edge'.\\n\\nWeek ending: {{ $json.week_ending }}\\n\\nData:\\n- TAO price: ${{ $json.tao_current_price }} ({{ $json.tao_weekly_change_pct }}% weekly)\\n- SN106 Alpha price: ${{ $json.alpha_current_price }} ({{ $json.alpha_weekly_change_pct }}% weekly)\\n- Bridge volume: {{ $json.bridge_total_tao }} TAO bridged this week\\n- Bridge transactions: {{ $json.bridge_tx_count }}\\n- Unique bridge wallets: {{ $json.bridge_unique_wallets }}\\n- GitHub repos active: {{ $json.github_active_repos }}\\n\\nFormat your response as a JSON array of strings, one per tweet. Example:\\n[\\\"1/ Hook tweet here\\\", \\\"2/ Second tweet\\\", ..., \\\"8/ Final tweet with CTA\\\"]\"\n    }\n  ]\n}",
+        "options": { "timeout": 60000 }
+      },
+      "id": "claude-generate",
+      "name": "Claude: Generate Thread",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [800, 50],
+      "continueOnFail": true,
+      "notes": "Generate 8-10 tweet thread from weekly data. Uses claude-sonnet-4-20250514 for cost efficiency."
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nlet threadTweets = [];\n\ntry {\n  const text = response.content[0].text;\n  threadTweets = JSON.parse(text);\n} catch (e) {\n  const text = response.content?.[0]?.text || '';\n  threadTweets = text.split('\\n').filter(line => line.match(/^\\d+\\//));\n}\n\nconst validated = threadTweets.map((tweet, i) => ({\n  index: i + 1,\n  text: tweet,\n  length: tweet.length,\n  over_limit: tweet.length > 280\n}));\n\nconst hasErrors = validated.some(t => t.over_limit);\n\nreturn [{\n  json: {\n    thread: validated,\n    tweet_count: validated.length,\n    has_length_errors: hasErrors\n  }\n}];"
+      },
+      "id": "parse-thread",
+      "name": "Parse Thread",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 50],
+      "notes": "Parse Claude response into individual tweets. Validate each is under 280 chars."
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs = require('fs');\nconst draftsDir = $env.QUEUE_DRAFTS_PATH || '/data/voidai/queue/drafts/';\nconst date = new Date().toISOString().split('T')[0];\nconst filename = `weekly-recap-${date}.md`;\nconst filepath = `${draftsDir}${filename}`;\n\nconst thread = $input.first().json.thread;\n\nlet content = `---\\ntype: x-thread\\naccount: \"@v0idai\"\\nstatus: review\\ncreated: ${new Date().toISOString()}\\nsource: workflow-3-weekly-recap\\nrequires_human_review: true\\ntweet_count: ${thread.length}\\nhas_length_errors: ${$input.first().json.has_length_errors}\\n---\\n\\n# Weekly Recap Thread | ${date}\\n\\n`;\n\nfor (const tweet of thread) {\n  content += `## Tweet ${tweet.index} (${tweet.length} chars${tweet.over_limit ? ' -- OVER LIMIT' : ''})\\n\\n${tweet.text}\\n\\n`;\n}\n\nfs.mkdirSync(draftsDir, { recursive: true });\nfs.writeFileSync(filepath, content);\n\nreturn [{ json: { status: 'drafted', file: filepath, tweet_count: thread.length } }];"
+      },
+      "id": "write-drafts",
+      "name": "Write to Drafts Queue",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1300, 50],
+      "notes": "Write thread to queue/drafts/ with YAML frontmatter. ALWAYS requires human review."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"**Weekly Recap Thread Ready for Review**\\n\\nFile: `{{ $json.file }}`\\nTweets: {{ $json.tweet_count }}\\n\\nReview and approve before posting. Use `/queue approve` when ready.\\n\\n_This thread will NOT be posted automatically. Human review required._\"\n}",
+        "options": {}
+      },
+      "id": "discord-notify",
+      "name": "Discord: Review Needed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1550, 50],
+      "notes": "Notify Vew that the weekly recap is ready for human review."
+    }
+  ],
+  "connections": {
+    "Friday 2PM ET": {
+      "main": [
+        [
+          { "node": "Taostats 7d History", "type": "main", "index": 0 },
+          { "node": "CoinGecko TAO 7d", "type": "main", "index": 0 },
+          { "node": "CoinGecko SN106 7d", "type": "main", "index": 0 },
+          { "node": "Bridge Volume 7d", "type": "main", "index": 0 },
+          { "node": "GitHub Repos", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Taostats 7d History": {
+      "main": [
+        [{ "node": "Merge All Data", "type": "main", "index": 0 }]
+      ]
+    },
+    "CoinGecko TAO 7d": {
+      "main": [
+        [{ "node": "Merge All Data", "type": "main", "index": 0 }]
+      ]
+    },
+    "CoinGecko SN106 7d": {
+      "main": [
+        [{ "node": "Merge All Data", "type": "main", "index": 0 }]
+      ]
+    },
+    "Bridge Volume 7d": {
+      "main": [
+        [{ "node": "Merge All Data", "type": "main", "index": 0 }]
+      ]
+    },
+    "GitHub Repos": {
+      "main": [
+        [{ "node": "Merge All Data", "type": "main", "index": 0 }]
+      ]
+    },
+    "Merge All Data": {
+      "main": [
+        [{ "node": "Claude: Generate Thread", "type": "main", "index": 0 }]
+      ]
+    },
+    "Claude: Generate Thread": {
+      "main": [
+        [{ "node": "Parse Thread", "type": "main", "index": 0 }]
+      ]
+    },
+    "Parse Thread": {
+      "main": [
+        [{ "node": "Write to Drafts Queue", "type": "main", "index": 0 }]
+      ]
+    },
+    "Write to Drafts Queue": {
+      "main": [
+        [{ "node": "Discord: Review Needed", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/New_York",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  },
+  "staticData": null,
+  "tags": [
+    { "name": "weekly" },
+    { "name": "thread" },
+    { "name": "requires-review" }
+  ],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "voidai-marketing"
+  }
+}

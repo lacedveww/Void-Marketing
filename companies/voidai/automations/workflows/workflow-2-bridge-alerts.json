@@ -1,0 +1,265 @@
+{
+  "name": "VoidAI - Bridge Transaction Alerts",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bridge-tx-alert",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook: Bridge TX",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "notes": "Option A (preferred): Receives POST from Tracker/FastAPI when a bridge tx exceeds threshold. Expected payload: { tx_hash, amount_tao, source_chain, dest_chain, timestamp, explorer_url }"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/15 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Cron: Every 15min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 200],
+      "disabled": true,
+      "notes": "Option B (fallback): Poll every 15 minutes. DISABLED by default. Enable if webhook not available."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.BRIDGE_MONITOR_URL }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "since",
+              "value": "15m"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "fetch-recent-txs",
+      "name": "Fetch Recent Txs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [250, 200],
+      "continueOnFail": true,
+      "notes": "Only used with Cron trigger. Fetches recent bridge transactions from Tracker/FastAPI."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "threshold-check",
+              "leftValue": "={{ $json.amount_tao }}",
+              "rightValue": "={{ $env.BRIDGE_TX_THRESHOLD }}",
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "filter-threshold",
+      "name": "Amount >= Threshold?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [500, 100],
+      "notes": "Only alert for transactions above BRIDGE_TX_THRESHOLD (default: 100 TAO)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs = require('fs');\nconst stateFile = ($env.LOG_FILE_PATH || '/data/n8n/dry-run-logs/') + 'bridge-alert-state.json';\n\nlet state = {};\ntry {\n  state = JSON.parse(fs.readFileSync(stateFile, 'utf8'));\n} catch (e) {\n  state = { posted_hashes: [] };\n}\n\nconst txHash = $input.first().json.tx_hash;\n\nif (state.posted_hashes.includes(txHash)) {\n  return [];\n}\n\nstate.posted_hashes.push(txHash);\nif (state.posted_hashes.length > 500) {\n  state.posted_hashes = state.posted_hashes.slice(-500);\n}\n\nconst logDir = $env.LOG_FILE_PATH || '/data/n8n/dry-run-logs/';\nfs.mkdirSync(logDir, { recursive: true });\nfs.writeFileSync(stateFile, JSON.stringify(state, null, 2));\n\nreturn $input.all();"
+      },
+      "id": "deduplicate",
+      "name": "Deduplicate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [750, 100],
+      "notes": "Prevent duplicate alerts. Keeps last 500 tx hashes in state file."
+    },
+    {
+      "parameters": {
+        "jsCode": "const tx = $input.first().json;\n\nconst amount = Number(tx.amount_tao).toLocaleString('en-US', {\n  minimumFractionDigits: 0,\n  maximumFractionDigits: 1\n});\n\nconst chainDisplay = {\n  'Bittensor': 'Bittensor',\n  'Solana': 'Solana',\n  'Ethereum': 'Ethereum',\n  'Base': 'Base'\n};\n\nconst source = chainDisplay[tx.source_chain] || tx.source_chain;\nconst dest = chainDisplay[tx.dest_chain] || tx.dest_chain;\n\nconst tweet = `${amount} $TAO bridged from ${source} to ${dest}.\\n\\nNon-custodial. Secured by @chainlink CCIP.\\n\\n#Bittensor #VoidAI #CrossChain`;\n\nlet tweetWithLink = tweet;\nif (tx.explorer_url && (tweet.length + tx.explorer_url.length + 2) <= 280) {\n  tweetWithLink = `${amount} $TAO bridged from ${source} to ${dest}.\\n\\nNon-custodial. Secured by @chainlink CCIP.\\n\\n${tx.explorer_url}\\n\\n#Bittensor #VoidAI #CrossChain`;\n}\n\nconst finalTweet = tweetWithLink.length <= 280 ? tweetWithLink : tweet;\n\nreturn [{\n  json: {\n    tweet: finalTweet,\n    tx_hash: tx.tx_hash,\n    amount_tao: tx.amount_tao,\n    source_chain: tx.source_chain,\n    dest_chain: tx.dest_chain,\n    timestamp: tx.timestamp\n  }\n}];"
+      },
+      "id": "format-tweet",
+      "name": "Format Alert Tweet",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1000, 100],
+      "notes": "Format bridge tx into tweet. Includes explorer link if it fits within 280 chars."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "dry-run-check",
+              "leftValue": "={{ $env.DRY_RUN }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "dry-run-check",
+      "name": "DRY_RUN?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1250, 100]
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs = require('fs');\nconst logDir = $env.LOG_FILE_PATH || '/data/n8n/dry-run-logs/';\nconst date = new Date().toISOString().replace(/[:.]/g, '-');\nconst logFile = `${logDir}workflow-2-bridge-alert-${date}.json`;\n\nconst logEntry = {\n  workflow: 'bridge-alert',\n  timestamp: new Date().toISOString(),\n  dry_run: true,\n  tweet_text: $input.first().json.tweet,\n  tx_hash: $input.first().json.tx_hash,\n  amount_tao: $input.first().json.amount_tao,\n  source_chain: $input.first().json.source_chain,\n  dest_chain: $input.first().json.dest_chain,\n  would_post_to: '@v0idai'\n};\n\nfs.mkdirSync(logDir, { recursive: true });\nfs.writeFileSync(logFile, JSON.stringify(logEntry, null, 2));\n\nreturn [{ json: { status: 'logged', file: logFile } }];"
+      },
+      "id": "dry-run-log",
+      "name": "DRY_RUN Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1500, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.opentweet.com/v1/tweets",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.OPENTWEET_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $('Format Alert Tweet').first().json.tweet }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "post-tweet",
+      "name": "Post Tweet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1500, 200],
+      "continueOnFail": true,
+      "notes": "Post via configured API. Default: OpenTweet. Switch to X API or Outstand by updating POSTING_API env var and this node's URL/auth."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"**Bridge Alert Posted**\\n{{ $('Format Alert Tweet').first().json.tweet }}\\n\\nTx: {{ $('Format Alert Tweet').first().json.tx_hash }}\"\n}",
+        "options": {}
+      },
+      "id": "discord-notify",
+      "name": "Discord Notify",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1750, 200],
+      "notes": "Notify Vew of posted bridge alert."
+    }
+  ],
+  "connections": {
+    "Webhook: Bridge TX": {
+      "main": [
+        [{ "node": "Amount >= Threshold?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Cron: Every 15min": {
+      "main": [
+        [{ "node": "Fetch Recent Txs", "type": "main", "index": 0 }]
+      ]
+    },
+    "Fetch Recent Txs": {
+      "main": [
+        [{ "node": "Amount >= Threshold?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Amount >= Threshold?": {
+      "main": [
+        [{ "node": "Deduplicate", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Deduplicate": {
+      "main": [
+        [{ "node": "Format Alert Tweet", "type": "main", "index": 0 }]
+      ]
+    },
+    "Format Alert Tweet": {
+      "main": [
+        [{ "node": "DRY_RUN?", "type": "main", "index": 0 }]
+      ]
+    },
+    "DRY_RUN?": {
+      "main": [
+        [{ "node": "DRY_RUN Log", "type": "main", "index": 0 }],
+        [{ "node": "Post Tweet", "type": "main", "index": 0 }]
+      ]
+    },
+    "Post Tweet": {
+      "main": [
+        [{ "node": "Discord Notify", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  },
+  "staticData": null,
+  "tags": [
+    { "name": "bridge" },
+    { "name": "alerts" },
+    { "name": "critical" }
+  ],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "voidai-marketing"
+  }
+}

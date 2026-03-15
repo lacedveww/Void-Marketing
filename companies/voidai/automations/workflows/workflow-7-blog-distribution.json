@@ -1,0 +1,218 @@
+{
+  "name": "VoidAI - Blog Distribution Pipeline [Phase 3+]",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "blog-published",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook: Blog Published",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "notes": "Phase 3+ workflow. Triggered when a new blog post is published. Expected payload: { title, url, content, category, author }"
+    },
+    {
+      "parameters": {
+        "jsCode": "const post = $input.first().json;\n\n// Validate required fields\nconst required = ['title', 'url', 'content'];\nconst missing = required.filter(f => !post[f]);\n\nif (missing.length > 0) {\n  return [{ json: { error: true, missing_fields: missing } }];\n}\n\n// Truncate content for Claude prompt (keep under 8000 chars)\nconst truncated = post.content.length > 8000\n  ? post.content.slice(0, 8000) + '\\n\\n[Content truncated for processing]'\n  : post.content;\n\nreturn [{ json: {\n  title: post.title,\n  url: post.url,\n  content: truncated,\n  full_length: post.content.length,\n  category: post.category || 'general',\n  author: post.author || 'VoidAI',\n  error: false\n} }];"
+      },
+      "id": "validate-input",
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [250, 0],
+      "notes": "Validate webhook payload. Truncate content for Claude prompt limits."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "error-check",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-valid",
+      "name": "Valid Input?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [500, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "={{ $env.CLAUDE_API_KEY }}" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-sonnet-4-20250514\",\n  \"max_tokens\": 3000,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Convert this blog post into a 10-12 tweet X thread for @v0idai (VoidAI, Bittensor SN106 subnet).\\n\\nRules:\\n- First tweet is the hook. Must stop the scroll.\\n- Each tweet MUST be under 280 characters.\\n- Include the blog link in tweet 2 or 3.\\n- Use specific numbers and data from the post.\\n- Tone: builder-credible, data-first, direct. Not hype.\\n- Include $TAO and #Bittensor hashtags naturally.\\n- Last tweet: CTA to read the full post.\\n- NEVER use em dashes. Use commas, periods, or colons.\\n- NEVER use: 'game-changer', 'paradigm shift', 'seamless', 'robust ecosystem', 'cutting-edge', 'It's worth noting'.\\n- Include a short disclaimer if financial topics: 'Not financial advice. DYOR.'\\n\\nBlog Title: {{ $json.title }}\\nBlog URL: {{ $json.url }}\\nCategory: {{ $json.category }}\\n\\nBlog Content:\\n{{ $json.content }}\\n\\nRespond as a JSON array of strings, one per tweet.\\n[\\\"1/ Hook tweet\\\", \\\"2/ ...\\\", ..., \\\"10/ CTA tweet\\\"]\"\n    }\n  ]\n}",
+        "options": { "timeout": 60000 }
+      },
+      "id": "claude-thread",
+      "name": "Claude: X Thread",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [750, -100],
+      "continueOnFail": true,
+      "notes": "Generate 10-12 tweet X thread from blog post content."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "={{ $env.CLAUDE_API_KEY }}" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-sonnet-4-20250514\",\n  \"max_tokens\": 1000,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Convert this blog post into a LinkedIn post for VoidAI's company page.\\n\\nRules:\\n- Professional, thought-leadership tone.\\n- 200-400 words.\\n- Include the blog link.\\n- Add relevant hashtags: #Bittensor #DeFi #CrossChain #Web3 #VoidAI\\n- Lead with the key insight or data point.\\n- NEVER use em dashes.\\n- NEVER use: 'game-changer', 'paradigm shift', 'seamless', 'robust ecosystem'.\\n- Include brief disclaimer if financial topics.\\n\\nBlog Title: {{ $json.title }}\\nBlog URL: {{ $json.url }}\\nCategory: {{ $json.category }}\\n\\nBlog Content:\\n{{ $json.content }}\\n\\nRespond with ONLY the LinkedIn post text.\"\n    }\n  ]\n}",
+        "options": { "timeout": 60000 }
+      },
+      "id": "claude-linkedin",
+      "name": "Claude: LinkedIn Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [750, 0],
+      "continueOnFail": true,
+      "notes": "Generate LinkedIn post derivative from blog content."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "={{ $env.CLAUDE_API_KEY }}" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-sonnet-4-20250514\",\n  \"max_tokens\": 800,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Convert this blog post into a Discord announcement for #announcements channel.\\n\\nRules:\\n- Casual but informative.\\n- Include the blog link prominently.\\n- Use Discord markdown formatting (**, __, `code`, > quotes).\\n- Keep under 2000 characters.\\n- Brief summary, key points, then link.\\n- NEVER use em dashes.\\n\\nBlog Title: {{ $json.title }}\\nBlog URL: {{ $json.url }}\\nCategory: {{ $json.category }}\\n\\nBlog Content:\\n{{ $json.content }}\\n\\nRespond with ONLY the Discord announcement text.\"\n    }\n  ]\n}",
+        "options": { "timeout": 60000 }
+      },
+      "id": "claude-discord",
+      "name": "Claude: Discord Announcement",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [750, 100],
+      "continueOnFail": true,
+      "notes": "Generate Discord announcement derivative from blog content."
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs = require('fs');\nconst draftsDir = $env.QUEUE_DRAFTS_PATH || '/data/voidai/queue/drafts/';\nconst post = $('Validate Input').first().json;\nconst slug = post.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40);\nconst date = new Date().toISOString().split('T')[0];\n\nconst results = [];\n\n// 1. X Thread\ntry {\n  const threadResponse = $('Claude: X Thread').first().json;\n  const threadText = threadResponse?.content?.[0]?.text || '[]';\n  let tweets = [];\n  try {\n    tweets = JSON.parse(threadText);\n  } catch (e) {\n    tweets = threadText.split('\\n').filter(l => l.match(/^\\d+\\//));\n  }\n\n  const threadContent = `---\\ntype: x-thread\\naccount: \"@v0idai\"\\nstatus: review\\ncreated: ${new Date().toISOString()}\\nsource: workflow-7-blog-distribution\\nrequires_human_review: true\\nblog_url: ${post.url}\\ntweet_count: ${tweets.length}\\n---\\n\\n# X Thread | ${post.title}\\n\\n${tweets.map((t, i) => `## Tweet ${i + 1}\\n\\n${typeof t === 'string' ? t : t.text || t}\\n`).join('\\n')}`;\n\n  const threadFile = `${draftsDir}blog-deriv-x-thread-${slug}.md`;\n  fs.mkdirSync(draftsDir, { recursive: true });\n  fs.writeFileSync(threadFile, threadContent);\n  results.push({ type: 'x-thread', file: threadFile, tweets: tweets.length });\n} catch (e) {\n  results.push({ type: 'x-thread', error: e.message });\n}\n\n// 2. LinkedIn Post\ntry {\n  const liResponse = $('Claude: LinkedIn Post').first().json;\n  const liText = liResponse?.content?.[0]?.text || '';\n\n  const liContent = `---\\ntype: linkedin\\naccount: \"voidai\"\\nstatus: review\\ncreated: ${new Date().toISOString()}\\nsource: workflow-7-blog-distribution\\nrequires_human_review: true\\nblog_url: ${post.url}\\n---\\n\\n# LinkedIn Post | ${post.title}\\n\\n${liText}`;\n\n  const liFile = `${draftsDir}blog-deriv-linkedin-${slug}.md`;\n  fs.writeFileSync(liFile, liContent);\n  results.push({ type: 'linkedin', file: liFile });\n} catch (e) {\n  results.push({ type: 'linkedin', error: e.message });\n}\n\n// 3. Discord Announcement\ntry {\n  const dcResponse = $('Claude: Discord Announcement').first().json;\n  const dcText = dcResponse?.content?.[0]?.text || '';\n\n  const dcContent = `---\\ntype: discord\\naccount: \"announcements\"\\nstatus: review\\ncreated: ${new Date().toISOString()}\\nsource: workflow-7-blog-distribution\\nrequires_human_review: true\\nblog_url: ${post.url}\\n---\\n\\n# Discord Announcement | ${post.title}\\n\\n${dcText}`;\n\n  const dcFile = `${draftsDir}blog-deriv-discord-${slug}.md`;\n  fs.writeFileSync(dcFile, dcContent);\n  results.push({ type: 'discord', file: dcFile });\n} catch (e) {\n  results.push({ type: 'discord', error: e.message });\n}\n\nreturn [{ json: {\n  blog_title: post.title,\n  derivatives_created: results.filter(r => !r.error).length,\n  derivatives_failed: results.filter(r => r.error).length,\n  results\n} }];"
+      },
+      "id": "write-all-drafts",
+      "name": "Write All Drafts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 0],
+      "notes": "Write X thread, LinkedIn post, and Discord announcement to queue/drafts/."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"**Blog Distribution Pipeline Complete**\\n\\nBlog: {{ $json.blog_title }}\\nDerivatives created: {{ $json.derivatives_created }}/3\\nFailed: {{ $json.derivatives_failed }}/3\\n\\nDraft files ready in `queue/drafts/`. Review and approve each derivative before posting.\\n\\n_All derivatives require human review._\"\n}",
+        "options": {}
+      },
+      "id": "discord-notify",
+      "name": "Discord: Derivatives Ready",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1300, 0],
+      "notes": "Notify Vew that blog derivatives are ready for review."
+    }
+  ],
+  "connections": {
+    "Webhook: Blog Published": {
+      "main": [
+        [{ "node": "Validate Input", "type": "main", "index": 0 }]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [{ "node": "Valid Input?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Valid Input?": {
+      "main": [
+        [],
+        [
+          { "node": "Claude: X Thread", "type": "main", "index": 0 },
+          { "node": "Claude: LinkedIn Post", "type": "main", "index": 0 },
+          { "node": "Claude: Discord Announcement", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Claude: X Thread": {
+      "main": [
+        [{ "node": "Write All Drafts", "type": "main", "index": 0 }]
+      ]
+    },
+    "Claude: LinkedIn Post": {
+      "main": [
+        [{ "node": "Write All Drafts", "type": "main", "index": 0 }]
+      ]
+    },
+    "Claude: Discord Announcement": {
+      "main": [
+        [{ "node": "Write All Drafts", "type": "main", "index": 0 }]
+      ]
+    },
+    "Write All Drafts": {
+      "main": [
+        [{ "node": "Discord: Derivatives Ready", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  },
+  "staticData": null,
+  "tags": [
+    { "name": "blog" },
+    { "name": "distribution" },
+    { "name": "phase-3" }
+  ],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "voidai-marketing"
+  }
+}
