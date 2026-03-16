@@ -93,7 +93,7 @@ Always frame as "network participation" or "protocol validation," not "earning" 
 
 ### Video Scripts (Spoken Disclaimer, include in script and description)
 
-> This content is for informational purposes only and does not constitute financial advice. Digital assets are volatile and carry risk of total loss. Not financial advice -- do your own research.
+> This content is for informational purposes only and does not constitute financial advice. Digital assets are volatile and carry risk of total loss. Not financial advice. Do your own research.
 
 ### Podcast Episodes (Spoken Disclaimer, include in intro/outro and show notes)
 

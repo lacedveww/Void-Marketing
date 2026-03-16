@@ -21,6 +21,30 @@
     },
     {
       "parameters": {
+        "jsCode": "// EMERGENCY STOP CHECK\n// Must be the first code node in every workflow, right after the trigger.\n// Checks the EMERGENCY_STOP environment variable. If true, sends a\n// notification to Discord and halts the workflow (returns empty array).\n//\n// Referenced in: crisis.md, n8n-workflow-specs.md\n// Variable: EMERGENCY_STOP (Settings > Variables)\n\nconst emergencyStop = $env.EMERGENCY_STOP;\n\nif (emergencyStop === 'true' || emergencyStop === true) {\n  const workflowName = $workflow.name || 'Unknown Workflow';\n  const timestamp = new Date().toISOString();\n\n  const discordUrl = $env.DISCORD_WEBHOOK_URL;\n  if (discordUrl) {\n    try {\n      await fetch(discordUrl, {\n        method: 'POST',\n        headers: { 'Content-Type': 'application/json' },\n        body: JSON.stringify({\n          content: `**EMERGENCY STOP ACTIVE** | Workflow \"${workflowName}\" halted at ${timestamp}. No content was published. Set EMERGENCY_STOP=false in n8n variables to resume.`\n        })\n      });\n    } catch (e) {\n      // Discord notification failed, but we still halt.\n    }\n  }\n\n  return [];\n}\n\nreturn $input.all();"
+      },
+      "id": "emergency-stop-check",
+      "name": "Emergency Stop Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [125, 0],
+      "notes": "KILL SWITCH: Checks EMERGENCY_STOP env var. If true, notifies Discord and halts the workflow. Must be first node after trigger.",
+      "onError": "stopWorkflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "// PRE-POST EMERGENCY STOP CHECK\n// Second check right before writing news items and sending Discord notifications.\n// Catches mid-execution activation of EMERGENCY_STOP.\n\nconst emergencyStop = $env.EMERGENCY_STOP;\n\nif (emergencyStop === 'true' || emergencyStop === true) {\n  return [];\n}\n\nreturn $input.all();"
+      },
+      "id": "emergency-stop-pre-post",
+      "name": "Emergency Stop Pre-Post",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1450, 200],
+      "notes": "KILL SWITCH: Second EMERGENCY_STOP check before writing news items. Catches mid-execution stop activation.",
+      "onError": "stopWorkflow"
+    },
+    {
+      "parameters": {
         "method": "GET",
         "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
         "options": { "timeout": 15000 }
@@ -103,14 +127,38 @@
     },
     {
       "parameters": {
-        "jsCode": "const keywords = [\n  'bittensor', 'tao', 'sn106', 'voidai', 'void ai',\n  'subnet', 'decentralized ai', 'chainlink ccip',\n  'cross-chain bridge', 'dtao', 'opentensor'\n];\n\nconst allItems = [];\nconst feedNodes = ['RSS: CoinDesk', 'RSS: The Block', 'RSS: CoinTelegraph', 'RSS: DL News'];\n\nfor (const nodeName of feedNodes) {\n  try {\n    const feed = $(nodeName).first().json;\n    const items = feed?.rss?.channel?.item || feed?.items || feed?.feed?.entry || [];\n    const itemList = Array.isArray(items) ? items : [items];\n\n    for (const item of itemList) {\n      if (!item) continue;\n      const title = (item.title || '').toLowerCase();\n      const desc = (item.description || item.summary || item.content || '').toLowerCase();\n      const combined = title + ' ' + desc;\n\n      const isRelevant = keywords.some(kw => combined.includes(kw));\n      if (isRelevant) {\n        allItems.push({\n          title: item.title || 'Untitled',\n          description: (item.description || item.summary || '').slice(0, 500),\n          url: item.link || item.url || item.id || '',\n          published: item.pubDate || item.published || item.updated || '',\n          source: nodeName.replace('RSS: ', ''),\n          type: 'news'\n        });\n      }\n    }\n  } catch (e) {\n    // Feed unavailable, skip\n  }\n}\n\n// Deduplicate by URL\nconst seen = new Set();\nconst unique = allItems.filter(item => {\n  if (!item.url || seen.has(item.url)) return false;\n  seen.add(item.url);\n  return true;\n});\n\n// Check against already-processed items\nconst fs = require('fs');\nconst logDir = $env.LOG_FILE_PATH || '/data/n8n/dry-run-logs/';\nfs.mkdirSync(logDir, { recursive: true });\nconst stateFile = logDir + 'news-monitor-state.json';\nlet state = {};\ntry {\n  state = JSON.parse(fs.readFileSync(stateFile, 'utf8'));\n} catch (e) {\n  state = { processed_urls: [] };\n}\n\nconst newItems = unique.filter(item => !state.processed_urls.includes(item.url));\n\nstate.processed_urls = [...state.processed_urls, ...newItems.map(i => i.url)].slice(-1000);\nfs.writeFileSync(stateFile, JSON.stringify(state, null, 2));\n\nif (newItems.length === 0) {\n  return [{ json: { no_new_items: true, scanned: unique.length } }];\n}\n\nreturn newItems.map(item => ({ json: item }));"
+        "mode": "append",
+        "numberInputs": 4,
+        "options": {}
+      },
+      "id": "wait-for-all-rss",
+      "name": "Wait For All RSS",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [400, 0],
+      "notes": "Wait for all 4 parallel RSS feed requests to complete before proceeding. Uses append mode with 4 inputs so the node waits for data on every branch."
+    },
+    {
+      "parameters": {
+        "jsCode": "// RSS Input Sanitization per CLAUDE.md Prompt Injection Safeguards\n// This processes external text and must sanitize before downstream use.\n\nconst feedNodes = ['RSS: CoinDesk', 'RSS: The Block', 'RSS: CoinTelegraph', 'RSS: DL News'];\nconst sanitizedFeeds = {};\n\n// Instruction-like patterns to strip (per CLAUDE.md safeguards)\nconst INJECTION_PATTERNS = [\n  /ignore\\s+(previous|all|above|prior)/gi,\n  /system\\s*prompt/gi,\n  /act\\s+as/gi,\n  /you\\s+are\\s+(now|a)/gi,\n  /forget\\s+(everything|all|previous)/gi,\n  /override\\s+(instructions|rules|previous)/gi,\n  /disregard\\s+(all|previous|above)/gi,\n  /new\\s+instructions?:/gi,\n  /\\[INST\\]/gi,\n  /\\[SYSTEM\\]/gi,\n  /<\\/?system>/gi,\n  /<<SYS>>/gi\n];\n\n// URL pattern for stripping\nconst URL_PATTERN = /https?:\\/\\/[^\\s)\"'<>]+/gi;\n\n// Zero-width and non-printable character pattern\nconst INVISIBLE_CHARS = /[\\u200B-\\u200F\\u2028-\\u202F\\u2060-\\u206F\\uFEFF\\u0000-\\u001F]/g;\n\nfunction sanitizeText(text) {\n  if (!text || typeof text !== 'string') return '';\n\n  let cleaned = text;\n\n  // Remove non-printable and zero-width characters\n  cleaned = cleaned.replace(INVISIBLE_CHARS, '');\n\n  // Strip instruction-like patterns\n  for (const pattern of INJECTION_PATTERNS) {\n    cleaned = cleaned.replace(pattern, '[REDACTED]');\n  }\n\n  // Remove URLs from text content\n  cleaned = cleaned.replace(URL_PATTERN, '');\n\n  // Truncate to 500 chars per CLAUDE.md safeguards\n  if (cleaned.length > 500) {\n    cleaned = cleaned.slice(0, 500);\n  }\n\n  return cleaned.trim();\n}\n\nfunction shouldFlag(text) {\n  if (!text || typeof text !== 'string') return false;\n  const lower = text.toLowerCase();\n  const flagKeywords = ['ignore', 'forget', 'override', 'system', 'prompt', 'persona'];\n  return flagKeywords.some(kw => lower.includes(kw));\n}\n\nfor (const nodeName of feedNodes) {\n  try {\n    const feed = $(nodeName).first().json;\n    const items = feed?.rss?.channel?.item || feed?.items || feed?.feed?.entry || [];\n    const itemList = Array.isArray(items) ? items : [items];\n\n    sanitizedFeeds[nodeName] = itemList.map(item => {\n      if (!item) return null;\n      const rawTitle = item.title || '';\n      const rawDesc = item.description || item.summary || item.content || '';\n\n      return {\n        title: sanitizeText(rawTitle),\n        description: sanitizeText(rawDesc),\n        url: item.link || item.url || item.id || '',\n        pubDate: item.pubDate || item.published || item.updated || '',\n        source: nodeName.replace('RSS: ', ''),\n        flagged: shouldFlag(rawTitle) || shouldFlag(rawDesc)\n      };\n    }).filter(Boolean);\n  } catch (e) {\n    sanitizedFeeds[nodeName] = [];\n  }\n}\n\nreturn [{ json: { feeds: sanitizedFeeds } }];"
+      },
+      "id": "sanitize-rss",
+      "name": "Sanitize RSS Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 0],
+      "notes": "Sanitize all RSS input per CLAUDE.md Prompt Injection Safeguards. Strips instruction-like patterns, removes URLs from text, truncates to 500 chars, removes non-printable chars. Flags suspicious items for human review."
+    },
+    {
+      "parameters": {
+        "jsCode": "const keywords = [\n  'bittensor', 'tao', 'sn106', 'voidai', 'void ai',\n  'subnet', 'decentralized ai', 'chainlink ccip',\n  'cross-chain bridge', 'dtao', 'opentensor'\n];\n\nconst sanitizedFeeds = $input.first().json.feeds;\nconst allItems = [];\n\nfor (const [nodeName, items] of Object.entries(sanitizedFeeds)) {\n  for (const item of items) {\n    if (!item) continue;\n\n    // Skip flagged items (possible injection)\n    if (item.flagged) continue;\n\n    const title = (item.title || '').toLowerCase();\n    const desc = (item.description || '').toLowerCase();\n    const combined = title + ' ' + desc;\n\n    const isRelevant = keywords.some(kw => combined.includes(kw));\n    if (isRelevant) {\n      allItems.push({\n        title: item.title || 'Untitled',\n        description: item.description || '',\n        url: item.url || '',\n        published: item.pubDate || '',\n        source: item.source || nodeName.replace('RSS: ', ''),\n        type: 'news'\n      });\n    }\n  }\n}\n\n// Deduplicate by URL within this batch\nconst seen = new Set();\nconst unique = allItems.filter(item => {\n  if (!item.url || seen.has(item.url)) return false;\n  seen.add(item.url);\n  return true;\n});\n\n// Check against already-processed items using static data (n8n Cloud compatible)\nconst staticData = $getWorkflowStaticData('global');\nif (!staticData.processed_urls) {\n  staticData.processed_urls = [];\n}\n\nconst newItems = unique.filter(item => !staticData.processed_urls.includes(item.url));\n\n// Update processed URLs, keep last 1000\nstaticData.processed_urls = [...staticData.processed_urls, ...newItems.map(i => i.url)].slice(-1000);\n\nif (newItems.length === 0) {\n  return [{ json: { no_new_items: true, scanned: unique.length } }];\n}\n\nreturn newItems.map(item => ({ json: item }));"
       },
       "id": "filter-dedupe",
       "name": "Filter + Deduplicate",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [550, 50],
-      "notes": "Filter RSS items for Bittensor keywords. Deduplicate by URL. Track processed URLs in state file."
+      "position": [750, 0],
+      "notes": "Filter sanitized RSS items for Bittensor keywords. Skip flagged items. Deduplicate by URL. Track processed URLs in n8n static data (n8n Cloud compatible)."
     },
     {
       "parameters": {
@@ -138,43 +186,8 @@
       "name": "New Items?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [800, 50],
+      "position": [1000, 0],
       "notes": "Stop if no new relevant items found."
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.anthropic.com/v1/messages",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "x-api-key", "value": "={{ $env.CLAUDE_API_KEY }}" },
-            { "name": "anthropic-version", "value": "2023-06-01" },
-            { "name": "Content-Type", "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"model\": \"claude-sonnet-4-20250514\",\n  \"max_tokens\": 500,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Score this news item for relevance to VoidAI (Bittensor SN106, cross-chain bridge, DeFi infrastructure) and draft a short commentary tweet from @v0idai perspective.\\n\\nRules for commentary:\\n- Be data-first, builder-credible, direct.\\n- Show genuine ecosystem knowledge.\\n- NEVER use em dashes. Use commas, periods, or colons.\\n- NEVER use: 'game-changer', 'paradigm shift', 'seamless', 'robust ecosystem', 'cutting-edge'.\\n- Max 280 characters for the commentary tweet.\\n- If the news mentions VoidAI directly, score higher.\\n- If the news is about Bittensor ecosystem, Chainlink, cross-chain DeFi, or TAO, score higher.\\n\\nNews item:\\nTitle: {{ $json.title }}\\nDescription: {{ $json.description }}\\nSource: {{ $json.source }}\\nURL: {{ $json.url }}\\n\\nRespond in JSON format only:\\n{\\\"score\\\": <1-10>, \\\"reasoning\\\": \\\"<why this score>\\\", \\\"commentary\\\": \\\"<draft tweet text>\\\", \\\"suggested_hashtags\\\": [\\\"#tag1\\\", \\\"#tag2\\\"]}\"\n    }\n  ]\n}",
-        "options": { "timeout": 30000 }
-      },
-      "id": "claude-score",
-      "name": "Claude: Score + Draft",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [1050, 150],
-      "continueOnFail": true,
-      "notes": "Score each news item 1-10 for relevance. Generate draft commentary tweet. Process items one at a time."
-    },
-    {
-      "parameters": {
-        "jsCode": "const response = $input.first().json;\nconst originalItem = $('Filter + Deduplicate').first().json;\n\ntry {\n  const text = response.content?.[0]?.text || '{}';\n  // Try to extract JSON from response (may have markdown wrapper)\n  const jsonMatch = text.match(/\\{[\\s\\S]*\\}/);\n  const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : text);\n\n  return [{\n    json: {\n      ...originalItem,\n      score: parsed.score || 0,\n      reasoning: parsed.reasoning || '',\n      commentary: parsed.commentary || '',\n      hashtags: parsed.suggested_hashtags || [],\n      scored_at: new Date().toISOString()\n    }\n  }];\n} catch (e) {\n  return [{ json: { ...originalItem, score: 0, error: 'Failed to parse Claude response' } }];\n}"
-      },
-      "id": "parse-score",
-      "name": "Parse Score",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [1300, 150]
     },
     {
       "parameters": {
@@ -186,35 +199,24 @@
           },
           "conditions": [
             {
-              "id": "score-filter",
-              "leftValue": "={{ $json.score }}",
-              "rightValue": "7",
+              "id": "dry-run-check",
+              "leftValue": "={{ $env.DRY_RUN }}",
+              "rightValue": "false",
               "operator": {
-                "type": "number",
-                "operation": "gte"
+                "type": "string",
+                "operation": "equals"
               }
             }
           ],
           "combinator": "and"
         }
       },
-      "id": "filter-score",
-      "name": "Score >= 7?",
+      "id": "dry-run-check",
+      "name": "DRY_RUN?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [1550, 150],
-      "notes": "Only items scoring 7 or above proceed to drafts."
-    },
-    {
-      "parameters": {
-        "jsCode": "const fs = require('fs');\nconst draftsDir = $env.QUEUE_DRAFTS_PATH || '/data/voidai/queue/drafts/';\nconst item = $input.first().json;\nconst slug = (item.title || 'untitled').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 50);\nconst date = new Date().toISOString().split('T')[0];\nconst filename = `news-${date}-${slug}.md`;\nconst filepath = `${draftsDir}${filename}`;\n\nconst content = `---\\ntype: x-single\\naccount: \"@v0idai\"\\nstatus: review\\ncreated: ${new Date().toISOString()}\\nsource: workflow-4-ecosystem-news\\nrequires_human_review: true\\nrelevance_score: ${item.score}\\nnews_source: ${item.source}\\nnews_url: ${item.url}\\n---\\n\\n# News Commentary | ${item.title}\\n\\n## Original Article\\n- **Title:** ${item.title}\\n- **Source:** ${item.source}\\n- **URL:** ${item.url}\\n- **Relevance Score:** ${item.score}/10\\n- **Reasoning:** ${item.reasoning}\\n\\n## Draft Tweet (${(item.commentary || '').length} chars)\\n\\n${item.commentary}\\n\\n## Suggested Hashtags\\n${(item.hashtags || []).join(' ')}\\n`;\n\nfs.mkdirSync(draftsDir, { recursive: true });\nfs.writeFileSync(filepath, content);\n\nreturn [{ json: { status: 'drafted', file: filepath, score: item.score, title: item.title } }];"
-      },
-      "id": "write-draft",
-      "name": "Write to Drafts",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [1800, 50],
-      "notes": "Write high-scoring news items to queue/drafts/ with YAML frontmatter."
+      "position": [1200, 100],
+      "notes": "Safe default: DRY_RUN must be strictly 'false' to proceed to news item collection. Any other value routes to dry-run log."
     },
     {
       "parameters": {
@@ -222,19 +224,51 @@
         "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"content\": \"**Ecosystem News: {{ $json.score }}/10**\\n\\n{{ $json.title }}\\n\\nDraft saved to `{{ $json.file }}`\\nReview and approve for posting.\"\n}",
+        "jsonBody": "={\n  \"content\": \"**[DRY_RUN] Ecosystem News Found**\\nTitle: {{ $json.title }}\\nSource: {{ $json.source }}\\nURL: {{ $json.url }}\\n\\nCollection skipped in dry-run mode.\"\n}",
         "options": {}
       },
-      "id": "discord-notify",
-      "name": "Discord: News Alert",
+      "id": "dry-run-discord",
+      "name": "DRY_RUN: Discord Log",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [2050, 50],
-      "notes": "Notify Vew of high-scoring news item ready for review."
+      "position": [1450, 0],
+      "notes": "Send dry-run news item to Discord for review. Collection skipped."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Write filtered news items to static data as raw items for manual content generation.\n// No Claude API dependency. Content generation happens via Claude Code skills.\n\nconst items = $input.all();\nconst staticData = $getWorkflowStaticData('global');\n\nif (!staticData.news_items) {\n  staticData.news_items = {};\n}\n\nconst collectedAt = new Date().toISOString();\nconst writtenItems = [];\n\nfor (const inputItem of items) {\n  const item = inputItem.json;\n  const slug = (item.title || 'untitled').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 50);\n  const date = new Date().toISOString().split('T')[0];\n  const itemKey = `news-${date}-${slug}`;\n\n  const newsItem = {\n    type: 'news-item',\n    status: 'pending_content_generation',\n    collected_at: collectedAt,\n    source: item.source || 'Unknown',\n    title: item.title || 'Untitled',\n    summary: (item.description || '').slice(0, 500),\n    original_url: item.url || '',\n    content_brief: 'Generate a tweet from this news item using /generate-tweet'\n  };\n\n  staticData.news_items[itemKey] = newsItem;\n  writtenItems.push({ key: itemKey, title: newsItem.title, source: newsItem.source });\n}\n\n// Clean up old news items (keep last 50)\nconst itemKeys = Object.keys(staticData.news_items).sort();\nif (itemKeys.length > 50) {\n  for (const oldKey of itemKeys.slice(0, itemKeys.length - 50)) {\n    delete staticData.news_items[oldKey];\n  }\n}\n\nreturn [{ json: { count: writtenItems.length, items: writtenItems } }];"
+      },
+      "id": "write-news-items",
+      "name": "Write News Items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1700, 200],
+      "notes": "Store filtered news items in n8n static data as raw items (n8n Cloud compatible). No Claude API call. Content generation happens manually via Claude Code /generate-tweet skill."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"**Ecosystem News: {{ $json.count }} new items collected**\\n\\n{{ $json.items.map(i => '- ' + i.title + ' (' + i.source + ')').join('\\n') }}\\n\\nReview and run /generate-tweet for each item.\"\n}",
+        "options": {}
+      },
+      "id": "discord-news-ready",
+      "name": "Discord: News Items Ready",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1950, 200],
+      "notes": "Notify Vew that new ecosystem news items are collected and ready for manual content generation."
     }
   ],
   "connections": {
     "Every 4 Hours": {
+      "main": [
+        [{ "node": "Emergency Stop Check", "type": "main", "index": 0 }]
+      ]
+    },
+    "Emergency Stop Check": {
       "main": [
         [
           { "node": "RSS: CoinDesk", "type": "main", "index": 0 },
@@ -246,20 +280,30 @@
     },
     "RSS: CoinDesk": {
       "main": [
-        [{ "node": "Filter + Deduplicate", "type": "main", "index": 0 }]
+        [{ "node": "Wait For All RSS", "type": "main", "index": 0 }]
       ]
     },
     "RSS: The Block": {
       "main": [
-        [{ "node": "Filter + Deduplicate", "type": "main", "index": 0 }]
+        [{ "node": "Wait For All RSS", "type": "main", "index": 1 }]
       ]
     },
     "RSS: CoinTelegraph": {
       "main": [
-        [{ "node": "Filter + Deduplicate", "type": "main", "index": 0 }]
+        [{ "node": "Wait For All RSS", "type": "main", "index": 2 }]
       ]
     },
     "RSS: DL News": {
+      "main": [
+        [{ "node": "Wait For All RSS", "type": "main", "index": 3 }]
+      ]
+    },
+    "Wait For All RSS": {
+      "main": [
+        [{ "node": "Sanitize RSS Input", "type": "main", "index": 0 }]
+      ]
+    },
+    "Sanitize RSS Input": {
       "main": [
         [{ "node": "Filter + Deduplicate", "type": "main", "index": 0 }]
       ]
@@ -272,28 +316,23 @@
     "New Items?": {
       "main": [
         [],
-        [{ "node": "Claude: Score + Draft", "type": "main", "index": 0 }]
+        [{ "node": "DRY_RUN?", "type": "main", "index": 0 }]
       ]
     },
-    "Claude: Score + Draft": {
+    "DRY_RUN?": {
       "main": [
-        [{ "node": "Parse Score", "type": "main", "index": 0 }]
+        [{ "node": "Emergency Stop Pre-Post", "type": "main", "index": 0 }],
+        [{ "node": "DRY_RUN: Discord Log", "type": "main", "index": 0 }]
       ]
     },
-    "Parse Score": {
+    "Emergency Stop Pre-Post": {
       "main": [
-        [{ "node": "Score >= 7?", "type": "main", "index": 0 }]
+        [{ "node": "Write News Items", "type": "main", "index": 0 }]
       ]
     },
-    "Score >= 7?": {
+    "Write News Items": {
       "main": [
-        [{ "node": "Write to Drafts", "type": "main", "index": 0 }],
-        []
-      ]
-    },
-    "Write to Drafts": {
-      "main": [
-        [{ "node": "Discord: News Alert", "type": "main", "index": 0 }]
+        [{ "node": "Discord: News Items Ready", "type": "main", "index": 0 }]
       ]
     }
   },

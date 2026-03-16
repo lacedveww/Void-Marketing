@@ -4,8 +4,8 @@ created_at: "2026-03-15"
 updated_at: "2026-03-15"
 
 # Status
-status: "approved"
-previous_status: "review"
+status: "review"
+previous_status: "approved"
 
 # Target
 platform: "x"
@@ -69,3 +69,4 @@ NFA. DYOR.
 ## Editor Notes
 
 <!-- Ecosystem Intelligence pillar. Hot take designed to invite debate. Makes a specific, defensible claim: liquidity is a bigger constraint than compute. The Bittensor community will have strong opinions on this, which drives replies. Data-backed: references the real gap between subnet count (128) and liquid token markets. Does not mention VoidAI or SN106, but the implication is obvious to anyone who knows VoidAI builds liquidity infrastructure. This is the kind of post that generates "but compute is the real bottleneck because..." replies, which is exactly the engagement pattern needed. Created by Phase 2 Challenger to fill Gap 2. -->
+<!-- FLAGGED 2026-03-16: Moved back to review status. Requires human review before publishing per CLAUDE.md human review gate. -->

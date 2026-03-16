@@ -62,7 +62,7 @@ stagger_order: 0
 
 - Emissions: 7,200 to 3,600 $TAO/day
 - Inflation: ~26% to ~13%
-- ~68% of $TAO staked
+- Majority of $TAO staked
 - 128+ subnets competing for emissions
 
 Supply compression is real. Subnets that generate value keep their share.
@@ -71,5 +71,5 @@ NFA. DYOR.
 
 ## Editor Notes
 
-<!-- DATA REFRESH NEEDED: "~68% staked" may be stale. Coinbase reports 76.27% as of 2026-03-15 -->
+<!-- FIXED 2026-03-15: Replaced "~68% staked" with "Majority of $TAO staked" to avoid stale figures. -->
 <!-- Ecosystem Intelligence pillar. Post-halving analysis with real metrics from metrics-baseline.md. Alpha-leak register: data-forward, connects supply reduction to subnet competition dynamics. -->

@@ -20,7 +20,7 @@ latest_post_at: ""
 
 # Content metadata
 pillar: "ecosystem-intelligence"
-character_count: 2750
+character_count: 2745
 has_media: false
 thread_count: 1
 
@@ -74,7 +74,7 @@ The network absorbed the reduction without structural disruption:
 - TAO holding a top-40 CMC rank with a multi-billion dollar market cap (check current price on CoinGecko)
 - Majority of TAO staked. Holders locking supply, not selling
 - 128+ active subnets (at capacity, with competitive replacement)
-- TAO ranks #2 in AI coin mentions (LunarCrush)
+- TAO ranks #2 in AI coin mentions as of Q3 2025 (LunarCrush)
 - Grayscale filed for a Bittensor Trust in December 2025
 
 Pre-halving Q2 2025 growth: +50% subnets, +16% miners, +28% wallets, +21.5% staked TAO. The halving did not reverse these trends.
@@ -87,13 +87,13 @@ Low-performing subnets can be deregistered after a 4-month immunity period. With
 
 **What This Means**
 
-For holders: reduced new supply, 68% staking rate signals long-term network participation. Staking outcomes are variable, not guaranteed.
+For holders: reduced new supply and a high staking participation rate signal long-term network commitment. Staking outcomes are variable, not guaranteed.
 
-For builders: institutional attention (Grayscale), reduced inflation, and 128+ active subnets create a more stable foundation. The question shifts from "will this network survive" to "which subnets will capture value."
+For builders: institutional attention (Grayscale), reduced inflation, and 128+ active subnets create a more stable foundation. The question shifts from "will this network survive" to "which subnets will sustain real usage."
 
 For miners/validators: competition intensifies. Smaller pool means performance scoring has larger economic consequences.
 
-VoidAI operates SN106, a liquidity provisioning subnet ranked top-5 in Bittensor Kaito mindshare as of September 2025. We publish ecosystem analysis because an informed network makes better decisions.
+VoidAI operates SN106, a liquidity provisioning subnet coordinating concentrated liquidity on Raydium CLMM for Bittensor tokens. We publish ecosystem analysis because an informed network makes better decisions.
 
 Network data: taostats.io
 Bridge TAO: app.voidai.com/bridge-chains
@@ -107,7 +107,9 @@ This content is for informational and educational purposes only and does not con
 
 <!-- FIXED 2026-03-15: Removed specific TAO price, market cap, CMC rank, 24h volume. Replaced with generic references. -->
 <!-- FIXED 2026-03-15: Mindshare now qualified as "top-5 as of September 2025". Removed specific 2.01% figure. -->
-<!-- FIXED 2026-03-15: Changed "128 subnets" to "128+ subnets" throughout. Changed "68% staked" to "majority staked". -->
+<!-- FIXED 2026-03-15: Changed "128 subnets" to "128+ subnets" throughout. Changed "68% staked" to generic phrasing. -->
+<!-- FIXED 2026-03-15: Replaced "which subnets will capture value" with "which subnets will sustain real usage" to remove implicit buy signal near SN106 mention. -->
+<!-- FIXED 2026-03-15: Removed Kaito mindshare reference from VoidAI line. Replaced with functional description of SN106 (concentrated liquidity on Raydium CLMM). Kaito reference consolidated to L1 only. -->
 <!-- Human review notes. NOT posted. -->
 <!-- COMPLIANCE NOTES:
 - Ecosystem analysis framing: educational, not promotional ✓

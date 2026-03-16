@@ -4,8 +4,8 @@ created_at: "2026-03-15"
 updated_at: "2026-03-15"
 
 # Status
-status: "approved"
-previous_status: "review"
+status: "review"
+previous_status: "approved"
 
 # Target
 platform: "x"
@@ -90,3 +90,4 @@ NFA. DYOR.
 ## Editor Notes
 
 <!-- Ecosystem Intelligence pillar. Subnet spotlight for Chutes (SN64) per Community Entry Playbook mandate: "Highlight OTHER subnets (not SN106)." Zero VoidAI mentions. Zero SN106 references. Pure ecosystem value content that demonstrates genuine Bittensor knowledge. Differentiates Chutes from other inference subnets (SN19, SN4) with specific technical reasoning. Uses builder-credibility register with concise technical analysis. Created by Phase 2 Challenger to fill Gap 1 (no subnet spotlights in original stockpile). Each part under 280 chars. -->
+<!-- FLAGGED 2026-03-16: Moved back to review status. Requires human review before publishing per CLAUDE.md human review gate. -->

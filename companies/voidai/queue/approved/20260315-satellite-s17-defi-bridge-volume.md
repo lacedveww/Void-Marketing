@@ -4,8 +4,8 @@ created_at: "2026-03-15"
 updated_at: "2026-03-15"
 
 # Status
-status: "approved"
-previous_status: "review"
+status: "review"
+previous_status: "approved"
 
 # Target
 platform: "x"
@@ -70,3 +70,4 @@ NFA. DYOR.
 
 <!-- FIXED 2026-03-15: Removed specific TAO market cap ($2.4B). Replaced with "multi-billion dollars". -->
 <!-- Ecosystem Intelligence pillar. DeFi satellite voice: uses "What I'm watching today:" format per persona spec. Market gap analysis angle. References real TAO market cap from metrics.md ($2.39B, rounded to $2.4B). The "gap between asset value and bridge infrastructure" framing implicitly benefits VoidAI without naming it. No @v0idai mention (preserving 2/week limit for higher-value posts). Stagger: 4+ hours after main @v0idai. Created by Phase 2 Challenger to fill Gap 4. -->
+<!-- FLAGGED 2026-03-16: Moved back to review status. Requires human review before publishing per CLAUDE.md human review gate. -->

@@ -7,10 +7,10 @@ When the user says: "data card", "daily metrics", "generate data card", "/data-c
 
 ## Instructions
 
-1. **Load config:**
-   - Read `CLAUDE.md` for rules
-   - Read `companies/voidai/voice.md`
-   - Read `companies/voidai/design-system.md` for visual specs
+1. **Load config** (stop if any missing):
+   - Read all config files per CLAUDE.md Config Load Order (items 1-8 minimum)
+   - Read `companies/{ACTIVE_COMPANY}/brand/voice-learnings.md` (mandatory for content generation)
+   - Read `companies/{ACTIVE_COMPANY}/design-system.md` for visual specs
    - Read `engine/templates/data-card.md` for template
 
 2. **Gather metrics** (ask user or fetch via MCP):
@@ -40,7 +40,15 @@ When the user says: "data card", "daily metrics", "generate data card", "/data-c
    - If any metric unavailable, show "N/A" and flag in editor notes
    - Never estimate or use stale data
 
-6. **Output:**
+6. **Compliance checks (all must pass):**
+   - Zero banned AI phrases (full list in CLAUDE.md)
+   - Zero em dashes or double hyphens ( -- )
+   - Under 280 characters
+   - No price predictions or guaranteed returns
+   - Voice matches assigned account register per voice.md
+
+7. **Output:**
    - Write to `companies/voidai/queue/drafts/{YYYYMMDD}-datacard.md`
    - Tag with pillar: bridge-build
    - has_media: true
+   - Remind user to run `/queue check <id>` for compliance validation

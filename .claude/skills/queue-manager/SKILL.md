@@ -8,17 +8,17 @@ Activated by any `/queue` command. This skill manages content items stored as ma
 
 ## Before Any Operation
 
-1. Read `CLAUDE.md` — universal rules, routing, active company
-2. Read `companies/{ACTIVE_COMPANY}/voice.md` — brand voice rules
-3. Read `companies/{ACTIVE_COMPANY}/compliance.md` — compliance rules (references engine modules)
-4. Read `companies/{ACTIVE_COMPANY}/brand/voice-learnings.md` — latest performance data
-5. Read `engine/compliance/base-rules.md` — universal compliance (FTC, banned phrases, quality gate)
+1. Read `CLAUDE.md`:universal rules, routing, active company
+2. Read `companies/{ACTIVE_COMPANY}/voice.md`:brand voice rules
+3. Read `companies/{ACTIVE_COMPANY}/compliance.md`:compliance rules (references engine modules)
+4. Read `companies/{ACTIVE_COMPANY}/brand/voice-learnings.md`:latest performance data
+5. Read `engine/compliance/base-rules.md`:universal compliance (FTC, banned phrases, quality gate)
 
 ## Directory Layout
 
 ```
 companies/{ACTIVE_COMPANY}/queue/
-  manifest.json           # Derived index -- regenerated on every operation
+  manifest.json           # Derived index, regenerated on every operation
   drafts/                 # AI-generated, not yet reviewed
   review/                 # Queued for human review
   approved/               # Approved, awaiting scheduling
@@ -45,13 +45,13 @@ The `id` field in frontmatter matches the filename without `.md`.
 
 | Template | File | Content Type | Tool | Best For |
 |----------|------|:------------:|------|----------|
-| X single post | `x-single.md` | single | -- | Quick tweets, metrics drops, engagement |
-| X thread | `x-thread.md` | thread | -- | Deep-dives, tutorials, weekly recaps |
-| X reply | `x-reply.md` | reply | -- | Engagement replies, community interaction |
-| X quote tweet | `x-quote-tweet.md` | quote_tweet | -- | Commentary on other posts, amplification |
-| LinkedIn post | `linkedin-post.md` | article | — | Professional updates, ecosystem positioning |
-| Discord announcement | `discord-announcement.md` | announcement | — | Community announcements, launches |
-| Blog post | `blog-post.md` | article | — | Pillar content, SEO, tutorials |
+| X single post | `x-single.md` | single | N/A | Quick tweets, metrics drops, engagement |
+| X thread | `x-thread.md` | thread | N/A | Deep-dives, tutorials, weekly recaps |
+| X reply | `x-reply.md` | reply | N/A | Engagement replies, community interaction |
+| X quote tweet | `x-quote-tweet.md` | quote_tweet | N/A | Commentary on other posts, amplification |
+| LinkedIn post | `linkedin-post.md` | article | N/A | Professional updates, ecosystem positioning |
+| Discord announcement | `discord-announcement.md` | announcement | N/A | Community announcements, launches |
+| Blog post | `blog-post.md` | article | N/A | Pillar content, SEO, tutorials |
 | Podcast brief | `podcast-notebooklm.md` | podcast | NotebookLM | Audio content from source documents |
 | Video script | `video-script.md` | video | Higgsfield/Loom/Screen Studio/Canva | Scripted video content |
 | Video (AI gen) | `video-google-veo.md` | video | Google Flow / Veo | AI-generated video clips |
@@ -93,9 +93,9 @@ Create a new content item in `drafts/`.
 6. Save the file to `companies/{ACTIVE_COMPANY}/queue/drafts/`
 7. **Auto-advance to review**: Immediately move the file to `companies/{ACTIVE_COMPANY}/queue/review/`, update status frontmatter
 8. Regenerate `manifest.json`
-9. **Auto-present review card**: Display the full in-chat review card (see `/queue review` format) and prompt the reviewer to approve or reject inline. Do NOT leave items sitting in `drafts/` — every generated draft flows straight into the review card for immediate decision.
+9. **Auto-present review card**: Display the full in-chat review card (see `/queue review` format) and prompt the reviewer to approve or reject inline. Do NOT leave items sitting in `drafts/`:every generated draft flows straight into the review card for immediate decision.
 
-**CRITICAL — Auto-Review Rule:** Any time content is generated or drafted (whether via `/queue add`, batch generation, or any other content creation workflow), the draft MUST be immediately presented as an in-chat review card for the reviewer's approval. Never silently save drafts without presenting them for review. This applies to ALL content generation, not just `/queue add`.
+**CRITICAL:Auto-Review Rule:** Any time content is generated or drafted (whether via `/queue add`, batch generation, or any other content creation workflow), the draft MUST be immediately presented as an in-chat review card for the reviewer's approval. Never silently save drafts without presenting them for review. This applies to ALL content generation, not just `/queue add`.
 
 ### `/queue list`
 
@@ -241,7 +241,7 @@ Approve all items from a specific source workflow.
 
 **Behavior:**
 1. Find all items in `companies/{ACTIVE_COMPANY}/queue/review/` with matching `source_workflow`
-2. **EXCLUDE all Tier 1 items** — Tier 1 content (mandatory human review) must ALWAYS be individually reviewed via `/queue review`. Batch approval is for Tier 2/3 only. If Tier 1 items are found, display a warning listing them and skip.
+2. **EXCLUDE all Tier 1 items**:Tier 1 content (mandatory human review) must ALWAYS be individually reviewed via `/queue review`. Batch approval is for Tier 2/3 only. If Tier 1 items are found, display a warning listing them and skip.
 3. Verify all remaining have `compliance_passed: true`
 4. Display list and ask for confirmation
 5. On confirm, approve each item (same as `/queue approve`)
@@ -352,12 +352,12 @@ Scan content body for absolute prohibitions (case-insensitive, including common 
 - "get rich", "financial freedom", "passive income", "to the moon", "100x"
 - "SEC-approved", "SEC-registered", "CFTC-approved", "government-backed", "FDIC-insured"
 - "investment" (when describing token purchase/staking/protocol participation)
-- "earn" (when describing staking/lending — substitute: "receive" or "be allocated")
-- "yield" (without "variable" qualifier — substitute: "variable rate rewards")
-- "profit" (describing protocol participation — substitute: "network-generated rewards")
+- "earn" (when describing staking/lending:substitute: "receive" or "be allocated")
+- "yield" (without "variable" qualifier:substitute: "variable rate rewards")
+- "profit" (describing protocol participation:substitute: "network-generated rewards")
 - "high APY" (without specific rate and disclaimer)
-- "allocation" (in context of token rewards or airdrops — implies securities distribution)
-- "airdrop" (as incentive for user actions — SEC enforcement precedent)
+- "allocation" (in context of token rewards or airdrops:implies securities distribution)
+- "airdrop" (as incentive for user actions:SEC enforcement precedent)
 
 **Result:** If ANY Category A term found → `prohibited_language: "fail"`, `compliance_passed: false`. Content is blocked and must be rewritten.
 
@@ -365,19 +365,19 @@ Scan content body for absolute prohibitions (case-insensitive, including common 
 
 Scan for context-dependent review triggers:
 
-- "APY" / "APR" — OK if reporting current rate with disclaimer, NOT OK if celebratory
-- "TVL" — OK if factual reporting, NOT OK if celebratory
-- "alpha" — OK for ecosystem analysis, NOT OK if implying insider info
-- "yield farming" -- OK if educational, NOT OK if promotional for company products
-- "stake" / "staking" — OK if educational, NOT OK if promotional
-- "rewards" — OK if "variable rewards" with context, NOT OK if "huge rewards"
-- "opportunity" — OK if generic, NOT OK if financial
-- "bullish" / "bearish" — OK for market commentary, NOT OK for price predictions
-- "undervalued", "gem", "hidden gem" — NEVER OK for VOID token
+- "APY" / "APR":OK if reporting current rate with disclaimer, NOT OK if celebratory
+- "TVL":OK if factual reporting, NOT OK if celebratory
+- "alpha":OK for ecosystem analysis, NOT OK if implying insider info
+- "yield farming": OK if educational, NOT OK if promotional for company products
+- "stake" / "staking":OK if educational, NOT OK if promotional
+- "rewards":OK if "variable rewards" with context, NOT OK if "huge rewards"
+- "opportunity":OK if generic, NOT OK if financial
+- "bullish" / "bearish":OK for market commentary, NOT OK for price predictions
+- "undervalued", "gem", "hidden gem":NEVER OK for VOID token
 
 **Result:** Each found term recorded in `red_flags_found[]` with the matched term and surrounding context. Human review needed for context judgment.
 
-### Step 3: Category C — Competitor Name Scan
+### Step 3: Category C:Competitor Name Scan
 
 Scan for competitor names listed in `companies/{ACTIVE_COMPANY}/competitors.md`. Flag any named competitor, bridge, lending protocol, or similar project.
 
@@ -400,10 +400,10 @@ Check that the appropriate disclaimer is present based on platform AND account. 
 
 Score content against the 4 Howey prongs:
 
-1. **Investment of money** — Does the content use "invest", "deposit", "put in"? (+1 risk)
-2. **Common enterprise** — Does it emphasize pooled funds, shared outcomes, or community investment? (+1 risk)
-3. **Expectation of profit** — Does it mention returns, yields, APY, earning, profit? (+1 risk)
-4. **Efforts of others** — Does it reference team efforts driving returns, "our team", "we work for you"? (+1 risk)
+1. **Investment of money**:Does the content use "invest", "deposit", "put in"? (+1 risk)
+2. **Common enterprise**:Does it emphasize pooled funds, shared outcomes, or community investment? (+1 risk)
+3. **Expectation of profit**:Does it mention returns, yields, APY, earning, profit? (+1 risk)
+4. **Efforts of others**:Does it reference team efforts driving returns, "our team", "we work for you"? (+1 risk)
 
 **Scoring:**
 - 0 prongs triggered → `howey_risk: "none"`
@@ -484,7 +484,7 @@ When scheduling, check:
 
 ## Manifest Regeneration
 
-`manifest.json` is rebuilt from files on every queue operation. It is never the source of truth — files are.
+`manifest.json` is rebuilt from files on every queue operation. It is never the source of truth:files are.
 
 **Regeneration process:**
 1. Scan all status subdirectories for `.md` files

@@ -71,8 +71,8 @@ tool: "canva"
 |--------|-------|--------|--------|-----------|
 | Total Value Bridged (Cumulative) | [PLACEHOLDER] | [PLACEHOLDER] 7d | internal | [PLACEHOLDER] |
 | Transactions Today | [PLACEHOLDER] | [PLACEHOLDER] vs yesterday | internal | [PLACEHOLDER] |
-| Bridge Uptime | [PLACEHOLDER]% | -- | internal | [PLACEHOLDER] |
-| Chains Supported | 4 (Bittensor, Solana, Ethereum, Base) | -- | internal | [PLACEHOLDER] |
+| Bridge Uptime | [PLACEHOLDER]% | n/a | internal | [PLACEHOLDER] |
+| Chains Supported | 4 (Bittensor, Solana, Ethereum, Base) | n/a | internal | [PLACEHOLDER] |
 | SN106 Mindshare Rank | [PLACEHOLDER] (#[PLACEHOLDER]) | [PLACEHOLDER] 7d | taostats | [PLACEHOLDER] |
 | Unique Wallets (Cumulative) | [PLACEHOLDER] | [PLACEHOLDER] 7d | internal | [PLACEHOLDER] |
 | SN106 Variable Rate (Current) | [PLACEHOLDER]% | [PLACEHOLDER] vs last week | taostats | [PLACEHOLDER] |

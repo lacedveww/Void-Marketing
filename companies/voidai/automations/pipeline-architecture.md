@@ -19,6 +19,8 @@
 7. [Testing Architecture](#7-testing-architecture)
 8. [Environment Variables and Secrets](#8-environment-variables-and-secrets)
 9. [Deployment Phases](#9-deployment-phases)
+    - [9.1 Crisis Kill Switch Procedure](#91-crisis-kill-switch-procedure)
+    - [9.2 Credential Rotation Runbook](#92-credential-rotation-runbook)
 10. [Failure Modes and Recovery](#10-failure-modes-and-recovery)
 11. [Operational Checklists](#11-operational-checklists)
 
@@ -61,19 +63,19 @@
 |                                                                            |
 |  +---------------------+  +----------------------+  +------------------+   |
 |  | WF1: Daily Metrics  |  | WF2: Bridge Alerts   |  | WF3: Weekly      |   |
-|  | Cron 9AM ET daily   |  | Webhook: tx>threshold |  | Recap Thread     |   |
+|  | Cron 10AM ET daily  |  | Webhook: tx>threshold |  | Recap Thread     |   |
 |  | -> Tracker API      |  | -> Filter             |  | Cron Fri 2PM ET  |   |
 |  | -> Format           |  | -> Claude format      |  | -> 7-day metrics |   |
 |  | -> Queue or Post    |  | -> Queue or Post      |  | -> Claude thread |   |
 |  +---------------------+  +----------------------+  | -> Queue/review  |   |
 |                                                      +------------------+   |
 |  +---------------------+  +----------------------+                          |
-|  | WF4: News Monitor   |  | WF5: Blog Distro     |  (Phase 3+)            |
-|  | Cron every 4 hours  |  | Webhook: new blog     |                        |
-|  | -> X API search     |  | -> Claude derivatives |                        |
-|  | -> Claude relevance |  | -> Thread, LinkedIn,  |                        |
-|  | -> IF score>=7:     |  |    Discord, Telegram  |                        |
-|  |    draft to queue   |  | -> Queue for review   |                        |
+|  | WF4: News Monitor   |  | WF5: Content          |                          |
+|  | Cron every 4 hours  |  | Scheduler             |                          |
+|  | -> X API search     |  | Cron 7AM ET daily     |                          |
+|  | -> Claude relevance |  | -> Read approved/     |                          |
+|  | -> IF score>=7:     |  | -> Enforce cadence    |                          |
+|  |    draft to queue   |  | -> Schedule or Post   |                          |
 |  +---------------------+  +----------------------+                          |
 |                                                                            |
 +=======|================================================================+===+
@@ -201,7 +203,7 @@ TRIGGER                    GENERATE                 QUEUE                   REVI
 | n8n WF1 (metrics) |            |                 | or review/       |             |
 | n8n WF2 (bridge)  |            v                 +------------------+             |
 | n8n WF4 (news)    |     +------------------+                                      v
-| n8n WF5 (blog     |     | Canva (if visual)|                              SCHEDULE
+| n8n WF7 (blog     |     | Canva (if visual)|                              SCHEDULE
 |   derivatives)    |     | Data card, header|                        +------------------+
 +-------------------+     | Social graphic   |                        | Assign time slot |
                           +------------------+                        | Cadence rules:   |
@@ -283,7 +285,7 @@ TRIGGER                    GENERATE                 QUEUE                   REVI
 ### 3.1 Daily Metrics Auto-Post (n8n Workflow 1)
 
 ```
-[Cron: 9:00 AM ET daily]
+[Cron: 10:00 AM ET daily]
         |
         v
 [HTTP: Tracker /api/metrics/summary]
@@ -397,7 +399,7 @@ queue/drafts      |           |
 [Queue to drafts/]  -->  [Vew reviews, approves, or discards]
 ```
 
-### 3.5 Blog Distribution Pipeline (n8n Workflow 5, Phase 3+)
+### 3.5 Blog Distribution Pipeline (n8n Workflow 7, Phase 3+)
 
 ```
 [Webhook: New blog post published on voidai.com]
@@ -551,21 +553,20 @@ n8n Cloud free tier: **5 workflows maximum.** This means we must prioritize.
 
 | # | Workflow | Trigger | Data Sources | Output | Priority |
 |---|---------|---------|-------------|--------|----------|
-| 1 | Daily Metrics Auto-Post | Cron 9AM ET | Tracker, Taostats, CoinGecko | Formatted tweet -> queue | MUST HAVE |
+| 1 | Daily Metrics Auto-Post | Cron 10AM ET | Tracker, Taostats, CoinGecko | Formatted tweet -> queue | MUST HAVE |
 | 2 | Bridge Transaction Alerts | Webhook from Bridge DB | Bridge PostgreSQL | Alert tweet -> queue | MUST HAVE |
 | 3 | Weekly Recap Thread | Cron Fri 2PM ET | Tracker, GitHub, Taostats, CoinGecko | 8-10 tweet thread -> queue | MUST HAVE |
 | 4 | Ecosystem News Monitor | Cron every 4 hours | X API search, RSS feeds | Commentary drafts -> queue | HIGH |
 | 5 | Scheduler/Publisher | Cron every 15 min | queue/scheduled/ | API calls to platforms | MUST HAVE |
 
-**Strategy:** Workflows 1-3 and 5 (Scheduler) are non-negotiable. Workflow 4 (News Monitor) fills the 5th slot. When self-hosting on DGX Spark removes the 5-workflow limit, add Workflows 5-7.
+**Strategy:** Workflows 1-3 and 5 (Scheduler) are non-negotiable. Workflow 4 (News Monitor) fills the 5th slot. When self-hosting on DGX Spark removes the 5-workflow limit, add Workflows 6-7.
 
 ### Phase 3+ Workflows (self-hosted n8n, no limit)
 
 | # | Workflow | Trigger | Data Sources | Output |
 |---|---------|---------|-------------|--------|
-| 5a | Blog Distribution | Webhook: new blog | Blog content | Derivatives -> queue |
 | 6 | Competitor Monitor | Cron daily 8AM | X API, Taostats | Private Discord DM to Vew |
-| 7 | Email Campaign (Mautic) | Trigger from Mautic | Contact segments | Email sequences |
+| 7 | Blog Distribution | Webhook: new blog | Blog content | Derivatives -> queue |
 
 ### Phase 4 Workflows (Lead Nurturing, fully specified in x-lead-nurturing-architecture.md)
 
@@ -713,7 +714,8 @@ Set `DRY_RUN=true` in n8n environment variables. This immediately stops all exte
 
 | Variable | Values | Default | Where Set | Purpose |
 |----------|--------|---------|-----------|---------|
-| `DRY_RUN` | `true` / `false` | `true` | n8n env vars, `.env` | Prevents all external publishing API calls |
+| `EMERGENCY_STOP` | `true` / `false` | `false` | n8n env vars | **Crisis kill switch.** Halts ALL workflows before any external API call. Takes priority over DRY_RUN and all other flags. See `crisis.md` for activation/recovery procedures. |
+| `DRY_RUN` | `true` / `false` | `true` (fail-safe: defaults to dry-run if undefined or missing) | n8n env vars, `.env` | Prevents all external publishing API calls. If the variable is undefined, deleted, or set to any value other than the exact string `false`, the system treats it as dry-run mode. See n8n-workflow-specs.md "DRY_RUN Fail-Safe Logic" for implementation details. |
 | `APPROVAL_GATE` | `true` / `false` | `true` | n8n env vars, `.env` | Requires human approval for every post |
 | `APPROVAL_GATE_METRICS` | `true` / `false` | `true` | n8n env vars | Separate gate for daily metrics (remove first in Phase 4) |
 | `APPROVAL_GATE_ALERTS` | `true` / `false` | `true` | n8n env vars | Separate gate for bridge alerts |
@@ -746,12 +748,12 @@ Set `DRY_RUN=true` in n8n environment variables. This immediately stops all exte
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `BRIDGE_TX_ALERT_THRESHOLD` | `1000` | Minimum TAO bridge amount to trigger alert (WF2) |
+| `BRIDGE_TX_THRESHOLD` | `100` | Minimum TAO bridge amount to trigger alert (WF2) |
 | `BRIDGE_ALERTS_MAX_PER_DAY` | `4` | Maximum bridge alert tweets per day |
 | `NEWS_RELEVANCE_THRESHOLD` | `7` | Minimum Claude relevance score to draft news commentary (WF4) |
 | `WEEKLY_RECAP_DAY` | `friday` | Day of week for weekly recap thread (WF3) |
 | `WEEKLY_RECAP_TIME` | `14:00` | Time (ET) for weekly recap |
-| `DAILY_METRICS_TIME` | `09:00` | Time (ET) for daily metrics post |
+| `DAILY_METRICS_TIME` | `10:00` | Time (ET) for daily metrics post (10 AM ET = 14:00 UTC in summer, 15:00 UTC in winter, both within peak window) |
 | `SCHEDULER_INTERVAL_MIN` | `15` | How often WF5 checks for ready-to-post items |
 | `MAX_RETRIES` | `3` | Number of publishing retries before moving to failed/ |
 | `V0IDAI_X_USER_ID` | (set on setup) | Numeric X user ID for @v0idai |
@@ -814,7 +816,7 @@ Set `DRY_RUN=true` in n8n environment variables. This immediately stops all exte
 |-----------|-------------|--------|
 | DRY_RUN | `true` -> `false` | Set in n8n env vars |
 | APPROVAL_GATE | `true` (stays) | No change |
-| n8n workflows 1-4 | Manual -> Cron triggers | WF1: 9AM ET daily. WF3: Fri 2PM ET. WF4: every 4h. WF2: webhook (always on). |
+| n8n workflows 1-4 | Manual -> Cron triggers | WF1: 10AM ET daily. WF3: Fri 2PM ET. WF4: every 4h. WF2: webhook (always on). |
 | n8n workflow 5 (Scheduler) | Manual -> Cron every 15 min | Processes scheduled/ items |
 | OpenTweet | Test -> Production @v0idai | Switch API credentials to production account |
 | X API Basic | Not active -> Active ($200/mo) | Activate when OpenTweet trial ends |
@@ -831,7 +833,7 @@ Morning:
 Afternoon:
 - [ ] Set `DRY_RUN=false` in n8n environment
 - [ ] Verify `APPROVAL_GATE=true` is set for all gate variables
-- [ ] Switch n8n WF1 from manual to cron (9AM ET daily)
+- [ ] Switch n8n WF1 from manual to cron (10AM ET daily)
 - [ ] Switch n8n WF3 from manual to cron (Fri 2PM ET)
 - [ ] Switch n8n WF4 from manual to cron (every 4 hours)
 - [ ] Switch n8n WF5 from manual to cron (every 15 minutes)
@@ -882,6 +884,98 @@ Afternoon:
 | Hermes Agent | Content orchestrator with self-improvement | DGX Spark |
 | ElizaOS | Discord/Telegram community bot | DGX Spark |
 | Lead nurturing workflows (8-14) | Automated satellite engagement | n8n self-hosted |
+
+### 9.1 Crisis Kill Switch Procedure
+
+When a crisis requires immediately halting all publishing (bridge exploit, security incident, regulatory action, or other emergency), follow this procedure. The goal is to stop all external output within 60 seconds.
+
+**Immediate halt (choose the fastest available method):**
+
+**Method A: EMERGENCY_STOP variable (preferred, fastest)**
+1. Open n8n dashboard > Settings > Variables
+2. Set `EMERGENCY_STOP` = `true`
+3. This takes effect on the next workflow execution. All workflows check this variable before any external API call and will halt immediately with a Discord log message.
+4. Note: any workflow execution already in progress will complete its current node before checking the variable. If a tweet is mid-publish, it may still go out.
+
+**Method B: DRY_RUN toggle (backup)**
+1. Open n8n dashboard > Settings > Variables
+2. Set `DRY_RUN` = `true`
+3. Same behavior as EMERGENCY_STOP for publishing, but without the explicit "crisis" logging.
+
+**Method C: Deactivate all workflows (most thorough)**
+1. Open n8n dashboard > Workflows
+2. Click the toggle switch to deactivate each active workflow (WF1 through WF5)
+3. This prevents any future executions from starting. Does not stop executions already in progress.
+4. Use this if you need to guarantee no new executions will start at all.
+
+**Method D: Full shutdown (nuclear option)**
+1. If self-hosted: stop the n8n Docker container (`docker stop n8n`)
+2. If n8n Cloud: deactivate all workflows (Method C is the equivalent)
+3. Revoke API keys at provider dashboards if credential compromise is suspected
+
+**Post-halt checklist:**
+- [ ] Verify no new posts appeared after the halt was activated
+- [ ] Check the last 30 minutes of posts across all accounts for problematic content
+- [ ] Delete any published content that is part of the crisis
+- [ ] Notify relevant stakeholders
+- [ ] Document the incident using the template in Section 11.4
+- [ ] Do NOT re-enable publishing until the root cause is identified and resolved
+
+**Re-enabling after crisis resolution:**
+1. Fix the root cause
+2. Test the fix with `DRY_RUN=true` and `EMERGENCY_STOP=false`
+3. Run each affected workflow manually and verify output
+4. Set `DRY_RUN=false` only after explicit sign-off
+5. Monitor the first 3 automated executions closely
+
+### 9.2 Credential Rotation Runbook
+
+All API keys should be rotated at least every 90 days, or immediately if a compromise is suspected. This section documents every credential, how to rotate it, and how to verify the rotation succeeded.
+
+**Credential inventory:**
+
+| # | Credential | Service | Used By | Rotation Method | Verification |
+|---|-----------|---------|---------|-----------------|-------------|
+| 1 | `TAOSTATS_API_KEY` | Taostats | WF1, WF3, WF6 | Generate new key at taostats.io dashboard. Update in n8n Settings > Variables. | Run WF1 manually; verify Taostats nodes return 200. |
+| 2 | `COINGECKO_API_KEY` | CoinGecko | WF1, WF3 | Generate new demo key at coingecko.com developer portal. Update in n8n. | Run WF1 manually; verify CoinGecko nodes return 200. |
+| 3 | `OPENTWEET_API_KEY` | OpenTweet | WF1, WF2, WF5 (posting) | Generate new key at opentweet.io dashboard. Update in n8n. | With DRY_RUN=false, post a test tweet to the private alt account. |
+| 4 | `X_API_KEY` / `X_API_SECRET` | X Developer Portal | WF1 (posting), WF4, WF6 (search) | Regenerate at developer.x.com > Projects > Keys and Tokens. Update both values in n8n. | Run WF4 manually (search only); verify X API search returns results. |
+| 5 | `X_ACCESS_TOKEN` / `X_ACCESS_SECRET` | X Developer Portal | WF1 (posting as @v0idai) | Regenerate at developer.x.com > Projects > Keys and Tokens > Access Token. Update both values in n8n. Also update the OAuth 1.0a credential in n8n Credentials store. | With DRY_RUN=false, post a test tweet to verify write access. |
+| 6 | `X_API_BEARER_TOKEN` | X Developer Portal | WF4, WF6 (search) | Regenerate at developer.x.com > Projects > Keys and Tokens > Bearer Token. Update in n8n. | Run WF4 manually; verify search node returns results. |
+| 7 | `CLAUDE_API_KEY` | Anthropic Console | WF3, WF4, WF6, WF7 | Generate new key at console.anthropic.com > API Keys. Revoke old key. Update in n8n AND in Claude Code MCP config. | Run WF3 manually; verify Claude API node returns generated content. |
+| 8 | `DISCORD_WEBHOOK_URL` | Discord Server Settings | All workflows (notifications) | Create new webhook at Discord Server > Settings > Integrations > Webhooks. Delete old webhook. Update in n8n. | Run any workflow manually; verify Discord notification arrives. |
+| 9 | `DISCORD_ANNOUNCE_WEBHOOK` | Discord Server Settings | WF7, publishing | Same as above but for #announcements channel. | Post test message to #announcements via the new webhook URL. |
+| 10 | `GITHUB_TOKEN` | GitHub Settings | WF3 | Generate new PAT at github.com > Settings > Developer settings > Personal access tokens. Revoke old token. Update in n8n and MCP config. | Run WF3 manually; verify GitHub commits node returns data. |
+| 11 | `LINKEDIN_ACCESS_TOKEN` | LinkedIn Developer Portal | Direct posting (Phase 3+) | Re-authorize OAuth flow. LinkedIn tokens expire every 60 days. Update in n8n. | Post test update (can delete immediately). |
+| 12 | `TELEGRAM_BOT_TOKEN` | Telegram BotFather | Telegram channel (Phase 3+) | Revoke and regenerate via /revoke command to @BotFather. Update in n8n. | Send test message to test channel via Bot API. |
+| 13 | `OUTSTAND_API_KEY` | Outstand dashboard | Multi-platform publishing (Phase 3+) | Generate new key at Outstand dashboard. Update in n8n. | Post test via Outstand API. |
+| 14 | WF2/WF7 webhook Header Auth | n8n Credentials store | WF2, WF7 | Update the Header Auth credential in n8n Credentials. Update the corresponding header value in the sending service (Tracker/FastAPI for WF2, CMS for WF7). | Send test webhook request with new header; verify n8n accepts it. Send request with old header; verify n8n rejects with 401. |
+
+**Rotation procedure (generic):**
+
+1. Generate the new key/token at the provider's dashboard
+2. Update the value in n8n (Settings > Variables or Credentials store, depending on the credential)
+3. Run a manual test of each workflow that uses the credential (with DRY_RUN=true for posting workflows)
+4. Verify the workflow completes without authentication errors
+5. Revoke the old key at the provider's dashboard (only after confirming the new key works)
+6. Log the rotation date in the credential tracking table below
+
+**Rotation tracking:**
+
+| Credential | Last Rotated | Next Due (90 days) | Rotated By |
+|-----------|-------------|-------------------|-----------|
+| TAOSTATS_API_KEY | (fill on setup) | | |
+| COINGECKO_API_KEY | (fill on setup) | | |
+| OPENTWEET_API_KEY | (fill on setup) | | |
+| X_API_KEY / X_API_SECRET | (fill on setup) | | |
+| X_ACCESS_TOKEN / X_ACCESS_SECRET | (fill on setup) | | |
+| X_API_BEARER_TOKEN | (fill on setup) | | |
+| CLAUDE_API_KEY | (fill on setup) | | |
+| DISCORD_WEBHOOK_URL | (fill on setup) | | |
+| GITHUB_TOKEN | (fill on setup) | | |
+| WF2/WF7 Header Auth | (fill on setup) | | |
+
+**Reminders:** Set a recurring calendar reminder every 90 days to review this table and rotate any credentials that are due. During the monthly review (Section 11.3), check this table as part of the "Audit all active API keys" task.
 
 ---
 
@@ -945,7 +1039,7 @@ Afternoon:
 | Time (ET) | Activity | Duration | Tools |
 |-----------|----------|----------|-------|
 | 8:30 AM | Check overnight: n8n workflow runs (any failures?), brand mentions, DMs | 15 min | n8n dashboard, X notifications |
-| 9:00 AM | Review and approve daily metrics post (auto-generated by WF1) | 5 min | Queue, `/queue approve` |
+| 10:00 AM | Review and approve daily metrics post (auto-generated by WF1) | 5 min | Queue, `/queue approve` |
 | 9:30 AM | Review queued content batch (2-3 items). Approve, reject, or edit. | 15 min | Queue, `/queue list`, `/queue approve` |
 | 10:00 AM | Reply engagement: 5-10 quality replies on X Tier 1-2 accounts | 30-45 min | X Pro lists, manual |
 | 1:00 PM | Review news monitor outputs (WF4), approve if relevant | 10 min | Queue |
@@ -1021,11 +1115,12 @@ When something goes wrong, fill in this template and save to `companies/voidai/i
 
 | Action | How |
 |--------|-----|
+| **Crisis: halt ALL publishing instantly** | Set `EMERGENCY_STOP=true` in n8n Settings > Variables. See Section 9.1 for full procedure. |
 | Stop ALL automated publishing | Set `DRY_RUN=true` in n8n environment variables |
 | Stop a single workflow | Deactivate the workflow in n8n dashboard |
 | Stop all n8n | Stop the n8n container/process |
 | Lock an X account | Change password + revoke all app permissions in X settings |
-| Revoke all API keys | Visit each provider dashboard (X Dev Portal, OpenTweet, Anthropic Console) |
+| Revoke all API keys | Visit each provider dashboard (X Dev Portal, OpenTweet, Anthropic Console). See Section 9.2 for the full credential inventory. |
 
 ### Key URLs (fill in during setup)
 
@@ -1065,3 +1160,4 @@ When something goes wrong, fill in this template and save to `companies/voidai/i
 | Date | Change |
 |------|--------|
 | 2026-03-15 | Initial pipeline architecture document created. Covers full system: data sources, processing, content generation, queue, publishing, monitoring, testing, environment config, deployment phases, failure recovery. |
+| 2026-03-15 | Post-audit updates: corrected all WF1 cron references from 9 AM to 10 AM ET; added Section 9.1 (Crisis Kill Switch Procedure) and Section 9.2 (Credential Rotation Runbook); updated DRY_RUN fail-safe default documentation in Section 8.1; updated DAILY_METRICS_TIME in Section 8.3; added EMERGENCY_STOP to Appendix A Emergency Stops table. |

@@ -18,14 +18,38 @@
     },
     {
       "parameters": {
-        "jsCode": "const post = $input.first().json;\n\n// Validate required fields\nconst required = ['title', 'url', 'content'];\nconst missing = required.filter(f => !post[f]);\n\nif (missing.length > 0) {\n  return [{ json: { error: true, missing_fields: missing } }];\n}\n\n// Truncate content for Claude prompt (keep under 8000 chars)\nconst truncated = post.content.length > 8000\n  ? post.content.slice(0, 8000) + '\\n\\n[Content truncated for processing]'\n  : post.content;\n\nreturn [{ json: {\n  title: post.title,\n  url: post.url,\n  content: truncated,\n  full_length: post.content.length,\n  category: post.category || 'general',\n  author: post.author || 'VoidAI',\n  error: false\n} }];"
+        "jsCode": "// EMERGENCY STOP CHECK\n// Must be the first code node in every workflow, right after the trigger.\n// Checks the EMERGENCY_STOP environment variable. If true, sends a\n// notification to Discord and halts the workflow (returns empty array).\n//\n// Referenced in: crisis.md, n8n-workflow-specs.md\n// Variable: EMERGENCY_STOP (Settings > Variables)\n\nconst emergencyStop = $env.EMERGENCY_STOP;\n\nif (emergencyStop === 'true' || emergencyStop === true) {\n  const workflowName = $workflow.name || 'Unknown Workflow';\n  const timestamp = new Date().toISOString();\n\n  const discordUrl = $env.DISCORD_WEBHOOK_URL;\n  if (discordUrl) {\n    try {\n      await fetch(discordUrl, {\n        method: 'POST',\n        headers: { 'Content-Type': 'application/json' },\n        body: JSON.stringify({\n          content: `**EMERGENCY STOP ACTIVE** | Workflow \"${workflowName}\" halted at ${timestamp}. No content was published. Set EMERGENCY_STOP=false in n8n variables to resume.`\n        })\n      });\n    } catch (e) {\n      // Discord notification failed, but we still halt.\n    }\n  }\n\n  return [];\n}\n\nreturn $input.all();"
+      },
+      "id": "emergency-stop-check",
+      "name": "Emergency Stop Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [125, 0],
+      "notes": "KILL SWITCH: Checks EMERGENCY_STOP env var. If true, notifies Discord and halts the workflow. Must be first node after trigger.",
+      "onError": "stopWorkflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "// PRE-POST EMERGENCY STOP CHECK\n// Second check right before storing blog data.\n// Catches mid-execution activation of EMERGENCY_STOP.\n\nconst emergencyStop = $env.EMERGENCY_STOP;\n\nif (emergencyStop === 'true' || emergencyStop === true) {\n  return [];\n}\n\nreturn $input.all();"
+      },
+      "id": "emergency-stop-pre-post",
+      "name": "Emergency Stop Pre-Post",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1250, 200],
+      "notes": "KILL SWITCH: Second EMERGENCY_STOP check before storing blog data. Catches mid-execution stop activation.",
+      "onError": "stopWorkflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "const post = $input.first().json;\n\n// Validate required fields\nconst required = ['title', 'url', 'content'];\nconst missing = required.filter(f => !post[f]);\n\nif (missing.length > 0) {\n  return [{ json: { error: true, missing_fields: missing } }];\n}\n\n// URL domain validation: only allow known blog domains\nconst allowedDomains = ['voidai.com', 'docs.voidai.com'];\ntry {\n  const parsed = new URL(post.url);\n  const hostname = parsed.hostname.replace(/^www\\./, '');\n  if (!allowedDomains.some(d => hostname === d || hostname.endsWith('.' + d))) {\n    return [{ json: { error: true, reason: 'URL domain not allowed: ' + hostname } }];\n  }\n  if (parsed.protocol !== 'https:') {\n    return [{ json: { error: true, reason: 'URL must use HTTPS' } }];\n  }\n} catch (e) {\n  return [{ json: { error: true, reason: 'Invalid URL format' } }];\n}\n\n// Truncate content for storage (keep under 8000 chars)\nconst truncated = post.content.length > 8000\n  ? post.content.slice(0, 8000) + '\\n\\n[Content truncated for processing]'\n  : post.content;\n\nreturn [{ json: {\n  title: post.title,\n  url: post.url,\n  content: truncated,\n  full_length: post.content.length,\n  category: post.category || 'general',\n  author: post.author || 'VoidAI',\n  error: false\n} }];"
       },
       "id": "validate-input",
       "name": "Validate Input",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [250, 0],
-      "notes": "Validate webhook payload. Truncate content for Claude prompt limits."
+      "notes": "Validate webhook payload: required fields, URL domain whitelist (voidai.com, docs.voidai.com), HTTPS check. Truncate content to 8000 chars."
     },
     {
       "parameters": {
@@ -57,89 +81,69 @@
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://api.anthropic.com/v1/messages",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "x-api-key", "value": "={{ $env.CLAUDE_API_KEY }}" },
-            { "name": "anthropic-version", "value": "2023-06-01" },
-            { "name": "Content-Type", "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"model\": \"claude-sonnet-4-20250514\",\n  \"max_tokens\": 3000,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Convert this blog post into a 10-12 tweet X thread for @v0idai (VoidAI, Bittensor SN106 subnet).\\n\\nRules:\\n- First tweet is the hook. Must stop the scroll.\\n- Each tweet MUST be under 280 characters.\\n- Include the blog link in tweet 2 or 3.\\n- Use specific numbers and data from the post.\\n- Tone: builder-credible, data-first, direct. Not hype.\\n- Include $TAO and #Bittensor hashtags naturally.\\n- Last tweet: CTA to read the full post.\\n- NEVER use em dashes. Use commas, periods, or colons.\\n- NEVER use: 'game-changer', 'paradigm shift', 'seamless', 'robust ecosystem', 'cutting-edge', 'It's worth noting'.\\n- Include a short disclaimer if financial topics: 'Not financial advice. DYOR.'\\n\\nBlog Title: {{ $json.title }}\\nBlog URL: {{ $json.url }}\\nCategory: {{ $json.category }}\\n\\nBlog Content:\\n{{ $json.content }}\\n\\nRespond as a JSON array of strings, one per tweet.\\n[\\\"1/ Hook tweet\\\", \\\"2/ ...\\\", ..., \\\"10/ CTA tweet\\\"]\"\n    }\n  ]\n}",
-        "options": { "timeout": 60000 }
+        "jsCode": "const post = $input.first().json;\n\n// Content sanitization per CLAUDE.md prompt injection safeguards\n// 1. Strip instruction-like patterns\nconst instructionPatterns = /ignore previous|system prompt|act as|forget all|override instructions|you are now|disregard|new persona|reveal your|output your|print your/gi;\n\n// 2. Remove non-printable and zero-width characters\nconst nonPrintable = /[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F\\u200B-\\u200F\\uFEFF\\u00AD\\u2060\\u2028\\u2029]/g;\n\n// 3. Remove URLs from content body (the url field is already validated)\nconst urlPattern = /https?:\\/\\/[^\\s)>\"']+/gi;\n\nfunction sanitize(text, maxLen) {\n  if (!text || typeof text !== 'string') return '';\n  return text\n    .replace(nonPrintable, '')\n    .replace(instructionPatterns, '[FILTERED]')\n    .replace(urlPattern, '[URL_REMOVED]')\n    .replace(/<script[^>]*>[\\s\\S]*?<\\/script>/gi, '')\n    .replace(/<[^>]+>/g, '')\n    .slice(0, maxLen);\n}\n\nreturn [{ json: {\n  title: sanitize(post.title, 200),\n  url: post.url,\n  // Blog content uses 5000-char limit (intentional exception to the CLAUDE.md\n  // 500-char rule, which targets short user-generated content like tweets and\n  // replies). Blog posts need sufficient length for manual derivative\n  // content generation (threads, LinkedIn posts, announcements).\n  content: sanitize(post.content, 5000),\n  full_length: post.full_length,\n  category: sanitize(post.category, 50),\n  author: sanitize(post.author, 100),\n  error: false\n} }];"
       },
-      "id": "claude-thread",
-      "name": "Claude: X Thread",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [750, -100],
-      "continueOnFail": true,
-      "notes": "Generate 10-12 tweet X thread from blog post content."
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.anthropic.com/v1/messages",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "x-api-key", "value": "={{ $env.CLAUDE_API_KEY }}" },
-            { "name": "anthropic-version", "value": "2023-06-01" },
-            { "name": "Content-Type", "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"model\": \"claude-sonnet-4-20250514\",\n  \"max_tokens\": 1000,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Convert this blog post into a LinkedIn post for VoidAI's company page.\\n\\nRules:\\n- Professional, thought-leadership tone.\\n- 200-400 words.\\n- Include the blog link.\\n- Add relevant hashtags: #Bittensor #DeFi #CrossChain #Web3 #VoidAI\\n- Lead with the key insight or data point.\\n- NEVER use em dashes.\\n- NEVER use: 'game-changer', 'paradigm shift', 'seamless', 'robust ecosystem'.\\n- Include brief disclaimer if financial topics.\\n\\nBlog Title: {{ $json.title }}\\nBlog URL: {{ $json.url }}\\nCategory: {{ $json.category }}\\n\\nBlog Content:\\n{{ $json.content }}\\n\\nRespond with ONLY the LinkedIn post text.\"\n    }\n  ]\n}",
-        "options": { "timeout": 60000 }
-      },
-      "id": "claude-linkedin",
-      "name": "Claude: LinkedIn Post",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [750, 0],
-      "continueOnFail": true,
-      "notes": "Generate LinkedIn post derivative from blog content."
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.anthropic.com/v1/messages",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "x-api-key", "value": "={{ $env.CLAUDE_API_KEY }}" },
-            { "name": "anthropic-version", "value": "2023-06-01" },
-            { "name": "Content-Type", "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"model\": \"claude-sonnet-4-20250514\",\n  \"max_tokens\": 800,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Convert this blog post into a Discord announcement for #announcements channel.\\n\\nRules:\\n- Casual but informative.\\n- Include the blog link prominently.\\n- Use Discord markdown formatting (**, __, `code`, > quotes).\\n- Keep under 2000 characters.\\n- Brief summary, key points, then link.\\n- NEVER use em dashes.\\n\\nBlog Title: {{ $json.title }}\\nBlog URL: {{ $json.url }}\\nCategory: {{ $json.category }}\\n\\nBlog Content:\\n{{ $json.content }}\\n\\nRespond with ONLY the Discord announcement text.\"\n    }\n  ]\n}",
-        "options": { "timeout": 60000 }
-      },
-      "id": "claude-discord",
-      "name": "Claude: Discord Announcement",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [750, 100],
-      "continueOnFail": true,
-      "notes": "Generate Discord announcement derivative from blog content."
-    },
-    {
-      "parameters": {
-        "jsCode": "const fs = require('fs');\nconst draftsDir = $env.QUEUE_DRAFTS_PATH || '/data/voidai/queue/drafts/';\nconst post = $('Validate Input').first().json;\nconst slug = post.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40);\nconst date = new Date().toISOString().split('T')[0];\n\nconst results = [];\n\n// 1. X Thread\ntry {\n  const threadResponse = $('Claude: X Thread').first().json;\n  const threadText = threadResponse?.content?.[0]?.text || '[]';\n  let tweets = [];\n  try {\n    tweets = JSON.parse(threadText);\n  } catch (e) {\n    tweets = threadText.split('\\n').filter(l => l.match(/^\\d+\\//));\n  }\n\n  const threadContent = `---\\ntype: x-thread\\naccount: \"@v0idai\"\\nstatus: review\\ncreated: ${new Date().toISOString()}\\nsource: workflow-7-blog-distribution\\nrequires_human_review: true\\nblog_url: ${post.url}\\ntweet_count: ${tweets.length}\\n---\\n\\n# X Thread | ${post.title}\\n\\n${tweets.map((t, i) => `## Tweet ${i + 1}\\n\\n${typeof t === 'string' ? t : t.text || t}\\n`).join('\\n')}`;\n\n  const threadFile = `${draftsDir}blog-deriv-x-thread-${slug}.md`;\n  fs.mkdirSync(draftsDir, { recursive: true });\n  fs.writeFileSync(threadFile, threadContent);\n  results.push({ type: 'x-thread', file: threadFile, tweets: tweets.length });\n} catch (e) {\n  results.push({ type: 'x-thread', error: e.message });\n}\n\n// 2. LinkedIn Post\ntry {\n  const liResponse = $('Claude: LinkedIn Post').first().json;\n  const liText = liResponse?.content?.[0]?.text || '';\n\n  const liContent = `---\\ntype: linkedin\\naccount: \"voidai\"\\nstatus: review\\ncreated: ${new Date().toISOString()}\\nsource: workflow-7-blog-distribution\\nrequires_human_review: true\\nblog_url: ${post.url}\\n---\\n\\n# LinkedIn Post | ${post.title}\\n\\n${liText}`;\n\n  const liFile = `${draftsDir}blog-deriv-linkedin-${slug}.md`;\n  fs.writeFileSync(liFile, liContent);\n  results.push({ type: 'linkedin', file: liFile });\n} catch (e) {\n  results.push({ type: 'linkedin', error: e.message });\n}\n\n// 3. Discord Announcement\ntry {\n  const dcResponse = $('Claude: Discord Announcement').first().json;\n  const dcText = dcResponse?.content?.[0]?.text || '';\n\n  const dcContent = `---\\ntype: discord\\naccount: \"announcements\"\\nstatus: review\\ncreated: ${new Date().toISOString()}\\nsource: workflow-7-blog-distribution\\nrequires_human_review: true\\nblog_url: ${post.url}\\n---\\n\\n# Discord Announcement | ${post.title}\\n\\n${dcText}`;\n\n  const dcFile = `${draftsDir}blog-deriv-discord-${slug}.md`;\n  fs.writeFileSync(dcFile, dcContent);\n  results.push({ type: 'discord', file: dcFile });\n} catch (e) {\n  results.push({ type: 'discord', error: e.message });\n}\n\nreturn [{ json: {\n  blog_title: post.title,\n  derivatives_created: results.filter(r => !r.error).length,\n  derivatives_failed: results.filter(r => r.error).length,\n  results\n} }];"
-      },
-      "id": "write-all-drafts",
-      "name": "Write All Drafts",
+      "id": "sanitize-content",
+      "name": "Sanitize Content",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1050, 0],
-      "notes": "Write X thread, LinkedIn post, and Discord announcement to queue/drafts/."
+      "position": [750, 100],
+      "notes": "SECURITY: Sanitize all webhook content per CLAUDE.md prompt injection safeguards. Strips instruction-like patterns, removes URLs from content body, removes non-printable/zero-width chars, strips HTML/script tags. Title: 200 chars, author: 100 chars, content: 5000 chars (intentional exception to the 500-char rule for blog content, which needs sufficient context for manual derivative generation)."
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"status\": \"error\", \"message\": \"Invalid input\", \"details\": {{ JSON.stringify($json.missing_fields || $json.reason || 'Unknown validation error') }} }",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "response-error",
+      "name": "Response: Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [750, -100],
+      "notes": "Return HTTP 400 to webhook caller when input validation fails."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "dry-run-check",
+              "leftValue": "={{ $env.DRY_RUN }}",
+              "rightValue": "false",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "dry-run-check",
+      "name": "DRY_RUN?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1000, 100],
+      "notes": "FAIL-SAFE: Only proceed to store blog data when DRY_RUN is strictly 'false'. Any other value (true, unset, typo) routes to dry-run log."
+    },
+    {
+      "parameters": {
+        "jsCode": "const post = $input.first().json;\nconst date = new Date().toISOString();\n\nreturn [{ json: {\n  status: 'dry_run',\n  timestamp: date,\n  message: 'Blog distribution skipped (DRY_RUN is not false)',\n  blog_title: post.title,\n  blog_url: post.url,\n  content_preview: (post.content || '').slice(0, 200)\n} }];"
+      },
+      "id": "dry-run-log",
+      "name": "DRY_RUN Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1250, 0],
+      "notes": "Log dry-run details. Output sent to Discord for visibility."
     },
     {
       "parameters": {
@@ -147,19 +151,83 @@
         "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"content\": \"**Blog Distribution Pipeline Complete**\\n\\nBlog: {{ $json.blog_title }}\\nDerivatives created: {{ $json.derivatives_created }}/3\\nFailed: {{ $json.derivatives_failed }}/3\\n\\nDraft files ready in `queue/drafts/`. Review and approve each derivative before posting.\\n\\n_All derivatives require human review._\"\n}",
+        "jsonBody": "={\n  \"content\": \"**[DRY RUN] Blog Distribution Pipeline**\\n\\nBlog: {{ $json.blog_title }}\\nURL: {{ $json.blog_url }}\\nContent preview: {{ $json.content_preview }}\\n\\nDRY_RUN is not set to 'false'. No content generated.\"\n}",
         "options": {}
       },
-      "id": "discord-notify",
-      "name": "Discord: Derivatives Ready",
+      "id": "dry-run-discord",
+      "name": "Discord: DRY_RUN Log",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1300, 0],
-      "notes": "Notify Vew that blog derivatives are ready for review."
+      "position": [1500, -100],
+      "continueOnFail": true,
+      "notes": "Send dry-run log to Discord instead of filesystem. continueOnFail ensures the Response: DRY_RUN node fires even if Discord is unreachable, preventing webhook caller hangs."
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"status\": \"dry_run\", \"message\": \"Blog distribution logged (DRY_RUN mode)\" }",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "response-dry-run",
+      "name": "Response: DRY_RUN",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1500, 50],
+      "notes": "Return HTTP 200 to webhook caller in dry-run mode."
+    },
+    {
+      "parameters": {
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nif (!staticData.blogs) staticData.blogs = {};\n\nconst post = $('Sanitize Content').first().json;\nconst slug = post.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40);\nconst date = new Date().toISOString().split('T')[0];\nconst key = `${date}-${slug}`;\n\nconst blogEntry = {\n  type: 'blog-distribution',\n  status: 'pending_content_generation',\n  received_at: new Date().toISOString(),\n  blog: {\n    title: post.title,\n    url: post.url,\n    content: post.content.slice(0, 5000),\n    category: post.category,\n    author: post.author\n  },\n  derivatives_needed: ['x-thread', 'linkedin-post', 'discord-announcement'],\n  content_brief: 'Generate derivatives using /generate-thread (for X), /generate-tweet (for LinkedIn), and manual Discord announcement'\n};\n\nstaticData.blogs[key] = blogEntry;\n\n// Cleanup: keep only last 20 entries\nconst blogKeys = Object.keys(staticData.blogs).sort();\nif (blogKeys.length > 20) {\n  blogKeys.slice(0, blogKeys.length - 20).forEach(k => delete staticData.blogs[k]);\n}\n\nreturn [{ json: {\n  blog_title: post.title,\n  blog_url: post.url,\n  storage_key: key,\n  status: 'pending_content_generation'\n} }];"
+      },
+      "id": "store-blog-data",
+      "name": "Store Blog Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1500, 200],
+      "notes": "Store sanitized blog data to workflow static data for manual derivative generation via Claude Code skills. Keeps last 20 entries."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"**Blog received: {{ $json.blog_title }}**\\n\\nURL: {{ $json.blog_url }}\\nStorage key: {{ $json.storage_key }}\\n\\nGenerate derivatives using /generate-thread and /generate-tweet, then add to queue.\"\n}",
+        "options": {}
+      },
+      "id": "discord-blog-received",
+      "name": "Discord: Blog Received",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1750, 200],
+      "continueOnFail": true,
+      "notes": "Notify that blog data has been stored and derivatives should be generated manually. continueOnFail prevents Discord outages from blocking the success response."
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"status\": \"received\", \"message\": \"Blog data stored. Generate derivatives manually.\" }",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "response-success",
+      "name": "Response: Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1750, 350],
+      "notes": "Return HTTP 200 to webhook caller after blog data has been stored."
     }
   ],
   "connections": {
     "Webhook: Blog Published": {
+      "main": [
+        [{ "node": "Emergency Stop Check", "type": "main", "index": 0 }]
+      ]
+    },
+    "Emergency Stop Check": {
       "main": [
         [{ "node": "Validate Input", "type": "main", "index": 0 }]
       ]
@@ -171,32 +239,52 @@
     },
     "Valid Input?": {
       "main": [
-        [],
         [
-          { "node": "Claude: X Thread", "type": "main", "index": 0 },
-          { "node": "Claude: LinkedIn Post", "type": "main", "index": 0 },
-          { "node": "Claude: Discord Announcement", "type": "main", "index": 0 }
+          { "node": "Response: Error", "type": "main", "index": 0 }
+        ],
+        [
+          { "node": "Sanitize Content", "type": "main", "index": 0 }
         ]
       ]
     },
-    "Claude: X Thread": {
+    "Sanitize Content": {
       "main": [
-        [{ "node": "Write All Drafts", "type": "main", "index": 0 }]
+        [{ "node": "DRY_RUN?", "type": "main", "index": 0 }]
       ]
     },
-    "Claude: LinkedIn Post": {
+    "DRY_RUN?": {
       "main": [
-        [{ "node": "Write All Drafts", "type": "main", "index": 0 }]
+        [
+          { "node": "Emergency Stop Pre-Post", "type": "main", "index": 0 }
+        ],
+        [
+          { "node": "DRY_RUN Log", "type": "main", "index": 0 }
+        ]
       ]
     },
-    "Claude: Discord Announcement": {
+    "DRY_RUN Log": {
       "main": [
-        [{ "node": "Write All Drafts", "type": "main", "index": 0 }]
+        [
+          { "node": "Discord: DRY_RUN Log", "type": "main", "index": 0 }
+        ]
       ]
     },
-    "Write All Drafts": {
+    "Discord: DRY_RUN Log": {
       "main": [
-        [{ "node": "Discord: Derivatives Ready", "type": "main", "index": 0 }]
+        [{ "node": "Response: DRY_RUN", "type": "main", "index": 0 }]
+      ]
+    },
+    "Emergency Stop Pre-Post": {
+      "main": [
+        [{ "node": "Store Blog Data", "type": "main", "index": 0 }]
+      ]
+    },
+    "Store Blog Data": {
+      "main": [
+        [
+          { "node": "Discord: Blog Received", "type": "main", "index": 0 },
+          { "node": "Response: Success", "type": "main", "index": 0 }
+        ]
       ]
     }
   },

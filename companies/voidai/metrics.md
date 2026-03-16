@@ -16,15 +16,15 @@ These are the key numbers to reference across all content. Pull latest data when
 
 | Metric | Value | Last Updated | Source |
 |--------|-------|-------------|--------|
-| TAO Price | $221.74 | 2026-03 | CoinMarketCap |
-| TAO Market Cap | $2.39B | 2026-03 | CoinMarketCap |
+| TAO Price | Check CoinGecko for live data | Rolling | CoinGecko, CoinMarketCap |
+| TAO Market Cap | $2.77B (Mar 15, 2026 snapshot; check CoinGecko for live data) | 2026-03-15 | CoinGecko |
 | CMC Rank | #36 | 2026-03 | CoinMarketCap |
-| 24h Trading Volume | $231.3M | 2026-03 | CoinMarketCap |
+| 24h Trading Volume | Check CoinGecko for live data | Rolling | CoinGecko, CoinMarketCap |
 | Circulating Supply | 10,757,669 TAO | 2026-03 | CoinMarketCap |
 | Max Supply | 21,000,000 TAO (fixed, Bitcoin-like) | -- | Protocol spec |
 | % of Max Supply Circulating | ~51% | 2026-03 | Calculated |
 | Fully Diluted Valuation | $4.90B | 2026-03 | CoinMarketCap |
-| % TAO Staked | ~68% | 2026-03 | CaptainAltcoin / Taostats |
+| % TAO Staked | High staking participation rate (76.27% as of Mar 15, 2026; check Taostats for live data) | 2026-03-15 | Taostats |
 | Active Subnets | ~128-129 | 2026-03 | Taostats (cap at 128, competitive replacement) |
 | TAO AI Coin Rank | 2nd most mentioned AI coin | 2026-03 | LunarCrush |
 

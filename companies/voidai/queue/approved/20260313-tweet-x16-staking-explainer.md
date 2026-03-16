@@ -58,7 +58,7 @@ stagger_order: 0
 
 ## Content
 
-~68% of $TAO is staked. Under dTAO, your stake directs emissions to subnets you back.
+The majority of $TAO is staked. Under dTAO, your stake directs emissions to subnets you back.
 
 Top subnets attract more stake, capture more of 3,600 $TAO/day.
 
@@ -68,5 +68,5 @@ NFA. DYOR.
 
 ## Editor Notes
 
-<!-- DATA REFRESH NEEDED: "~68% staked" may be stale. Coinbase reports 76.27% as of 2026-03-15 -->
-<!-- Alpha & Education pillar. Staking explainer connecting staking to dTAO mechanics. Uses compliant language: "network participation" not "earning." Real metric: 68% staked, 3,600 TAO/day post-halving emissions. Voice audit 2026-03-13: replaced "What that means under dTAO:" question-adjacent hook with declarative "Here's how it works under dTAO." Added missing $ cashtag to "3,600 TAO/day" -> "3,600 $TAO/day". Challenger audit 2026-03-13: merged "Here's how it works" setup phrase into direct statement per Vew's voice pattern. -->
+<!-- FIXED 2026-03-15: Replaced "~68% staked" with "The majority of $TAO is staked" to avoid stale figures. -->
+<!-- Alpha & Education pillar. Staking explainer connecting staking to dTAO mechanics. Uses compliant language: "network participation" not "earning." Original metric: 68% staked (now genericized), 3,600 TAO/day post-halving emissions. Voice audit 2026-03-13: replaced "What that means under dTAO:" question-adjacent hook with declarative "Here's how it works under dTAO." Added missing $ cashtag to "3,600 TAO/day" -> "3,600 $TAO/day". Challenger audit 2026-03-13: merged "Here's how it works" setup phrase into direct statement per Vew's voice pattern. -->

@@ -65,11 +65,11 @@ All satellite accounts MUST comply with these requirements:
   - Problem/Solution format for explaining what subnets do (e.g., "What @hippius_subnet does: [...] Problem it solves: [...]")
   - Thread format with thread emoji + pointing down for deep dives
   - Analogies to familiar products ("like a crypto Dropbox")
-  - Weekly update format: "Road to SOTA -- Weekly Update" style
+  - Weekly update format: "Road to SOTA: Weekly Update" style
   - "alpha has been in high demand": use "alpha" for both information and token context
 - **Content mix**: 50% ecosystem-intelligence, 25% alpha-education, 15% bridge-build, 10% community-culture
 - **Content format ratios**: 35% Bittensor ecosystem analysis, 25% subnet spotlights & alpha, 20% VoidAI/SN106 updates (builder credibility), 10% threads/deep-dives, 10% community engagement (QRTs, replies)
-- **Hook formulas**: "[Subnet name] (SN[X]) on Bittensor $TAO has been [doing thing]", "The State of Bittensor:", "$TAO and Subnets -- here's what's moving:", "SN106 weekly:"
+- **Hook formulas**: "[Subnet name] (SN[X]) on Bittensor $TAO has been [doing thing]", "The State of Bittensor:", "$TAO and Subnets: here's what's moving:", "SN106 weekly:"
 - **Cadence**: 1-2 posts/day
 - **DO**: Reference real metrics (emissions, mindshare rank, TVL). Tag other Bittensor projects. Share genuine subnet insights. Position VoidAI as ecosystem infrastructure, not just a token.
 - **DO NOT**: Shill without substance. Ignore other subnets. Sound like you're only here to pump SN106. Use generic crypto language that doesn't show Bittensor knowledge.
@@ -94,11 +94,11 @@ All satellite accounts MUST comply with these requirements:
   - Thread format for deep dives with numbered parts
 - **Content mix**: 40% alpha-education (yield/DeFi education), 30% ecosystem-intelligence (flow analysis), 20% bridge-build, 10% community-culture
 - **Content format ratios**: 30% cross-chain DeFi analysis, 25% alpha drops (bridge volumes, liquidity flows, yield opportunities), 20% VoidAI as DeFi infrastructure, 15% ecosystem commentary, 10% threads/deep-dives
-- **Hook formulas**: "Alpha on [topic]:", "Why [protocol/trend] matters for cross-chain DeFi:", "The data says:", "[Metric] just hit [number] -- here's what it means:", "Cross-chain liquidity update:"
+- **Hook formulas**: "Alpha on [topic]:", "Why [protocol/trend] matters for cross-chain DeFi:", "The data says:", "[Metric] just hit [number]. Here's what it means:", "Cross-chain liquidity update:"
 - **Cadence**: 1-2 posts/day
 - **DO**: Lead with data. Reference specific protocols, TVLs, volumes. Position VoidAI bridge as critical DeFi infrastructure. Compare bridge performance objectively. Share genuine yield analysis.
 - **DO NOT**: Sound like a shill account. Ignore competitors or other bridges. Post without data backing claims. Use empty superlatives.
-- **Compliance adaptation**: Professional disclaimer format. "Informational only -- not financial advice. DYOR." Link to full disclaimer.
+- **Compliance adaptation**: Professional disclaimer format. "Informational only. Not financial advice. DYOR." Link to full disclaimer.
 
 ---
 
@@ -109,14 +109,14 @@ All satellite accounts MUST comply with these requirements:
 - **Audience**: AI x crypto enthusiasts, decentralized compute researchers, broader crypto audience interested in AI narrative
 - **Voice**: Thought leadership on AI x crypto convergence. Broader audience than Bittensor-only. References AI trends (LLMs, agents, compute markets) and connects them to decentralized infrastructure. Analytical, forward-looking, connecting dots across industries.
 - **Voice patterns**:
-  - Connect mainstream AI news to decentralized alternatives: "OpenAI raised $X -- here's why decentralized compute matters more than ever"
+  - Connect mainstream AI news to decentralized alternatives: "OpenAI raised $X. Here's why decentralized compute matters more than ever"
   - Comparative framing: centralized vs. decentralized AI infrastructure
   - Reference specific AI models, benchmarks, compute costs
   - Thread format for deep dives on AI x crypto thesis
   - "The real alpha in AI isn't [obvious thing], it's [infrastructure play]"
 - **Content mix**: 40% ecosystem-intelligence (AI x crypto trends), 30% alpha-education, 20% bridge-build, 10% community-culture
 - **Content format ratios**: 35% AI x crypto trend analysis, 25% Bittensor as AI infrastructure, 20% educational threads, 10% news commentary, 10% engagement (polls, takes)
-- **Hook formulas**: "AI x crypto update:", "Why [AI trend] matters for Bittensor:", "Centralized AI vs. decentralized AI -- the numbers:", "The compute thesis:", "[AI company] just [did thing] -- here's what it means for $TAO:"
+- **Hook formulas**: "AI x crypto update:", "Why [AI trend] matters for Bittensor:", "Centralized AI vs. decentralized AI, the numbers:", "The compute thesis:", "[AI company] just [did thing]. Here's what it means for $TAO:"
 - **Cadence**: 1/day
 - **DO**: Bridge the gap between AI/ML audience and crypto audience. Reference real AI benchmarks, compute costs, model performance. Position Bittensor/VoidAI as infrastructure for the AI economy.
 - **DO NOT**: Overhype AI narratives. Make unsubstantiated claims about AI capabilities. Sound like a generic "AI will change everything" account. Ignore the technical substance.

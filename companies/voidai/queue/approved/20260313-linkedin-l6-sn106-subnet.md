@@ -20,7 +20,7 @@ latest_post_at: ""
 
 # Content metadata
 pillar: "bridge-build"
-character_count: 2850
+character_count: 2830
 has_media: false
 thread_count: 1
 
@@ -80,13 +80,12 @@ The incentive loop: Bittensor emits TAO to SN106 (post-halving: 3,600 TAO/day ac
 
 **Why Concentrated Liquidity**
 
-Standard AMMs spread liquidity uniformly across all prices. Capital focused in active price ranges provides dramatically more depth per dollar. For traders: lower slippage. SN106 miners compete to provide the most efficient positions. Bittensor's emissions reward top performers.
+Standard AMMs spread liquidity uniformly across all prices. Capital focused in active price ranges provides dramatically more depth per dollar. For traders: lower slippage. SN106 miners compete to provide the most efficient positions. Bittensor's emissions distribute to top performers.
 
 **Current Metrics**
 
-- Mindshare: top-5 Kaito ranking among Bittensor subnets (as of September 2025)
-- Token price: $1.01 | Market cap: $3.02M
-- 24h volume: ~$153K
+- Only Bittensor subnet focused on coordinating on-chain liquidity provisioning
+- Check live token metrics at app.voidai.com
 - CoinGecko listed as "Liquidity Provisioning"
 
 Point-in-time metrics. Outcomes are variable, not guaranteed.
@@ -108,7 +107,8 @@ This content is for informational and educational purposes only and does not con
 ## Editor Notes
 
 <!-- FIXED 2026-03-15: Mindshare now qualified as "top-5 as of September 2025". Removed specific 2.01% figure. Changed "128 subnets" to "128+ subnets". -->
-<!-- DATA REFRESH NEEDED: SN106 token price $1.01 / market cap $3.02M / 24h volume $153K are point-in-time snapshots. Refresh before posting as of 2026-03-15 -->
+<!-- FIXED 2026-03-15: Replaced hardcoded SN106 token price/market cap/volume with generic "Check live token metrics at app.voidai.com". -->
+<!-- FIXED 2026-03-15: Removed Kaito mindshare reference from Current Metrics. Replaced with factual positioning ("Only Bittensor subnet focused on coordinating on-chain liquidity provisioning"). Kaito reference consolidated to L1 only. -->
 <!-- Human review notes. NOT posted. -->
 <!-- COMPLIANCE NOTES:
 - "Participate" not "invest" ✓
@@ -118,7 +118,7 @@ This content is for informational and educational purposes only and does not con
 - Disclaimer included ✓
 - Non-custodial ✓
 - No price predictions ✓
-- Real metrics: #5/2.01%, $1.01, $3.02M cap, $153K vol ✓
+- Original metrics replaced with generic references to avoid stale data ✓
 - Post-halving emissions (3,600 TAO/day) ✓
 - Professional LinkedIn tone ✓
 - Trimmed to post format (<3,000 chars) ✓

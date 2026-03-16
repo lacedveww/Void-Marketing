@@ -7,10 +7,9 @@ When the user says: "generate tweet", "write tweet", "create tweet", "/generate-
 
 ## Instructions
 
-1. **Load config:**
-   - Read `CLAUDE.md` for banned phrases, formatting rules
-   - Read `companies/voidai/voice.md` for voice registers
-   - Read `companies/voidai/accounts.md` for account personas
+1. **Load config** (stop if any missing):
+   - Read all config files per CLAUDE.md Config Load Order (items 1-8 minimum)
+   - Read `companies/{ACTIVE_COMPANY}/brand/voice-learnings.md` (mandatory for content generation)
    - Read `engine/templates/x-single.md` for template format
 
 2. **Gather inputs** (ask if not provided):
@@ -37,3 +36,4 @@ When the user says: "generate tweet", "write tweet", "create tweet", "/generate-
    - Write to `companies/voidai/queue/drafts/{YYYYMMDD}-tweet-{short-id}.md`
    - Exact YAML frontmatter format from existing approved tweets
    - Set status: "draft", dry_run: true
+   - Remind user to run `/queue check <id>` for compliance validation

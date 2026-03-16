@@ -4,8 +4,8 @@ created_at: "2026-03-15"
 updated_at: "2026-03-15"
 
 # Status
-status: "approved"
-previous_status: "review"
+status: "review"
+previous_status: "approved"
 
 # Target
 platform: "x"
@@ -69,3 +69,4 @@ NFA.
 ## Editor Notes
 
 <!-- Bridge & Build pillar. Product feedback question for @v0idai main account. NOTE FOR VEW: This departs from Vew's typical declarative style (no question hooks). Included because the Phase 2 audit identified zero community input mechanisms in the queue. The framing is "building the roadmap" (builder register), not "vote for your favorite chain" (engagement bait). "Genuine question" signals authenticity. If Vew prefers not to use question format on main account, this could be posted from the Ecosystem Satellite instead. Created by Phase 2 Challenger to fill Gap 2. -->
+<!-- FLAGGED 2026-03-16: Moved back to review status. Requires human review before publishing per CLAUDE.md human review gate. -->

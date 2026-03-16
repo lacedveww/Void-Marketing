@@ -4,8 +4,8 @@ created_at: "2026-03-15"
 updated_at: "2026-03-15"
 
 # Status
-status: "approved"
-previous_status: "review"
+status: "review"
+previous_status: "approved"
 
 # Target
 platform: "x"
@@ -69,3 +69,4 @@ NFA. DYOR.
 ## Editor Notes
 
 <!-- Ecosystem Intelligence pillar. Opens with declarative data (Vew's natural style), closes with an indirect prompt for replies. "Curious which subnets people think survive" is softer than a direct question hook but still invites engagement. References real post-halving data from metrics.md. Does not mention SN106 or VoidAI, but the "on-chain activity" framing implicitly favors liquidity subnets. The "survive the next 6 months" framing will generate debate because subnet operators and stakers have strong opinions. Created by Phase 2 Challenger to fill Gap 2. -->
+<!-- FLAGGED 2026-03-16: Moved back to review status. Requires human review before publishing per CLAUDE.md human review gate. -->

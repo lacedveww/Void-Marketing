@@ -4,8 +4,8 @@ created_at: "2026-03-15"
 updated_at: "2026-03-15"
 
 # Status
-status: "approved"
-previous_status: "review"
+status: "review"
+previous_status: "approved"
 
 # Target
 platform: "x"
@@ -69,3 +69,4 @@ NFA. DYOR.
 ## Editor Notes
 
 <!-- Ecosystem Intelligence pillar. Subnet spotlight for OpenKaito (SN5). Single tweet format for variety (SN64 and SN4 are threads). Zero VoidAI or SN106 references. Concise, factual description of what OpenKaito does. "Signal from noise" framing is natural to crypto-native audience. Positions search as a genuinely difficult technical challenge. Created by Phase 2 Challenger to fill Gap 1. -->
+<!-- FLAGGED 2026-03-16: Moved back to review status. Requires human review before publishing per CLAUDE.md human review gate. -->

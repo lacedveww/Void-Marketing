@@ -7,17 +7,29 @@
           "interval": [
             {
               "field": "cronExpression",
-              "expression": "0 9 * * *"
+              "expression": "0 10 * * *"
             }
           ]
         }
       },
       "id": "cron-trigger",
-      "name": "Daily 9AM ET",
+      "name": "Daily 10AM ET",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [0, 0],
-      "notes": "Trigger: 9:00 AM ET daily. Adjust timezone in n8n settings to America/New_York."
+      "notes": "Trigger: 10:00 AM ET daily. 10 AM EDT = 14:00 UTC (summer), 10 AM EST = 15:00 UTC (winter). Both within cadence.md peak window 14:00-16:00 UTC."
+    },
+    {
+      "parameters": {
+        "jsCode": "// EMERGENCY STOP CHECK\n// Must be the first code node in every workflow, right after the trigger.\n// Checks the EMERGENCY_STOP environment variable. If true, sends a\n// notification to Discord and halts the workflow (returns empty array).\n//\n// Referenced in: crisis.md, n8n-workflow-specs.md\n// Variable: EMERGENCY_STOP (Settings > Variables)\n\nconst emergencyStop = $env.EMERGENCY_STOP;\n\nif (emergencyStop === 'true' || emergencyStop === true) {\n  const workflowName = $workflow.name || 'Unknown Workflow';\n  const timestamp = new Date().toISOString();\n\n  const discordUrl = $env.DISCORD_WEBHOOK_URL;\n  if (discordUrl) {\n    try {\n      await fetch(discordUrl, {\n        method: 'POST',\n        headers: { 'Content-Type': 'application/json' },\n        body: JSON.stringify({\n          content: `**EMERGENCY STOP ACTIVE** | Workflow \"${workflowName}\" halted at ${timestamp}. No content was published. Set EMERGENCY_STOP=false in n8n variables to resume.`\n        })\n      });\n    } catch (e) {\n      // Discord notification failed, but we still halt.\n    }\n  }\n\n  return [];\n}\n\nreturn $input.all();"
+      },
+      "id": "emergency-stop-check",
+      "name": "Emergency Stop Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [125, 0],
+      "notes": "KILL SWITCH: Checks EMERGENCY_STOP env var. If true, notifies Discord and halts the workflow. Must be first node after trigger.",
+      "onError": "stopWorkflow"
     },
     {
       "parameters": {
@@ -26,28 +38,18 @@
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
-            {
-              "name": "netuid",
-              "value": "106"
-            }
+            { "name": "netuid", "value": "106" }
           ]
         },
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            {
-              "name": "Authorization",
-              "value": "={{ $env.TAOSTATS_API_KEY }}"
-            }
+            { "name": "Authorization", "value": "={{ $env.TAOSTATS_API_KEY }}" }
           ]
         },
         "options": {
           "timeout": 30000,
-          "response": {
-            "response": {
-              "responseFormat": "json"
-            }
-          }
+          "response": { "response": { "responseFormat": "json" } }
         }
       },
       "id": "taostats-subnet",
@@ -65,28 +67,18 @@
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
-            {
-              "name": "netuid",
-              "value": "106"
-            }
+            { "name": "netuid", "value": "106" }
           ]
         },
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            {
-              "name": "Authorization",
-              "value": "={{ $env.TAOSTATS_API_KEY }}"
-            }
+            { "name": "Authorization", "value": "={{ $env.TAOSTATS_API_KEY }}" }
           ]
         },
         "options": {
           "timeout": 30000,
-          "response": {
-            "response": {
-              "responseFormat": "json"
-            }
-          }
+          "response": { "response": { "responseFormat": "json" } }
         }
       },
       "id": "taostats-pool",
@@ -104,35 +96,16 @@
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
-            {
-              "name": "ids",
-              "value": "bittensor"
-            },
-            {
-              "name": "vs_currencies",
-              "value": "usd"
-            },
-            {
-              "name": "include_24hr_change",
-              "value": "true"
-            },
-            {
-              "name": "include_market_cap",
-              "value": "true"
-            },
-            {
-              "name": "include_24hr_vol",
-              "value": "true"
-            }
+            { "name": "ids", "value": "bittensor" },
+            { "name": "vs_currencies", "value": "usd" },
+            { "name": "include_24hr_change", "value": "true" },
+            { "name": "include_market_cap", "value": "true" },
+            { "name": "include_24hr_vol", "value": "true" }
           ]
         },
         "options": {
           "timeout": 30000,
-          "response": {
-            "response": {
-              "responseFormat": "json"
-            }
-          }
+          "response": { "response": { "responseFormat": "json" } }
         }
       },
       "id": "coingecko-tao",
@@ -150,31 +123,15 @@
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
-            {
-              "name": "ids",
-              "value": "liquidity-provisioning"
-            },
-            {
-              "name": "vs_currencies",
-              "value": "usd"
-            },
-            {
-              "name": "include_24hr_change",
-              "value": "true"
-            },
-            {
-              "name": "include_market_cap",
-              "value": "true"
-            }
+            { "name": "ids", "value": "liquidity-provisioning" },
+            { "name": "vs_currencies", "value": "usd" },
+            { "name": "include_24hr_change", "value": "true" },
+            { "name": "include_market_cap", "value": "true" }
           ]
         },
         "options": {
           "timeout": 30000,
-          "response": {
-            "response": {
-              "responseFormat": "json"
-            }
-          }
+          "response": { "response": { "responseFormat": "json" } }
         }
       },
       "id": "coingecko-sn106",
@@ -187,32 +144,38 @@
     },
     {
       "parameters": {
+        "mode": "append",
+        "numberInputs": 4,
+        "options": {}
+      },
+      "id": "wait-for-all",
+      "name": "Wait For All APIs",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [450, 50],
+      "notes": "Wait for all 4 parallel HTTP requests to complete before proceeding. Uses append mode with 4 inputs so the node waits for data on every branch."
+    },
+    {
+      "parameters": {
         "jsCode": "// Merge all API responses into a single data object\nconst taostatsSubnet = $('Taostats Subnet 106').first().json;\nconst taostatsPool = $('Taostats Pool').first().json;\nconst taoPrice = $('CoinGecko TAO').first().json;\nconst alphaPrice = $('CoinGecko SN106').first().json;\n\nconst data = {\n  tao_price: taoPrice?.bittensor?.usd ?? 'N/A',\n  tao_24h_change: taoPrice?.bittensor?.usd_24h_change ?? 'N/A',\n  tao_market_cap: taoPrice?.bittensor?.usd_market_cap ?? 'N/A',\n  tao_volume_24h: taoPrice?.bittensor?.usd_24h_vol ?? 'N/A',\n  alpha_price_usd: alphaPrice?.['liquidity-provisioning']?.usd ?? 'N/A',\n  alpha_24h_change: alphaPrice?.['liquidity-provisioning']?.usd_24h_change ?? 'N/A',\n  alpha_market_cap: alphaPrice?.['liquidity-provisioning']?.usd_market_cap ?? 'N/A',\n  sn106_emission: taostatsSubnet?.emission ?? 'N/A',\n  sn106_tao_reserve: taostatsPool?.tao_reserve ?? 'N/A',\n  sn106_alpha_reserve: taostatsPool?.alpha_reserve ?? 'N/A',\n  sn106_alpha_price_tao: taostatsPool?.price ?? 'N/A',\n  timestamp: new Date().toISOString(),\n  date_display: new Date().toLocaleDateString('en-US', {\n    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',\n    timeZone: 'America/New_York'\n  }),\n  api_failures: []\n};\n\nif (data.tao_price === 'N/A') data.api_failures.push('CoinGecko TAO');\nif (data.alpha_price_usd === 'N/A') data.api_failures.push('CoinGecko SN106');\nif (data.sn106_emission === 'N/A') data.api_failures.push('Taostats Subnet');\nif (data.sn106_tao_reserve === 'N/A') data.api_failures.push('Taostats Pool');\n\nreturn [{ json: data }];"
       },
       "id": "merge-data",
       "name": "Merge Data",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [500, 50],
+      "position": [650, 50],
       "notes": "Merge all API responses. Track which APIs failed."
     },
     {
       "parameters": {
         "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict"
-          },
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
           "conditions": [
             {
               "id": "api-fail-check",
               "leftValue": "={{ $json.api_failures.length }}",
               "rightValue": "2",
-              "operator": {
-                "type": "number",
-                "operation": "gt"
-              }
+              "operator": { "type": "number", "operation": "gt" }
             }
           ],
           "combinator": "and"
@@ -222,7 +185,7 @@
       "name": "Too Many API Failures?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [700, 50],
+      "position": [850, 50],
       "notes": "If more than 2 APIs failed, skip posting and notify."
     },
     {
@@ -244,7 +207,7 @@
       "name": "Error: Discord Notify",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [950, -50],
+      "position": [1100, -50],
       "notes": "Notify Vew via Discord that too many APIs are down."
     },
     {
@@ -255,26 +218,19 @@
       "name": "Format Tweet",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [950, 150],
+      "position": [1100, 150],
       "notes": "Format metrics into tweet. Auto-truncate if over 280 chars. Numbers formatted for readability (hint: use Space Grotesk for manual image creation)."
     },
     {
       "parameters": {
         "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict"
-          },
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
           "conditions": [
             {
               "id": "dry-run-check",
               "leftValue": "={{ $env.DRY_RUN }}",
-              "rightValue": "true",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
+              "rightValue": "false",
+              "operator": { "type": "string", "operation": "equals" }
             }
           ],
           "combinator": "and"
@@ -284,78 +240,105 @@
       "name": "DRY_RUN?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [1200, 150],
-      "notes": "If DRY_RUN=true, log to file instead of posting."
+      "position": [1350, 150],
+      "notes": "Safe default: DRY_RUN must be strictly 'false' to publish. Any other value (true, undefined, empty) routes to dry-run log."
     },
     {
       "parameters": {
-        "jsCode": "const fs = require('fs');\nconst logDir = $env.LOG_FILE_PATH || '/data/n8n/dry-run-logs/';\nconst date = new Date().toISOString().split('T')[0];\nconst logFile = `${logDir}workflow-1-daily-metrics-${date}.json`;\n\nconst logEntry = {\n  workflow: 'daily-metrics',\n  timestamp: new Date().toISOString(),\n  dry_run: true,\n  tweet_text: $input.first().json.tweet,\n  tweet_length: $input.first().json.tweet.length,\n  full_data: $input.first().json.full_data,\n  truncated: $input.first().json.truncated,\n  would_post_to: '@v0idai'\n};\n\nfs.mkdirSync(logDir, { recursive: true });\nfs.writeFileSync(logFile, JSON.stringify(logEntry, null, 2));\n\nreturn [{ json: { status: 'logged', file: logFile, ...logEntry } }];"
+        "jsCode": "// DRY_RUN log: send to Discord instead of filesystem for n8n Cloud compatibility\nconst logEntry = {\n  workflow: 'daily-metrics',\n  timestamp: new Date().toISOString(),\n  dry_run: true,\n  tweet_text: $input.first().json.tweet,\n  tweet_length: $input.first().json.tweet.length,\n  full_data: $input.first().json.full_data,\n  truncated: $input.first().json.truncated,\n  would_post_to: '@v0idai'\n};\n\nreturn [{ json: { status: 'logged', ...logEntry } }];"
       },
       "id": "dry-run-log",
       "name": "DRY_RUN Log",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1450, 50],
-      "notes": "Write formatted tweet + raw data to log file for review."
+      "position": [1600, 50],
+      "notes": "Prepare dry-run data for Discord notification. No filesystem writes for n8n Cloud compatibility."
     },
     {
       "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict"
-          },
-          "conditions": [
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"**[DRY_RUN] Daily Metrics Draft**\\nTweet ({{ $json.tweet_length }} chars):\\n```{{ $json.tweet_text }}```\\nTimestamp: {{ $json.timestamp }}\"\n}",
+        "options": {}
+      },
+      "id": "dry-run-discord",
+      "name": "DRY_RUN: Discord Log",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1850, 50],
+      "notes": "Send dry-run output to Discord for review instead of writing to filesystem."
+    },
+    {
+      "parameters": {
+        "jsCode": "// PRE-POST EMERGENCY STOP CHECK\n// Second check right before external posting API calls.\n// Catches mid-execution activation of EMERGENCY_STOP.\n\nconst emergencyStop = $env.EMERGENCY_STOP;\n\nif (emergencyStop === 'true' || emergencyStop === true) {\n  return [];\n}\n\nreturn $input.all();"
+      },
+      "id": "emergency-stop-pre-post",
+      "name": "Emergency Stop Pre-Post",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1550, 250],
+      "notes": "KILL SWITCH: Second EMERGENCY_STOP check before external posting APIs. Catches mid-execution stop activation.",
+      "onError": "stopWorkflow"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
             {
-              "id": "api-switch-opentweet",
-              "leftValue": "={{ $env.POSTING_API }}",
-              "rightValue": "opentweet",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+                "conditions": [{ "leftValue": "={{ $env.POSTING_API }}", "rightValue": "opentweet", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "opentweet"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+                "conditions": [{ "leftValue": "={{ $env.POSTING_API }}", "rightValue": "x_api", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "x_api"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+                "conditions": [{ "leftValue": "={{ $env.POSTING_API }}", "rightValue": "outstand", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "outstand"
             }
-          ],
-          "combinator": "and"
-        }
+          ]
+        },
+        "options": { "fallbackOutput": "extra" }
       },
       "id": "api-switch",
       "name": "Which Posting API?",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3,
-      "position": [1450, 250],
-      "notes": "Route to the configured posting API (opentweet, x_api, or outstand)."
+      "position": [1750, 250],
+      "notes": "Route to the configured posting API. Each output has a named condition. Fallback goes to failure notification if POSTING_API is not recognized."
     },
     {
       "parameters": {
         "method": "POST",
         "url": "https://api.opentweet.com/v1/tweets",
         "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $env.OPENTWEET_API_KEY }}"
-            }
-          ]
-        },
+        "headerParameters": { "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $env.OPENTWEET_API_KEY }}" }] },
         "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "text",
-              "value": "={{ $('Format Tweet').first().json.tweet }}"
-            }
-          ]
-        },
+        "bodyParameters": { "parameters": [{ "name": "text", "value": "={{ $('Format Tweet').first().json.tweet }}" }] },
         "options": {}
       },
       "id": "post-opentweet",
       "name": "Post via OpenTweet",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1700, 150],
+      "position": [1950, 150],
       "continueOnFail": true,
       "notes": "Post tweet via OpenTweet API (7-day trial, then $6/mo)."
     },
@@ -365,21 +348,14 @@
         "url": "https://api.twitter.com/2/tweets",
         "authentication": "oAuth1",
         "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "text",
-              "value": "={{ $('Format Tweet').first().json.tweet }}"
-            }
-          ]
-        },
+        "bodyParameters": { "parameters": [{ "name": "text", "value": "={{ $('Format Tweet').first().json.tweet }}" }] },
         "options": {}
       },
       "id": "post-x-api",
       "name": "Post via X API",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1700, 300],
+      "position": [1950, 300],
       "continueOnFail": true,
       "notes": "Post tweet via X API v2. Requires OAuth 1.0a credentials. X API Basic $200/mo."
     },
@@ -388,14 +364,7 @@
         "method": "POST",
         "url": "={{ $env.OUTSTAND_API_BASE }}/publish",
         "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $env.OUTSTAND_API_KEY }}"
-            }
-          ]
-        },
+        "headerParameters": { "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $env.OUTSTAND_API_KEY }}" }] },
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={\n  \"platforms\": [\"twitter\"],\n  \"account\": \"@v0idai\",\n  \"content\": {\n    \"text\": \"{{ $('Format Tweet').first().json.tweet }}\"\n  }\n}",
@@ -405,9 +374,42 @@
       "name": "Post via Outstand",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1700, 450],
+      "position": [1950, 450],
       "continueOnFail": true,
       "notes": "PLACEHOLDER: Outstand API not yet available. Update when API docs published."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check if the posting API returned a successful response (2xx status)\nconst response = $input.first().json;\nconst statusCode = $input.first().json.statusCode || $input.first().json.status || null;\n\nconst hasError = response.error || response.errors || (statusCode && statusCode >= 400);\n\nif (hasError) {\n  return [{ json: { success: false, error: response.error || response.errors || `HTTP ${statusCode}`, tweet: $('Format Tweet').first().json.tweet } }];\n}\n\nreturn [{ json: { success: true, response: response, tweet: $('Format Tweet').first().json.tweet } }];"
+      },
+      "id": "check-post-result",
+      "name": "Check Post Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2200, 250],
+      "notes": "Verify the posting API returned a successful response before sending success notification."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "success-check",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": "true",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "post-success-check",
+      "name": "Post Succeeded?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2450, 250],
+      "notes": "Route to success or failure notification based on API response."
     },
     {
       "parameters": {
@@ -422,7 +424,7 @@
       "name": "Success: Discord Notify",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1950, 150],
+      "position": [2700, 150],
       "notes": "Notify Vew of successful post."
     },
     {
@@ -431,19 +433,24 @@
         "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"content\": \"**ALERT: Daily Metrics Post FAILED**\\nAPI: {{ $env.POSTING_API }}\\nManual post required.\\n\\nDraft tweet:\\n```{{ $('Format Tweet').first().json.tweet }}```\"\n}",
+        "jsonBody": "={\n  \"content\": \"**ALERT: Daily Metrics Post FAILED**\\nAPI: {{ $env.POSTING_API }}\\nError: {{ $json.error }}\\nManual post required.\\n\\nDraft tweet:\\n```{{ $json.tweet }}```\"\n}",
         "options": {}
       },
       "id": "failure-notify",
       "name": "Failure: Discord Notify",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1950, 400],
+      "position": [2700, 400],
       "notes": "Alert Vew that posting failed. Includes draft tweet for manual posting."
     }
   ],
   "connections": {
-    "Daily 9AM ET": {
+    "Daily 10AM ET": {
+      "main": [
+        [{ "node": "Emergency Stop Check", "type": "main", "index": 0 }]
+      ]
+    },
+    "Emergency Stop Check": {
       "main": [
         [
           { "node": "Taostats Subnet 106", "type": "main", "index": 0 },
@@ -455,20 +462,25 @@
     },
     "Taostats Subnet 106": {
       "main": [
-        [{ "node": "Merge Data", "type": "main", "index": 0 }]
+        [{ "node": "Wait For All APIs", "type": "main", "index": 0 }]
       ]
     },
     "Taostats Pool": {
       "main": [
-        [{ "node": "Merge Data", "type": "main", "index": 0 }]
+        [{ "node": "Wait For All APIs", "type": "main", "index": 1 }]
       ]
     },
     "CoinGecko TAO": {
       "main": [
-        [{ "node": "Merge Data", "type": "main", "index": 0 }]
+        [{ "node": "Wait For All APIs", "type": "main", "index": 2 }]
       ]
     },
     "CoinGecko SN106": {
+      "main": [
+        [{ "node": "Wait For All APIs", "type": "main", "index": 3 }]
+      ]
+    },
+    "Wait For All APIs": {
       "main": [
         [{ "node": "Merge Data", "type": "main", "index": 0 }]
       ]
@@ -491,30 +503,52 @@
     },
     "DRY_RUN?": {
       "main": [
-        [{ "node": "DRY_RUN Log", "type": "main", "index": 0 }],
+        [{ "node": "Emergency Stop Pre-Post", "type": "main", "index": 0 }],
+        [{ "node": "DRY_RUN Log", "type": "main", "index": 0 }]
+      ]
+    },
+    "Emergency Stop Pre-Post": {
+      "main": [
         [{ "node": "Which Posting API?", "type": "main", "index": 0 }]
+      ]
+    },
+    "DRY_RUN Log": {
+      "main": [
+        [{ "node": "DRY_RUN: Discord Log", "type": "main", "index": 0 }]
       ]
     },
     "Which Posting API?": {
       "main": [
         [{ "node": "Post via OpenTweet", "type": "main", "index": 0 }],
         [{ "node": "Post via X API", "type": "main", "index": 0 }],
-        [{ "node": "Post via Outstand", "type": "main", "index": 0 }]
+        [{ "node": "Post via Outstand", "type": "main", "index": 0 }],
+        [{ "node": "Failure: Discord Notify", "type": "main", "index": 0 }]
       ]
     },
     "Post via OpenTweet": {
       "main": [
-        [{ "node": "Success: Discord Notify", "type": "main", "index": 0 }]
+        [{ "node": "Check Post Result", "type": "main", "index": 0 }]
       ]
     },
     "Post via X API": {
       "main": [
-        [{ "node": "Success: Discord Notify", "type": "main", "index": 0 }]
+        [{ "node": "Check Post Result", "type": "main", "index": 0 }]
       ]
     },
     "Post via Outstand": {
       "main": [
-        [{ "node": "Success: Discord Notify", "type": "main", "index": 0 }]
+        [{ "node": "Check Post Result", "type": "main", "index": 0 }]
+      ]
+    },
+    "Check Post Result": {
+      "main": [
+        [{ "node": "Post Succeeded?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Post Succeeded?": {
+      "main": [
+        [{ "node": "Success: Discord Notify", "type": "main", "index": 0 }],
+        [{ "node": "Failure: Discord Notify", "type": "main", "index": 0 }]
       ]
     }
   },

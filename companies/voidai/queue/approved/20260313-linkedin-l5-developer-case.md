@@ -20,7 +20,7 @@ latest_post_at: ""
 
 # Content metadata
 pillar: "alpha-education"
-character_count: 2580
+character_count: 2595
 has_media: false
 thread_count: 1
 
@@ -86,7 +86,7 @@ Subnet-as-a-service: if you operate a subnet, give your users a clean integratio
 
 **Why Bittensor + Solana**
 
-Bittensor: 128+ subnets, multi-billion dollar market cap, #2 AI coin by mindshare (LunarCrush). Solana: low fees, high throughput, established DEXs. VoidAI bridges the gap. The SDK is how developers build on that connection.
+Bittensor: 128+ subnets, multi-billion dollar market cap, #2 AI coin by mindshare as of Q3 2025 (LunarCrush). Solana: low fees, high throughput, established DEXs. VoidAI bridges the gap. The SDK is how developers build on that connection.
 
 Full stack open source at github.com/v0idai. Non-custodial.
 
@@ -102,6 +102,7 @@ This content is for informational and educational purposes only and does not con
 ## Editor Notes
 
 <!-- FIXED 2026-03-15: Removed specific TAO market cap ($2.39B). Changed "128 subnets" to "128+ subnets". -->
+<!-- FIXED 2026-03-15: Added "as of Q3 2025" date qualification to LunarCrush "#2 AI coin by mindshare" claim. -->
 <!-- Human review notes. NOT posted. -->
 <!-- COMPLIANCE NOTES:
 - SDK pitch framed as developer tooling, not financial product ✓

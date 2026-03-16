@@ -84,7 +84,7 @@ Post-halving, every subnet competes for a smaller pool. 3,600 TAO/day. Same 128+
 
 ### Part 4
 
-Network response: 68% of $TAO is now staked. Holders locking supply, not selling into reduced emissions.
+Network response: the majority of $TAO is now staked. Holders locking supply, not selling into reduced emissions.
 
 $TAO holding a top-40 CMC rank with a multi-billion dollar market cap. Market absorbed the halving without structural disruption. Check current price on CoinGecko or CoinMarketCap.
 
@@ -125,7 +125,7 @@ Digital assets carry risk of loss. Past performance does not predict future resu
 <!-- FIXED 2026-03-15: Removed specific TAO price ($221), market cap ($2.39B), CMC rank (#36), and 24h volume ($231M) from Part 4. Replaced with range-based references. -->
 <!-- FIXED 2026-03-15: Mindshare in Part 8 now qualified as "top-5 as of September 2025". Removed specific 2.01% figure. -->
 <!-- FIXED 2026-03-15: Changed "128 subnets" to "128+ subnets" in Parts 3 and 5. -->
-<!-- NOTE 2026-03-15: "68% staked" in Part 4 retained as it matches the post-halving observation period. May need refresh at posting time. -->
+<!-- FIXED 2026-03-15: Replaced "68% staked" in Part 4 with "majority of $TAO staked" to avoid stale figures. -->
 <!-- Human review notes. NOT posted. -->
 <!-- COMPLIANCE NOTES:
 - Short disclaimer on Part 1 ✓

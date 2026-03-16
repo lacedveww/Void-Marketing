@@ -7,9 +7,9 @@ When the user says: "subnet spotlight", "spotlight subnet", "/subnet-spotlight"
 
 ## Instructions
 
-1. **Load config:**
-   - Read `CLAUDE.md` for rules
-   - Read `companies/voidai/voice.md`
+1. **Load config** (stop if any missing):
+   - Read all config files per CLAUDE.md Config Load Order (items 1-8 minimum)
+   - Read `companies/{ACTIVE_COMPANY}/brand/voice-learnings.md` (mandatory for content generation)
    - Read `engine/templates/x-thread.md`
 
 2. **Gather inputs:**
@@ -37,12 +37,16 @@ When the user says: "subnet spotlight", "spotlight subnet", "/subnet-spotlight"
    - Use "Bittensor Ecosystem" framing, not VoidAI branding
    - Reference Canva subnet spotlight template (ID: DAHEDZjUQ_E) for image
 
-6. **Compliance:**
-   - Standard checks (banned phrases, em dashes, char limits)
+6. **Compliance checks (all must pass):**
+   - Zero banned AI phrases (full list in CLAUDE.md)
+   - Zero em dashes or double hyphens ( -- )
+   - Each part under 280 characters
    - No financial claims about the subnet's token
    - "Not financial advice" if discussing token economics
+   - Voice matches assigned account register per voice.md
 
 7. **Output:**
    - Write to `companies/voidai/queue/drafts/{YYYYMMDD}-subnet-spotlight-{name}.md`
    - Tag with pillar: ecosystem-intelligence
    - account: v0idai
+   - Remind user to run `/queue check <id>` for compliance validation

@@ -4,8 +4,8 @@ created_at: "2026-03-15"
 updated_at: "2026-03-15"
 
 # Status
-status: "approved"
-previous_status: "review"
+status: "review"
+previous_status: "approved"
 
 # Target
 platform: "x"
@@ -72,3 +72,4 @@ nfa // dyor
 
 <!-- FIXED 2026-03-15: Removed "34 repos on github" claim. VoidAI has 34 total repos but only 2 public (SN106, SubnetsBot). Replaced with "code is public on github". Readers WILL check, and this now accurately reflects what they'll find. -->
 <!-- Alpha & Education pillar. Fanpage satellite: builder-credibility angle from a fan perspective. "Go read it" is a CTA that invites verification, not trust. References verifiable facts (SDK languages, CCIP, public code on github) from metrics.md and product data. No @v0idai @mention (preserving 2/week limit, already used in s1 and s15). Stagger: 2+ hours after main @v0idai. Created by Phase 2 Challenger to fill Gap 4. -->
+<!-- FLAGGED 2026-03-16: Moved back to review status. Requires human review before publishing per CLAUDE.md human review gate. -->

@@ -4,8 +4,8 @@ created_at: "2026-03-15"
 updated_at: "2026-03-15"
 
 # Status
-status: "approved"
-previous_status: "review"
+status: "review"
+previous_status: "approved"
 
 # Target
 platform: "x"
@@ -69,3 +69,4 @@ Biggest barrier to $TAO in DeFi right now?
 ## Editor Notes
 
 <!-- Ecosystem Intelligence pillar. Engagement poll for main @v0idai account. Each option maps to a real pain point VoidAI addresses, but the poll frames it as an ecosystem question, not product promotion. "Bridging complexity" and "no lending markets" are VoidAI's core thesis, so votes there validate the roadmap. "Gas costs" and "DEX liquidity" are genuine community concerns that generate discussion. No disclaimer needed for a low-risk opinion poll with no financial claims. Created by Phase 2 Challenger to fill Gap 2 (only 1 poll in 50 items). -->
+<!-- FLAGGED 2026-03-16: Moved back to review status. Requires human review before publishing per CLAUDE.md human review gate. -->

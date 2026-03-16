@@ -21,18 +21,42 @@
     },
     {
       "parameters": {
-        "jsCode": "const fs = require('fs');\nconst path = require('path');\nconst approvedDir = $env.QUEUE_APPROVED_PATH || '/data/voidai/queue/approved/';\n\nlet files = [];\ntry {\n  files = fs.readdirSync(approvedDir)\n    .filter(f => f.endsWith('.md'))\n    .map(f => {\n      const content = fs.readFileSync(path.join(approvedDir, f), 'utf8');\n\n      // Parse YAML frontmatter\n      const fmMatch = content.match(/^---\\n([\\s\\S]*?)\\n---/);\n      const frontmatter = {};\n      if (fmMatch) {\n        fmMatch[1].split('\\n').forEach(line => {\n          const [key, ...val] = line.split(':');\n          if (key && val.length) {\n            frontmatter[key.trim()] = val.join(':').trim().replace(/^[\"']|[\"']$/g, '');\n          }\n        });\n      }\n\n      // Extract body content after frontmatter\n      const bodyMatch = content.match(/---\\n[\\s\\S]*?\\n---\\n([\\s\\S]*)/);\n      const body = bodyMatch ? bodyMatch[1].trim() : '';\n\n      return {\n        filename: f,\n        filepath: path.join(approvedDir, f),\n        frontmatter,\n        body,\n        account: frontmatter.account || '@v0idai',\n        type: frontmatter.type || 'x-single',\n        scheduled_date: frontmatter.scheduled_date || null,\n        priority: parseInt(frontmatter.priority || '5', 10)\n      };\n    });\n} catch (e) {\n  return [{ json: { error: 'Could not read approved queue', details: e.message, items: [] } }];\n}\n\nreturn [{ json: { items: files, count: files.length } }];"
+        "jsCode": "// EMERGENCY STOP CHECK\n// Must be the first code node in every workflow, right after the trigger.\n// Checks the EMERGENCY_STOP environment variable. If true, sends a\n// notification to Discord and halts the workflow (returns empty array).\n//\n// Referenced in: crisis.md, n8n-workflow-specs.md\n// Variable: EMERGENCY_STOP (Settings > Variables)\n\nconst emergencyStop = $env.EMERGENCY_STOP;\n\nif (emergencyStop === 'true' || emergencyStop === true) {\n  const workflowName = $workflow.name || 'Unknown Workflow';\n  const timestamp = new Date().toISOString();\n\n  const discordUrl = $env.DISCORD_WEBHOOK_URL;\n  if (discordUrl) {\n    try {\n      await fetch(discordUrl, {\n        method: 'POST',\n        headers: { 'Content-Type': 'application/json' },\n        body: JSON.stringify({\n          content: `**EMERGENCY STOP ACTIVE** | Workflow \"${workflowName}\" halted at ${timestamp}. No content was published. Set EMERGENCY_STOP=false in n8n variables to resume.`\n        })\n      });\n    } catch (e) {\n      // Discord notification failed, but we still halt.\n    }\n  }\n\n  return [];\n}\n\nreturn $input.all();"
+      },
+      "id": "emergency-stop-check",
+      "name": "Emergency Stop Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [125, 0],
+      "notes": "KILL SWITCH: Checks EMERGENCY_STOP env var. If true, notifies Discord and halts the workflow. Must be first node after trigger.",
+      "onError": "stopWorkflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "// PRE-POST EMERGENCY STOP CHECK\n// Second check right before scheduling and moving items.\n// Catches mid-execution activation of EMERGENCY_STOP.\n\nconst emergencyStop = $env.EMERGENCY_STOP;\n\nif (emergencyStop === 'true' || emergencyStop === true) {\n  return [];\n}\n\nreturn $input.all();"
+      },
+      "id": "emergency-stop-pre-post",
+      "name": "Emergency Stop Pre-Post",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1700, 200],
+      "notes": "KILL SWITCH: Second EMERGENCY_STOP check before scheduling items. Catches mid-execution stop activation.",
+      "onError": "stopWorkflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Read approved queue from static data (n8n Cloud compatible)\n// Queue items are stored via webhook or manual entry\nconst staticData = $getWorkflowStaticData('global');\n\nif (!staticData.approved_queue) {\n  staticData.approved_queue = [];\n}\n\nconst items = staticData.approved_queue;\n\nreturn [{ json: { items: items, count: items.length } }];"
       },
       "id": "read-queue",
       "name": "Read Approved Queue",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [250, 0],
-      "notes": "Read all .md files from queue/approved/. Parse YAML frontmatter for metadata."
+      "notes": "Read approved queue items from n8n static data. No filesystem dependency for n8n Cloud compatibility."
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.first().json.items;\nconst today = new Date().toISOString().split('T')[0];\n\nconst todaysItems = items.filter(item =>\n  item.scheduled_date === today || !item.scheduled_date\n);\n\ntodaysItems.sort((a, b) => a.priority - b.priority);\n\nif (todaysItems.length === 0) {\n  return [{ json: { no_items: true, today, total_in_queue: items.length } }];\n}\n\nreturn [{ json: { items: todaysItems, count: todaysItems.length, today } }];"
+        "jsCode": "const items = $input.first().json.items;\nconst today = new Date().toISOString().split('T')[0];\n\nconst todaysItems = items.filter(item =>\n  item.scheduled_date === today || !item.scheduled_date\n);\n\ntodaysItems.sort((a, b) => (a.priority || 5) - (b.priority || 5));\n\nif (todaysItems.length === 0) {\n  return [{ json: { no_items: true, today, total_in_queue: items.length } }];\n}\n\nreturn [{ json: { items: todaysItems, count: todaysItems.length, today } }];"
       },
       "id": "filter-today",
       "name": "Filter Today's Items",
@@ -72,7 +96,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Cadence rules from cadence.md:\n// - @v0idai: max 6/day hard limit, 1-2/day target, 3hr min gap\n// - Weekend: max 1/day per account\n// - Never > 6 from any single account\n\nconst items = $input.first().json.items;\nconst today = new Date();\nconst isWeekend = today.getDay() === 0 || today.getDay() === 6;\nconst maxPerDay = parseInt($env.MAX_POSTS_PER_DAY || '6', 10);\n\nconst byAccount = {};\nfor (const item of items) {\n  const acct = item.account;\n  if (!byAccount[acct]) byAccount[acct] = [];\n  byAccount[acct].push(item);\n}\n\nconst scheduled = [];\nconst deferred = [];\n\nfor (const [account, accountItems] of Object.entries(byAccount)) {\n  const dailyLimit = isWeekend ? 1 : Math.min(maxPerDay, 2);\n  const toPost = accountItems.slice(0, dailyLimit);\n  const toDefer = accountItems.slice(dailyLimit);\n\n  scheduled.push(...toPost.map((item, i) => ({ ...item, slot_index: i })));\n  deferred.push(...toDefer.map(item => ({ ...item, deferred_reason: 'cadence_limit' })));\n}\n\nreturn [{\n  json: {\n    scheduled,\n    deferred,\n    is_weekend: isWeekend,\n    scheduled_count: scheduled.length,\n    deferred_count: deferred.length\n  }\n}];"
+        "jsCode": "// Cadence rules from cadence.md:\n// - @v0idai: max 6/day hard limit, 1-2/day target, 3hr min gap\n// - Weekend: max 1/day per account\n// - Never > 6 from any single account\n\nconst items = $input.first().json.items;\nconst today = new Date();\nconst isWeekend = today.getDay() === 0 || today.getDay() === 6;\nconst maxPerDay = parseInt($env.MAX_POSTS_PER_DAY || '6', 10);\n\nconst byAccount = {};\nfor (const item of items) {\n  const acct = item.account || '@v0idai';\n  if (!byAccount[acct]) byAccount[acct] = [];\n  byAccount[acct].push(item);\n}\n\nconst scheduled = [];\nconst deferred = [];\n\nfor (const [account, accountItems] of Object.entries(byAccount)) {\n  const dailyLimit = isWeekend ? 1 : Math.min(maxPerDay, 2);\n  const toPost = accountItems.slice(0, dailyLimit);\n  const toDefer = accountItems.slice(dailyLimit);\n\n  scheduled.push(...toPost.map((item, i) => ({ ...item, slot_index: i })));\n  deferred.push(...toDefer.map(item => ({ ...item, deferred_reason: 'cadence_limit' })));\n}\n\nreturn [{\n  json: {\n    scheduled,\n    deferred,\n    is_weekend: isWeekend,\n    scheduled_count: scheduled.length,\n    deferred_count: deferred.length\n  }\n}];"
       },
       "id": "enforce-cadence",
       "name": "Enforce Cadence Rules",
@@ -104,7 +128,7 @@
             {
               "id": "dry-run-check",
               "leftValue": "={{ $env.DRY_RUN }}",
-              "rightValue": "true",
+              "rightValue": "false",
               "operator": {
                 "type": "string",
                 "operation": "equals"
@@ -118,29 +142,30 @@
       "name": "DRY_RUN?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [1500, 100]
+      "position": [1500, 100],
+      "notes": "Safe default: DRY_RUN must be strictly 'false' to schedule. Any other value (true, undefined, empty) routes to dry-run log."
     },
     {
       "parameters": {
-        "jsCode": "const fs = require('fs');\nconst logDir = $env.LOG_FILE_PATH || '/data/n8n/dry-run-logs/';\nconst date = new Date().toISOString().split('T')[0];\nconst logFile = `${logDir}workflow-5-schedule-${date}.json`;\n\nconst data = $input.first().json;\n\nconst logEntry = {\n  workflow: 'content-calendar-scheduler',\n  timestamp: new Date().toISOString(),\n  dry_run: true,\n  scheduled_items: (data.items || []).map(item => ({\n    filename: item.filename,\n    account: item.account,\n    type: item.type,\n    scheduled_post_at: item.scheduled_post_at,\n    time_slot: item.time_slot,\n    preview: (item.body || '').slice(0, 100) + '...'\n  })),\n  deferred_items: (data.deferred || []).map(item => ({\n    filename: item.filename,\n    reason: item.deferred_reason\n  })),\n  note: 'DRY_RUN: Files NOT moved from approved/ to scheduled/'\n};\n\nfs.mkdirSync(logDir, { recursive: true });\nfs.writeFileSync(logFile, JSON.stringify(logEntry, null, 2));\n\nreturn [{ json: { status: 'schedule_logged', file: logFile, ...logEntry } }];"
+        "jsCode": "// DRY_RUN log: prepare schedule summary for Discord\nconst data = $input.first().json;\n\nconst logEntry = {\n  workflow: 'content-calendar-scheduler',\n  timestamp: new Date().toISOString(),\n  dry_run: true,\n  scheduled_items: (data.items || []).map(item => ({\n    title: item.title || item.filename || 'Untitled',\n    account: item.account || '@v0idai',\n    type: item.type || 'x-single',\n    scheduled_post_at: item.scheduled_post_at,\n    time_slot: item.time_slot\n  })),\n  deferred_items: (data.deferred || []).map(item => ({\n    title: item.title || item.filename || 'Untitled',\n    reason: item.deferred_reason\n  })),\n  scheduled_count: data.scheduled_count || 0,\n  deferred_count: data.deferred_count || 0\n};\n\nreturn [{ json: { status: 'schedule_logged', ...logEntry } }];"
       },
       "id": "dry-run-log",
       "name": "DRY_RUN Log",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [1750, 0],
-      "notes": "Log schedule to file. Files NOT moved in DRY_RUN mode."
+      "notes": "Prepare schedule data for Discord notification. No filesystem writes for n8n Cloud compatibility."
     },
     {
       "parameters": {
-        "jsCode": "// In production: schedule each item via posting API, then move files.\n// X API v2 does not support native scheduling.\n// Options:\n// 1. OpenTweet: POST /v1/tweets/schedule { text, scheduled_time }\n// 2. Outstand: POST /v1/schedule { platforms, content, scheduled_time }\n// 3. n8n Wait node: delay until scheduled_time, then post\n// \n// For now, this node moves files and logs. Actual scheduling\n// will be added when the posting API supports it.\n\nconst fs = require('fs');\nconst path = require('path');\nconst approvedDir = $env.QUEUE_APPROVED_PATH || '/data/voidai/queue/approved/';\nconst scheduledDir = $env.QUEUE_SCHEDULED_PATH || '/data/voidai/queue/scheduled/';\nconst items = $input.first().json.items || [];\n\nfs.mkdirSync(scheduledDir, { recursive: true });\n\nconst results = [];\nfor (const item of items) {\n  try {\n    const src = path.join(approvedDir, item.filename);\n    const dest = path.join(scheduledDir, item.filename);\n\n    let content = fs.readFileSync(src, 'utf8');\n    content = content.replace(\n      /status: approved/,\n      `status: scheduled\\nscheduled_post_at: ${item.scheduled_post_at}`\n    );\n    fs.writeFileSync(dest, content);\n    fs.unlinkSync(src);\n\n    results.push({\n      filename: item.filename,\n      account: item.account,\n      scheduled_post_at: item.scheduled_post_at,\n      status: 'moved_to_scheduled'\n    });\n  } catch (e) {\n    results.push({\n      filename: item.filename,\n      status: 'error',\n      error: e.message\n    });\n  }\n}\n\nreturn [{ json: { results, moved_count: results.filter(r => r.status === 'moved_to_scheduled').length } }];"
+        "jsCode": "// In production: move items from approved to scheduled in static data\n// and prepare for posting API calls\nconst staticData = $getWorkflowStaticData('global');\nconst items = $input.first().json.items || [];\n\nif (!staticData.scheduled_queue) {\n  staticData.scheduled_queue = [];\n}\n\nconst results = [];\nfor (const item of items) {\n  // Add to scheduled queue with posting time\n  const scheduledItem = {\n    ...item,\n    status: 'scheduled',\n    moved_at: new Date().toISOString()\n  };\n  staticData.scheduled_queue.push(scheduledItem);\n\n  // Remove from approved queue\n  if (staticData.approved_queue) {\n    const idx = staticData.approved_queue.findIndex(\n      a => (a.id && a.id === item.id) || (a.title && a.title === item.title)\n    );\n    if (idx !== -1) {\n      staticData.approved_queue.splice(idx, 1);\n    }\n  }\n\n  results.push({\n    title: item.title || item.filename || 'Untitled',\n    account: item.account || '@v0idai',\n    scheduled_post_at: item.scheduled_post_at,\n    status: 'moved_to_scheduled'\n  });\n}\n\n// Clean up old scheduled items (keep last 50)\nif (staticData.scheduled_queue.length > 50) {\n  staticData.scheduled_queue = staticData.scheduled_queue.slice(-50);\n}\n\nreturn [{ json: { results, moved_count: results.length, deferred: $input.first().json.deferred, deferred_count: $input.first().json.deferred_count } }];"
       },
       "id": "schedule-and-move",
-      "name": "Schedule + Move Files",
+      "name": "Schedule + Move Items",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [1750, 200],
-      "notes": "Move files from approved/ to scheduled/ with updated frontmatter. TODO: Add actual posting API calls when available."
+      "notes": "Move items from approved to scheduled queue in static data. No filesystem dependency for n8n Cloud compatibility."
     },
     {
       "parameters": {
@@ -161,6 +186,11 @@
   ],
   "connections": {
     "Daily 7AM ET": {
+      "main": [
+        [{ "node": "Emergency Stop Check", "type": "main", "index": 0 }]
+      ]
+    },
+    "Emergency Stop Check": {
       "main": [
         [{ "node": "Read Approved Queue", "type": "main", "index": 0 }]
       ]
@@ -193,8 +223,13 @@
     },
     "DRY_RUN?": {
       "main": [
-        [{ "node": "DRY_RUN Log", "type": "main", "index": 0 }],
-        [{ "node": "Schedule + Move Files", "type": "main", "index": 0 }]
+        [{ "node": "Emergency Stop Pre-Post", "type": "main", "index": 0 }],
+        [{ "node": "DRY_RUN Log", "type": "main", "index": 0 }]
+      ]
+    },
+    "Emergency Stop Pre-Post": {
+      "main": [
+        [{ "node": "Schedule + Move Items", "type": "main", "index": 0 }]
       ]
     },
     "DRY_RUN Log": {
@@ -202,7 +237,7 @@
         [{ "node": "Discord: Schedule Summary", "type": "main", "index": 0 }]
       ]
     },
-    "Schedule + Move Files": {
+    "Schedule + Move Items": {
       "main": [
         [{ "node": "Discord: Schedule Summary", "type": "main", "index": 0 }]
       ]

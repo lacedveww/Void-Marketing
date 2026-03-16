@@ -7,10 +7,9 @@ When the user says: "weekly report", "weekly recap", "generate weekly thread", "
 
 ## Instructions
 
-1. **Load config:**
-   - Read `CLAUDE.md` for rules
-   - Read `companies/voidai/voice.md`
-   - Read `companies/voidai/metrics.md` for KPI definitions
+1. **Load config** (stop if any missing):
+   - Read all config files per CLAUDE.md Config Load Order (items 1-8 minimum)
+   - Read `companies/{ACTIVE_COMPANY}/brand/voice-learnings.md` (mandatory for content generation)
    - Read `engine/templates/x-thread.md` for thread format
 
 2. **Gather metrics** (ask user for data, or fetch if MCP tools available):
@@ -34,11 +33,16 @@ When the user says: "weekly report", "weekly recap", "generate weekly thread", "
    - Add "as of [date]" to any metric that might change
    - Never use placeholder or estimated data without flagging it
 
-5. **Compliance check:**
-   - Standard checks (banned phrases, em dashes, char limits)
-   - No price predictions in the "next week" section
+5. **Compliance checks (all must pass):**
+   - Zero banned AI phrases (full list in CLAUDE.md)
+   - Zero em dashes or double hyphens ( -- )
+   - Each part under 280 characters
+   - Appropriate disclaimer included per compliance.md
+   - No price predictions or guaranteed returns
+   - Voice matches assigned account register per voice.md
 
 6. **Output:**
    - Write to `companies/voidai/queue/drafts/{YYYYMMDD}-weekly-recap.md`
    - Tag with pillar: ecosystem-intelligence
    - Set review_tier: 1 (always requires human review)
+   - Remind user to run `/queue check <id>` for compliance validation

@@ -4,8 +4,8 @@ created_at: "2026-03-15"
 updated_at: "2026-03-15"
 
 # Status
-status: "approved"
-previous_status: "review"
+status: "review"
+previous_status: "approved"
 
 # Target
 platform: "x"
@@ -69,3 +69,4 @@ NFA. DYOR.
 ## Editor Notes
 
 <!-- Alpha & Education pillar. AI x Crypto satellite voice: educational content about Bittensor economics for the AI-curious audience that may not understand subnet tokenomics. Uses simple language to explain dTAO mechanics. Connects AI work types (inference, storage, compute) to the economic model. "Liquidity" included in the list naturally, which implicitly references SN106's role without naming it. No VoidAI or @v0idai mention. Stagger: 5+ hours after main @v0idai. Created by Phase 2 Challenger to fill Gap 4. -->
+<!-- FLAGGED 2026-03-16: Moved back to review status. Requires human review before publishing per CLAUDE.md human review gate. -->

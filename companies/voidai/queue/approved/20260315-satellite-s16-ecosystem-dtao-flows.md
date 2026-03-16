@@ -4,8 +4,8 @@ created_at: "2026-03-15"
 updated_at: "2026-03-15"
 
 # Status
-status: "approved"
-previous_status: "review"
+status: "review"
+previous_status: "approved"
 
 # Target
 platform: "x"
@@ -68,4 +68,5 @@ NFA. DYOR.
 
 ## Editor Notes
 
-<!-- Ecosystem Intelligence pillar. Bittensor Ecosystem Satellite voice: data-driven dTAO analysis. Uses "X to watch:" observational format. All numbers derived from metrics.md (3,600 TAO/day post-halving, 128 subnets, simple division for average). The "concentration" observation is a genuine insight about dTAO dynamics that the community discusses. No VoidAI or SN106 mention. Stagger: 3+ hours after main @v0idai. Created by Phase 2 Challenger to fill Gap 4. -->
+<!-- Ecosystem Intelligence pillar. Bittensor Ecosystem Satellite voice: data-driven dTAO analysis. Uses "X to watch:" observational format. All numbers derived from metrics.md (3,600 TAO/day post-halving, 128+ subnets, simple division for average). The "concentration" observation is a genuine insight about dTAO dynamics that the community discusses. No VoidAI or SN106 mention. Stagger: 3+ hours after main @v0idai. Created by Phase 2 Challenger to fill Gap 4. -->
+<!-- FLAGGED 2026-03-16: Moved back to review status. Requires human review before publishing per CLAUDE.md human review gate. -->

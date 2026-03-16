@@ -37,6 +37,30 @@
     },
     {
       "parameters": {
+        "jsCode": "// EMERGENCY STOP CHECK\n// Must be the first code node in every workflow, right after the trigger.\n// Checks the EMERGENCY_STOP environment variable. If true, sends a\n// notification to Discord and halts the workflow (returns empty array).\n//\n// Referenced in: crisis.md, n8n-workflow-specs.md\n// Variable: EMERGENCY_STOP (Settings > Variables)\n\nconst emergencyStop = $env.EMERGENCY_STOP;\n\nif (emergencyStop === 'true' || emergencyStop === true) {\n  const workflowName = $workflow.name || 'Unknown Workflow';\n  const timestamp = new Date().toISOString();\n\n  const discordUrl = $env.DISCORD_WEBHOOK_URL;\n  if (discordUrl) {\n    try {\n      await fetch(discordUrl, {\n        method: 'POST',\n        headers: { 'Content-Type': 'application/json' },\n        body: JSON.stringify({\n          content: `**EMERGENCY STOP ACTIVE** | Workflow \"${workflowName}\" halted at ${timestamp}. No content was published. Set EMERGENCY_STOP=false in n8n variables to resume.`\n        })\n      });\n    } catch (e) {\n      // Discord notification failed, but we still halt.\n    }\n  }\n\n  return [];\n}\n\nreturn $input.all();"
+      },
+      "id": "emergency-stop-check",
+      "name": "Emergency Stop Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [200, 100],
+      "notes": "KILL SWITCH: Checks EMERGENCY_STOP env var. If true, notifies Discord and halts the workflow. Must be first node after trigger.",
+      "onError": "stopWorkflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "// PRE-POST EMERGENCY STOP CHECK\n// Second check right before external posting API calls.\n// Catches mid-execution activation of EMERGENCY_STOP.\n\nconst emergencyStop = $env.EMERGENCY_STOP;\n\nif (emergencyStop === 'true' || emergencyStop === true) {\n  return [];\n}\n\nreturn $input.all();"
+      },
+      "id": "emergency-stop-pre-post",
+      "name": "Emergency Stop Pre-Post",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2100, 200],
+      "notes": "KILL SWITCH: Second EMERGENCY_STOP check before posting API. Catches mid-execution stop activation.",
+      "onError": "stopWorkflow"
+    },
+    {
+      "parameters": {
         "method": "GET",
         "url": "={{ $env.BRIDGE_MONITOR_URL }}",
         "sendQuery": true,
@@ -96,25 +120,126 @@
     },
     {
       "parameters": {
-        "jsCode": "const fs = require('fs');\nconst stateFile = ($env.LOG_FILE_PATH || '/data/n8n/dry-run-logs/') + 'bridge-alert-state.json';\n\nlet state = {};\ntry {\n  state = JSON.parse(fs.readFileSync(stateFile, 'utf8'));\n} catch (e) {\n  state = { posted_hashes: [] };\n}\n\nconst txHash = $input.first().json.tx_hash;\n\nif (state.posted_hashes.includes(txHash)) {\n  return [];\n}\n\nstate.posted_hashes.push(txHash);\nif (state.posted_hashes.length > 500) {\n  state.posted_hashes = state.posted_hashes.slice(-500);\n}\n\nconst logDir = $env.LOG_FILE_PATH || '/data/n8n/dry-run-logs/';\nfs.mkdirSync(logDir, { recursive: true });\nfs.writeFileSync(stateFile, JSON.stringify(state, null, 2));\n\nreturn $input.all();"
+        "jsCode": "// Deduplicate using n8n static data for persistence across executions on n8n Cloud\nconst staticData = $getWorkflowStaticData('global');\n\nif (!staticData.posted_hashes) {\n  staticData.posted_hashes = [];\n}\n\nconst txHash = $input.first().json.tx_hash;\n\nif (staticData.posted_hashes.includes(txHash)) {\n  return [];\n}\n\nstaticData.posted_hashes.push(txHash);\n\n// Keep only last 500 hashes to stay within static data size limits (~256KB)\nif (staticData.posted_hashes.length > 500) {\n  staticData.posted_hashes = staticData.posted_hashes.slice(-500);\n}\n\nreturn $input.all();"
       },
       "id": "deduplicate",
       "name": "Deduplicate",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [750, 100],
-      "notes": "Prevent duplicate alerts. Keeps last 500 tx hashes in state file."
+      "notes": "Prevent duplicate alerts. Keeps last 500 tx hashes in n8n static data (persists across executions on Cloud)."
     },
     {
       "parameters": {
-        "jsCode": "const tx = $input.first().json;\n\nconst amount = Number(tx.amount_tao).toLocaleString('en-US', {\n  minimumFractionDigits: 0,\n  maximumFractionDigits: 1\n});\n\nconst chainDisplay = {\n  'Bittensor': 'Bittensor',\n  'Solana': 'Solana',\n  'Ethereum': 'Ethereum',\n  'Base': 'Base'\n};\n\nconst source = chainDisplay[tx.source_chain] || tx.source_chain;\nconst dest = chainDisplay[tx.dest_chain] || tx.dest_chain;\n\nconst tweet = `${amount} $TAO bridged from ${source} to ${dest}.\\n\\nNon-custodial. Secured by @chainlink CCIP.\\n\\n#Bittensor #VoidAI #CrossChain`;\n\nlet tweetWithLink = tweet;\nif (tx.explorer_url && (tweet.length + tx.explorer_url.length + 2) <= 280) {\n  tweetWithLink = `${amount} $TAO bridged from ${source} to ${dest}.\\n\\nNon-custodial. Secured by @chainlink CCIP.\\n\\n${tx.explorer_url}\\n\\n#Bittensor #VoidAI #CrossChain`;\n}\n\nconst finalTweet = tweetWithLink.length <= 280 ? tweetWithLink : tweet;\n\nreturn [{\n  json: {\n    tweet: finalTweet,\n    tx_hash: tx.tx_hash,\n    amount_tao: tx.amount_tao,\n    source_chain: tx.source_chain,\n    dest_chain: tx.dest_chain,\n    timestamp: tx.timestamp\n  }\n}];"
+        "jsCode": "// Rate limit check: max 6 posts/day per cadence.md\n// NOTE: This node only CHECKS the count. The counter is incremented\n// in the 'Increment Post Counter' node AFTER a successful post.\n// This prevents invalid payloads and dry-run executions from\n// consuming the daily limit.\nconst staticData = $getWorkflowStaticData('global');\nconst now = new Date();\nconst todayKey = now.toISOString().split('T')[0];\n\nif (!staticData.daily_post_counts) {\n  staticData.daily_post_counts = {};\n}\n\n// Clean up old date entries\nfor (const key of Object.keys(staticData.daily_post_counts)) {\n  if (key !== todayKey) {\n    delete staticData.daily_post_counts[key];\n  }\n}\n\nconst todayCount = staticData.daily_post_counts[todayKey] || 0;\nconst MAX_DAILY_POSTS = 6;\n\nif (todayCount >= MAX_DAILY_POSTS) {\n  // Rate limited: skip posting, return empty to halt pipeline\n  return [{ json: { rate_limited: true, today_count: todayCount, max: MAX_DAILY_POSTS, tx_hash: $input.first().json.tx_hash } }];\n}\n\n// Pass through without incrementing. Counter incremented after successful post.\nreturn [{ json: { ...($input.first().json), rate_limited: false, today_count: todayCount } }];"
+      },
+      "id": "rate-limit-check",
+      "name": "Rate Limit Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [950, 100],
+      "notes": "Enforce max 6 bridge alert posts per day per cadence.md. Uses static data for persistence."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "rate-limit-pass",
+              "leftValue": "={{ $json.rate_limited }}",
+              "rightValue": "false",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "rate-limit-gate",
+      "name": "Rate Limit OK?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1150, 100],
+      "notes": "Only proceed if under daily rate limit. Rate-limited items go to Discord notification only."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"**Bridge Alert Rate Limited**\\nToday's count: {{ $json.today_count }}/{{ $json.max }}\\nSkipped tx: {{ $json.tx_hash }}\\nManual review if critical.\"\n}",
+        "options": {}
+      },
+      "id": "rate-limit-notify",
+      "name": "Rate Limit: Discord Notify",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1400, 0],
+      "notes": "Notify when a bridge alert is skipped due to daily rate limit."
+    },
+    {
+      "parameters": {
+        "jsCode": "const tx = $input.first().json;\n\n// Chain name allowlist: reject unknown chains to prevent injection\n// Case-insensitive comparison so 'ethereum', 'ETHEREUM', and 'Ethereum' all pass\nconst ALLOWED_CHAINS = ['bittensor', 'solana', 'ethereum', 'base', 'arbitrum', 'polygon', 'avalanche', 'bsc'];\n\nconst sourceChain = tx.source_chain;\nconst destChain = tx.dest_chain;\n\nif (!ALLOWED_CHAINS.includes(String(sourceChain).toLowerCase()) || !ALLOWED_CHAINS.includes(String(destChain).toLowerCase())) {\n  // Reject: unknown chain name, possible injection attempt\n  return [{ json: { rejected: true, reason: 'Unknown chain name', source_chain: sourceChain, dest_chain: destChain } }];\n}\n\n// Explorer URL domain validation: only allow known block explorer domains\nconst ALLOWED_EXPLORER_DOMAINS = [\n  'etherscan.io',\n  'bscscan.com',\n  'polygonscan.com',\n  'arbiscan.io',\n  'snowtrace.io',\n  'basescan.org',\n  'solscan.io',\n  'solana.fm',\n  'explorer.solana.com',\n  'taostats.io',\n  'ccip.chain.link'\n];\n\nlet explorerUrl = '';\nif (tx.explorer_url) {\n  try {\n    const parsed = new URL(tx.explorer_url);\n    const domain = parsed.hostname.replace(/^www\\./, '');\n    if (ALLOWED_EXPLORER_DOMAINS.some(d => domain === d || domain.endsWith('.' + d))) {\n      explorerUrl = tx.explorer_url;\n    }\n    // If domain not allowed, explorerUrl stays empty (URL is dropped)\n  } catch (e) {\n    // Invalid URL, drop it\n  }\n}\n\nconst amount = Number(tx.amount_tao).toLocaleString('en-US', {\n  minimumFractionDigits: 0,\n  maximumFractionDigits: 1\n});\n\nconst tweet = `${amount} $TAO bridged from ${sourceChain} to ${destChain}.\\n\\nNon-custodial. Secured by @chainlink CCIP.\\n\\n#Bittensor #VoidAI #CrossChain`;\n\nlet tweetWithLink = tweet;\nif (explorerUrl && (tweet.length + explorerUrl.length + 2) <= 280) {\n  tweetWithLink = `${amount} $TAO bridged from ${sourceChain} to ${destChain}.\\n\\nNon-custodial. Secured by @chainlink CCIP.\\n\\n${explorerUrl}\\n\\n#Bittensor #VoidAI #CrossChain`;\n}\n\nconst finalTweet = tweetWithLink.length <= 280 ? tweetWithLink : tweet;\n\nreturn [{\n  json: {\n    rejected: false,\n    tweet: finalTweet,\n    tx_hash: tx.tx_hash,\n    amount_tao: tx.amount_tao,\n    source_chain: sourceChain,\n    dest_chain: destChain,\n    timestamp: tx.timestamp\n  }\n}];"
       },
       "id": "format-tweet",
       "name": "Format Alert Tweet",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1000, 100],
-      "notes": "Format bridge tx into tweet. Includes explorer link if it fits within 280 chars."
+      "position": [1400, 200],
+      "notes": "Format bridge tx into tweet. Validates chain names against allowlist and explorer URL against known domains. Rejects items with unknown chains."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "rejection-check",
+              "leftValue": "={{ $json.rejected }}",
+              "rightValue": "false",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "validation-gate",
+      "name": "Input Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1650, 200],
+      "notes": "Only proceed if input validation passed. Rejected items go to Discord alert."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"**Bridge Alert Rejected: Invalid Input**\\nReason: {{ $json.reason }}\\nSource chain: {{ $json.source_chain }}\\nDest chain: {{ $json.dest_chain }}\\nPossible injection attempt. Review webhook sender.\"\n}",
+        "options": {}
+      },
+      "id": "rejection-notify",
+      "name": "Rejected: Discord Notify",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1900, 350],
+      "notes": "Alert operator when a bridge alert is rejected due to invalid input (unknown chain, invalid URL)."
     },
     {
       "parameters": {
@@ -128,7 +253,7 @@
             {
               "id": "dry-run-check",
               "leftValue": "={{ $env.DRY_RUN }}",
-              "rightValue": "true",
+              "rightValue": "false",
               "operator": {
                 "type": "string",
                 "operation": "equals"
@@ -142,17 +267,35 @@
       "name": "DRY_RUN?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [1250, 100]
+      "position": [1900, 150],
+      "notes": "Safe default: DRY_RUN must be strictly 'false' to publish. Any other value (true, undefined, empty) routes to dry-run log."
     },
     {
       "parameters": {
-        "jsCode": "const fs = require('fs');\nconst logDir = $env.LOG_FILE_PATH || '/data/n8n/dry-run-logs/';\nconst date = new Date().toISOString().replace(/[:.]/g, '-');\nconst logFile = `${logDir}workflow-2-bridge-alert-${date}.json`;\n\nconst logEntry = {\n  workflow: 'bridge-alert',\n  timestamp: new Date().toISOString(),\n  dry_run: true,\n  tweet_text: $input.first().json.tweet,\n  tx_hash: $input.first().json.tx_hash,\n  amount_tao: $input.first().json.amount_tao,\n  source_chain: $input.first().json.source_chain,\n  dest_chain: $input.first().json.dest_chain,\n  would_post_to: '@v0idai'\n};\n\nfs.mkdirSync(logDir, { recursive: true });\nfs.writeFileSync(logFile, JSON.stringify(logEntry, null, 2));\n\nreturn [{ json: { status: 'logged', file: logFile } }];"
+        "jsCode": "// DRY_RUN log: prepare data for Discord notification\nconst logEntry = {\n  workflow: 'bridge-alert',\n  timestamp: new Date().toISOString(),\n  dry_run: true,\n  tweet_text: $input.first().json.tweet,\n  tx_hash: $input.first().json.tx_hash,\n  amount_tao: $input.first().json.amount_tao,\n  source_chain: $input.first().json.source_chain,\n  dest_chain: $input.first().json.dest_chain,\n  would_post_to: '@v0idai'\n};\n\nreturn [{ json: { status: 'logged', ...logEntry } }];"
       },
       "id": "dry-run-log",
       "name": "DRY_RUN Log",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1500, 0]
+      "position": [2150, 50],
+      "notes": "Prepare dry-run data for Discord notification. No filesystem writes for n8n Cloud compatibility."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"**[DRY_RUN] Bridge Alert Draft**\\nTweet:\\n```{{ $json.tweet_text }}```\\nTx: {{ $json.tx_hash }}\\nAmount: {{ $json.amount_tao }} TAO\\nRoute: {{ $json.source_chain }} > {{ $json.dest_chain }}\"\n}",
+        "options": {}
+      },
+      "id": "dry-run-discord",
+      "name": "DRY_RUN: Discord Log",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2400, 50],
+      "notes": "Send dry-run output to Discord for review instead of writing to filesystem."
     },
     {
       "parameters": {
@@ -182,7 +325,7 @@
       "name": "Post Tweet",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1500, 200],
+      "position": [2150, 200],
       "continueOnFail": true,
       "notes": "Post via configured API. Default: OpenTweet. Switch to X API or Outstand by updating POSTING_API env var and this node's URL/auth."
     },
@@ -199,19 +342,38 @@
       "name": "Discord Notify",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1750, 200],
+      "position": [2400, 200],
       "notes": "Notify Vew of posted bridge alert."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Increment the daily post counter AFTER a successful post.\n// This ensures invalid payloads, dry-run executions, and rejected\n// chain names do not consume the daily rate limit.\nconst postResponse = $input.first().json;\n\n// Only increment if the Post Tweet node returned a 2xx status\nconst statusCode = postResponse.statusCode || postResponse.status || 200;\nif (statusCode < 200 || statusCode >= 300) {\n  // Post failed, do not consume a rate limit slot\n  return [{ json: { incremented: false, reason: 'Post returned non-2xx', statusCode } }];\n}\n\nconst staticData = $getWorkflowStaticData('global');\nconst now = new Date();\nconst todayKey = now.toISOString().split('T')[0];\n\nif (!staticData.daily_post_counts) {\n  staticData.daily_post_counts = {};\n}\n\nconst todayCount = staticData.daily_post_counts[todayKey] || 0;\nstaticData.daily_post_counts[todayKey] = todayCount + 1;\n\nreturn [{ json: { ...postResponse, incremented: true, today_count: todayCount + 1 } }];"
+      },
+      "id": "increment-post-counter",
+      "name": "Increment Post Counter",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2150, 350],
+      "notes": "Increment daily rate limit counter only after a successful post (2xx). Prevents invalid/dry-run payloads from consuming the limit."
     }
   ],
   "connections": {
     "Webhook: Bridge TX": {
       "main": [
-        [{ "node": "Amount >= Threshold?", "type": "main", "index": 0 }]
+        [{ "node": "Emergency Stop Check", "type": "main", "index": 0 }]
       ]
     },
     "Cron: Every 15min": {
       "main": [
-        [{ "node": "Fetch Recent Txs", "type": "main", "index": 0 }]
+        [{ "node": "Emergency Stop Check", "type": "main", "index": 0 }]
+      ]
+    },
+    "Emergency Stop Check": {
+      "main": [
+        [
+          { "node": "Amount >= Threshold?", "type": "main", "index": 0 },
+          { "node": "Fetch Recent Txs", "type": "main", "index": 0 }
+        ]
       ]
     },
     "Fetch Recent Txs": {
@@ -227,21 +389,53 @@
     },
     "Deduplicate": {
       "main": [
-        [{ "node": "Format Alert Tweet", "type": "main", "index": 0 }]
+        [{ "node": "Rate Limit Check", "type": "main", "index": 0 }]
+      ]
+    },
+    "Rate Limit Check": {
+      "main": [
+        [{ "node": "Rate Limit OK?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Rate Limit OK?": {
+      "main": [
+        [{ "node": "Format Alert Tweet", "type": "main", "index": 0 }],
+        [{ "node": "Rate Limit: Discord Notify", "type": "main", "index": 0 }]
       ]
     },
     "Format Alert Tweet": {
       "main": [
-        [{ "node": "DRY_RUN?", "type": "main", "index": 0 }]
+        [{ "node": "Input Valid?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Input Valid?": {
+      "main": [
+        [{ "node": "DRY_RUN?", "type": "main", "index": 0 }],
+        [{ "node": "Rejected: Discord Notify", "type": "main", "index": 0 }]
       ]
     },
     "DRY_RUN?": {
       "main": [
-        [{ "node": "DRY_RUN Log", "type": "main", "index": 0 }],
+        [{ "node": "Emergency Stop Pre-Post", "type": "main", "index": 0 }],
+        [{ "node": "DRY_RUN Log", "type": "main", "index": 0 }]
+      ]
+    },
+    "Emergency Stop Pre-Post": {
+      "main": [
         [{ "node": "Post Tweet", "type": "main", "index": 0 }]
       ]
     },
+    "DRY_RUN Log": {
+      "main": [
+        [{ "node": "DRY_RUN: Discord Log", "type": "main", "index": 0 }]
+      ]
+    },
     "Post Tweet": {
+      "main": [
+        [{ "node": "Increment Post Counter", "type": "main", "index": 0 }]
+      ]
+    },
+    "Increment Post Counter": {
       "main": [
         [{ "node": "Discord Notify", "type": "main", "index": 0 }]
       ]

@@ -71,11 +71,11 @@ These phrases are common AI writing tells. Content containing any of these fails
 
 When files contradict each other, this hierarchy determines which source is authoritative (highest to lowest):
 
-1. **Engine compliance rules** -- NEVER overridden by any other file
-2. **companies/voidai/compliance.md** -- VoidAI-specific compliance, non-negotiable
-3. **companies/voidai/voice.md** (this file) -- default brand rules
-4. **brand/voice-learnings.md** -- latest performance data may override default voice/format preferences (but never compliance rules)
-5. **research/x-voice-analysis.md** -- community baseline reference data, refreshed monthly via X scrape. Lowest priority if contradicted by actual performance data or compliance/voice rules
+1. **Engine compliance rules**: NEVER overridden by any other file
+2. **companies/voidai/compliance.md**: VoidAI-specific compliance, non-negotiable
+3. **companies/voidai/voice.md** (this file): default brand rules
+4. **brand/voice-learnings.md**: latest performance data may override default voice/format preferences (but never compliance rules)
+5. **research/x-voice-analysis.md**: community baseline reference data, refreshed monthly via X scrape. Lowest priority if contradicted by actual performance data or compliance/voice rules
 
 If you encounter a conflict between files, follow the higher-priority file and flag the conflict in `brand/voice-learnings.md` for resolution.
 

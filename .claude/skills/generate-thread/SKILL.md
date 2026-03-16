@@ -8,11 +8,8 @@ When the user says: "generate thread", "create thread", "write thread", "/genera
 ## Instructions
 
 1. **Load config** (stop if any missing):
-   - Read `CLAUDE.md` for banned phrases, formatting rules
-   - Read `companies/voidai/voice.md` for voice registers
-   - Read `companies/voidai/pillars.md` for pillar assignment
-   - Read `companies/voidai/compliance.md` for compliance rules
-   - Read `companies/voidai/accounts.md` for account voice matching
+   - Read all config files per CLAUDE.md Config Load Order (items 1-8 minimum)
+   - Read `companies/{ACTIVE_COMPANY}/brand/voice-learnings.md` (mandatory for content generation)
    - Read `engine/templates/x-thread.md` for the template format
 
 2. **Gather inputs** (ask user if not provided):
@@ -44,4 +41,4 @@ When the user says: "generate thread", "create thread", "write thread", "/genera
    - Include all hook variants in an ## Alternate Hooks section
    - Include ## Editor Notes with compliance check results
 
-6. **Notify user:** Show the thread content and confirm it's in drafts.
+6. **Notify user:** Show the thread content and confirm it's in drafts. Remind user to run `/queue check <id>` for compliance validation.

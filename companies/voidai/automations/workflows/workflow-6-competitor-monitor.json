@@ -21,6 +21,30 @@
     },
     {
       "parameters": {
+        "jsCode": "// EMERGENCY STOP CHECK\n// Must be the first code node in every workflow, right after the trigger.\n// Checks the EMERGENCY_STOP environment variable. If true, sends a\n// notification to Discord and halts the workflow (returns empty array).\n//\n// Referenced in: crisis.md, n8n-workflow-specs.md\n// Variable: EMERGENCY_STOP (Settings > Variables)\n\nconst emergencyStop = $env.EMERGENCY_STOP;\n\nif (emergencyStop === 'true' || emergencyStop === true) {\n  const workflowName = $workflow.name || 'Unknown Workflow';\n  const timestamp = new Date().toISOString();\n\n  const discordUrl = $env.DISCORD_WEBHOOK_URL;\n  if (discordUrl) {\n    try {\n      await fetch(discordUrl, {\n        method: 'POST',\n        headers: { 'Content-Type': 'application/json' },\n        body: JSON.stringify({\n          content: `**EMERGENCY STOP ACTIVE** | Workflow \"${workflowName}\" halted at ${timestamp}. No content was published. Set EMERGENCY_STOP=false in n8n variables to resume.`\n        })\n      });\n    } catch (e) {\n      // Discord notification failed, but we still halt.\n    }\n  }\n\n  return [];\n}\n\nreturn $input.all();"
+      },
+      "id": "emergency-stop-check",
+      "name": "Emergency Stop Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [125, 0],
+      "notes": "KILL SWITCH: Checks EMERGENCY_STOP env var. If true, notifies Discord and halts the workflow. Must be first node after trigger.",
+      "onError": "stopWorkflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "// PRE-POST EMERGENCY STOP CHECK\n// Second check right before sending intel digest to Discord.\n// Catches mid-execution activation of EMERGENCY_STOP.\n\nconst emergencyStop = $env.EMERGENCY_STOP;\n\nif (emergencyStop === 'true' || emergencyStop === true) {\n  return [];\n}\n\nreturn $input.all();"
+      },
+      "id": "emergency-stop-pre-post",
+      "name": "Emergency Stop Pre-Post",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1700, 150],
+      "notes": "KILL SWITCH: Second EMERGENCY_STOP check before Discord intel digest. Catches mid-execution stop activation.",
+      "onError": "stopWorkflow"
+    },
+    {
+      "parameters": {
         "method": "GET",
         "url": "https://api.twitter.com/2/tweets/search/recent",
         "sendQuery": true,
@@ -103,48 +127,37 @@
     },
     {
       "parameters": {
+        "mode": "append",
+        "options": {},
+        "numberInputs": 3
+      },
+      "id": "wait-for-all-apis",
+      "name": "Wait For All APIs",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [500, 50],
+      "notes": "SECURITY FIX: Wait for all 3 API responses before merging. Prevents Merge Intelligence from executing 3x (once per branch)."
+    },
+    {
+      "parameters": {
         "jsCode": "const competitorTweets = $('X: Competitor Tweets').first().json;\nconst mentions = $('X: VoidAI Mentions').first().json;\nconst sn106 = $('Taostats: SN106').first().json;\n\nconst digest = {\n  competitor_tweets: competitorTweets?.data || [],\n  competitor_count: competitorTweets?.data?.length || 0,\n  voidai_mentions: mentions?.data || [],\n  mention_count: mentions?.data?.length || 0,\n  sn106_data: sn106 || {},\n  generated_at: new Date().toISOString()\n};\n\nreturn [{ json: digest }];"
       },
       "id": "merge-intel",
       "name": "Merge Intelligence",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [550, 50]
+      "position": [750, 50]
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://api.anthropic.com/v1/messages",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "x-api-key", "value": "={{ $env.CLAUDE_API_KEY }}" },
-            { "name": "anthropic-version", "value": "2023-06-01" },
-            { "name": "Content-Type", "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"model\": \"claude-sonnet-4-20250514\",\n  \"max_tokens\": 1000,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Generate a brief daily competitor intelligence digest for VoidAI (Bittensor SN106).\\n\\nCompetitor tweets found: {{ $json.competitor_count }}\\nVoidAI mentions found: {{ $json.mention_count }}\\n\\nCompetitor tweet data: {{ JSON.stringify($json.competitor_tweets.slice(0, 10)) }}\\n\\nVoidAI mention data: {{ JSON.stringify($json.voidai_mentions.slice(0, 10)) }}\\n\\nFormat as a brief daily intelligence digest with sections:\\n1. Competitor Activity Summary\\n2. VoidAI Sentiment (what people are saying)\\n3. Threats & Opportunities\\n4. Recommended Actions (if any)\\n\\nKeep it concise. Under 500 words.\"\n    }\n  ]\n}",
-        "options": { "timeout": 30000 }
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nif (!staticData.intel_digests) staticData.intel_digests = {};\n\nconst data = $input.first().json;\nconst date = new Date().toISOString().split('T')[0];\nconst dateDisplay = new Date().toLocaleDateString('en-US', {\n  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',\n  timeZone: 'America/New_York'\n});\n\nstaticData.intel_digests[date] = {\n  type: 'competitor-intel',\n  status: 'collected',\n  collected_at: new Date().toISOString(),\n  data: {\n    competitor_tweets: data.competitor_tweets,\n    competitor_count: data.competitor_count,\n    voidai_mentions: data.voidai_mentions,\n    mention_count: data.mention_count,\n    sn106_data: data.sn106_data\n  }\n};\n\n// Cleanup: keep last 14 days\nconst keys = Object.keys(staticData.intel_digests).sort();\nif (keys.length > 14) {\n  keys.slice(0, keys.length - 14).forEach(k => delete staticData.intel_digests[k]);\n}\n\nreturn [{ json: {\n  message: `**Competitor Intel Data Collected | ${dateDisplay}**\\n\\nCompetitor tweets found: ${data.competitor_count}\\nVoidAI mentions found: ${data.mention_count}\\n\\nRaw data stored in workflow static data. Review in n8n execution log for details.`,\n  date: dateDisplay,\n  competitor_count: data.competitor_count,\n  mention_count: data.mention_count\n} }];"
       },
-      "id": "claude-summarize",
-      "name": "Claude: Daily Digest",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [800, 50],
-      "continueOnFail": true,
-      "notes": "Generate daily competitor intelligence digest using Claude."
-    },
-    {
-      "parameters": {
-        "jsCode": "const response = $input.first().json;\nconst digest = response?.content?.[0]?.text || 'Failed to generate digest. Check API logs.';\nconst date = new Date().toLocaleDateString('en-US', {\n  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',\n  timeZone: 'America/New_York'\n});\n\nreturn [{ json: {\n  message: `**Competitor Intel | ${date}**\\n\\n${digest}`,\n  date\n} }];"
-      },
-      "id": "format-digest",
-      "name": "Format Digest",
+      "id": "store-intel-data",
+      "name": "Store Intel Data",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1050, 50]
+      "position": [1000, 50],
+      "notes": "Store raw competitor intelligence data in workflow static data. No Claude API needed. Review raw data in n8n execution logs."
     },
     {
       "parameters": {
@@ -158,7 +171,7 @@
             {
               "id": "dry-run",
               "leftValue": "={{ $env.DRY_RUN }}",
-              "rightValue": "true",
+              "rightValue": "false",
               "operator": {
                 "type": "string",
                 "operation": "equals"
@@ -172,17 +185,35 @@
       "name": "DRY_RUN?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [1300, 50]
+      "position": [1500, 50],
+      "notes": "FAIL-SAFE: Only send to Discord when DRY_RUN is strictly 'false'. Any other value (true, unset, typo) routes to dry-run log."
     },
     {
       "parameters": {
-        "jsCode": "const fs = require('fs');\nconst logDir = $env.LOG_FILE_PATH || '/data/n8n/dry-run-logs/';\nconst date = new Date().toISOString().split('T')[0];\nconst logFile = `${logDir}workflow-6-competitor-${date}.json`;\n\nfs.mkdirSync(logDir, { recursive: true });\nfs.writeFileSync(logFile, JSON.stringify({\n  workflow: 'competitor-monitor',\n  dry_run: true,\n  timestamp: new Date().toISOString(),\n  digest: $input.first().json.message\n}, null, 2));\n\nreturn [{ json: { status: 'logged', file: logFile } }];"
+        "jsCode": "const data = $input.first().json;\nconst date = new Date().toISOString();\n\nreturn [{ json: {\n  status: 'dry_run',\n  timestamp: date,\n  message: 'Competitor monitor data collected but not delivered (DRY_RUN is not false)',\n  competitor_count: data.competitor_count || 0,\n  mention_count: data.mention_count || 0\n} }];"
       },
       "id": "dry-run-log",
       "name": "DRY_RUN Log",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1550, -50]
+      "position": [1750, -50],
+      "notes": "Log dry-run details. Output sent to Discord dry-run channel for visibility instead of filesystem."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"**[DRY RUN] Competitor Monitor**\\n\\nDigest preview: {{ $json.digest_preview }}\\n\\nDRY_RUN is not set to 'false'. Digest not delivered to intel channel.\"\n}",
+        "options": {}
+      },
+      "id": "dry-run-discord",
+      "name": "Discord: DRY_RUN Log",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2000, -50],
+      "notes": "Send dry-run log to Discord instead of writing to filesystem."
     },
     {
       "parameters": {
@@ -197,12 +228,17 @@
       "name": "Discord: Intel Digest",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1550, 150],
+      "position": [1750, 150],
       "notes": "Send competitor digest to private Discord channel. NEVER posts publicly."
     }
   ],
   "connections": {
     "Daily 8AM ET": {
+      "main": [
+        [{ "node": "Emergency Stop Check", "type": "main", "index": 0 }]
+      ]
+    },
+    "Emergency Stop Check": {
       "main": [
         [
           { "node": "X: Competitor Tweets", "type": "main", "index": 0 },
@@ -213,38 +249,48 @@
     },
     "X: Competitor Tweets": {
       "main": [
-        [{ "node": "Merge Intelligence", "type": "main", "index": 0 }]
+        [{ "node": "Wait For All APIs", "type": "main", "index": 0 }]
       ]
     },
     "X: VoidAI Mentions": {
       "main": [
-        [{ "node": "Merge Intelligence", "type": "main", "index": 0 }]
+        [{ "node": "Wait For All APIs", "type": "main", "index": 1 }]
       ]
     },
     "Taostats: SN106": {
+      "main": [
+        [{ "node": "Wait For All APIs", "type": "main", "index": 2 }]
+      ]
+    },
+    "Wait For All APIs": {
       "main": [
         [{ "node": "Merge Intelligence", "type": "main", "index": 0 }]
       ]
     },
     "Merge Intelligence": {
       "main": [
-        [{ "node": "Claude: Daily Digest", "type": "main", "index": 0 }]
+        [{ "node": "Store Intel Data", "type": "main", "index": 0 }]
       ]
     },
-    "Claude: Daily Digest": {
-      "main": [
-        [{ "node": "Format Digest", "type": "main", "index": 0 }]
-      ]
-    },
-    "Format Digest": {
+    "Store Intel Data": {
       "main": [
         [{ "node": "DRY_RUN?", "type": "main", "index": 0 }]
       ]
     },
     "DRY_RUN?": {
       "main": [
-        [{ "node": "DRY_RUN Log", "type": "main", "index": 0 }],
+        [{ "node": "Emergency Stop Pre-Post", "type": "main", "index": 0 }],
+        [{ "node": "DRY_RUN Log", "type": "main", "index": 0 }]
+      ]
+    },
+    "Emergency Stop Pre-Post": {
+      "main": [
         [{ "node": "Discord: Intel Digest", "type": "main", "index": 0 }]
+      ]
+    },
+    "DRY_RUN Log": {
+      "main": [
+        [{ "node": "Discord: DRY_RUN Log", "type": "main", "index": 0 }]
       ]
     }
   },

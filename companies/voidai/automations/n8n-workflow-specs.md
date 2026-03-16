@@ -11,6 +11,10 @@
 ## Table of Contents
 
 1. [Environment Variables (Shared)](#environment-variables-shared)
+    - [DRY_RUN Fail-Safe Logic](#dry_run-fail-safe-logic)
+    - [n8n Cloud Compatibility Notes](#n8n-cloud-compatibility-notes)
+    - [Merge Node Pattern: Wait For All](#merge-node-pattern-wait-for-all)
+    - [Credential Setup Checklist (Post-Import)](#credential-setup-checklist-post-import)
 2. [Workflow 1: Daily Metrics Post](#workflow-1-daily-metrics-post)
 3. [Workflow 2: Bridge Transaction Alerts](#workflow-2-bridge-transaction-alerts)
 4. [Workflow 3: Weekly Recap Thread](#workflow-3-weekly-recap-thread)
@@ -29,7 +33,8 @@ All workflows share a single set of environment variables configured in n8n Sett
 
 | Variable | Example Value | Description |
 |----------|--------------|-------------|
-| `DRY_RUN` | `true` | Master kill switch. When `true`, no external posts are made. All output goes to log file / webhook. |
+| `EMERGENCY_STOP` | `false` | **Crisis kill switch.** When `true`, ALL workflows halt immediately before any external API call (posting, webhooks to platforms). Logs "EMERGENCY STOP ACTIVE" to Discord and exits. Takes priority over all other flags. See `crisis.md` for activation procedure. |
+| `DRY_RUN` | `true` | Master kill switch. When `true`, no external posts are made. All output goes to log file / webhook. **Defaults to safe:** if undefined, missing, or any value other than the exact string `false`, the system treats it as dry-run mode (no publishing). See "DRY_RUN Fail-Safe Logic" below. |
 | `TAOSTATS_API_BASE` | `https://api.taostats.io/api` | Taostats API base URL |
 | `TAOSTATS_API_KEY` | `ts_xxxx` | Taostats API key (free tier) |
 | `COINGECKO_API_BASE` | `https://api.coingecko.com/api/v3` | CoinGecko API base URL |
@@ -39,7 +44,7 @@ All workflows share a single set of environment variables configured in n8n Sett
 | `X_API_SECRET` | `xxxx` | X API consumer secret |
 | `X_ACCESS_TOKEN` | `xxxx` | X OAuth 1.0a access token for @v0idai |
 | `X_ACCESS_SECRET` | `xxxx` | X OAuth 1.0a access token secret |
-| `OPENTWEET_API_KEY` | `ot_xxxx` | OpenTweet API key (7-day trial, then X API) |
+| `OPENTWEET_API_KEY` | `ot_xxxx` | OpenTweet API key (7-day trial, then X API). **Expires 2026-03-22.** Renew or migrate to X API Basic before expiry. |
 | `OUTSTAND_API_KEY` | `os_xxxx` | Outstand API key for multi-platform publishing |
 | `OUTSTAND_API_BASE` | `https://api.outstand.com/v1` | Outstand API base URL |
 | `CLAUDE_API_KEY` | `sk-ant-xxxx` | Anthropic Claude API key for content generation |
@@ -61,9 +66,145 @@ All workflows share a single set of environment variables configured in n8n Sett
 
 | Phase | Variables to Activate |
 |-------|-----------------------|
-| Phase 1-2 (Build/Test) | `DRY_RUN=true`, `POSTING_API=opentweet` |
-| Phase 3 (Soft Launch) | `DRY_RUN=false`, `POSTING_API=opentweet` (7-day trial) |
-| Phase 3+ (Production) | `DRY_RUN=false`, `POSTING_API=x_api` or `outstand` |
+| Phase 1-2 (Build/Test) | `EMERGENCY_STOP=false`, `DRY_RUN=true`, `POSTING_API=opentweet` |
+| Phase 3 (Soft Launch) | `EMERGENCY_STOP=false`, `DRY_RUN=false`, `POSTING_API=opentweet` (7-day trial) |
+| Phase 3+ (Production) | `EMERGENCY_STOP=false`, `DRY_RUN=false`, `POSTING_API=x_api` or `outstand` |
+| **Crisis (any phase)** | `EMERGENCY_STOP=true` (overrides all other flags, halts all publishing) |
+
+### DRY_RUN Fail-Safe Logic
+
+The DRY_RUN check in every workflow uses a "default to safe" pattern. If the `DRY_RUN` environment variable is undefined (deleted accidentally, not carried over during migration, or not set in a new n8n instance), the system refuses to publish. The correct check logic is:
+
+```javascript
+// Fail-safe: only publish when DRY_RUN is explicitly set to the string "false"
+const isDryRun = String($env.DRY_RUN).toLowerCase().trim() !== 'false';
+```
+
+This means:
+- `DRY_RUN=true` results in dry-run mode (no publishing). CORRECT.
+- `DRY_RUN=false` results in live mode (publishing enabled). CORRECT.
+- `DRY_RUN=True`, `DRY_RUN=TRUE`, `DRY_RUN=1` all result in dry-run mode. SAFE.
+- `DRY_RUN` is undefined, empty, or deleted: results in dry-run mode. SAFE.
+
+The only way to enable publishing is to explicitly set `DRY_RUN` to the string `false`. This eliminates the risk of accidental publishing due to variable deletion or migration errors.
+
+For IF nodes that use expression-based checks (rather than Code node logic), the condition should be:
+- Condition: `{{ $env.DRY_RUN }}` does NOT equal `false`
+- True path (dry-run): log to file
+- False path (live): post via API
+
+### n8n Cloud Compatibility Notes
+
+n8n Cloud runs workflows in ephemeral containers. Key limitations:
+
+**Filesystem persistence:** n8n Cloud runs in ephemeral containers. Files written via `require('fs')` do not persist between executions. All workflow code nodes have been updated to avoid filesystem operations:
+
+- **DRY_RUN log writes (WF1, WF2, WF5, WF6):** Output is prepared as JSON and sent to Discord webhook notifications instead of writing log files.
+- **Deduplication state (WF2, WF4):** Transaction hashes and processed news URLs are stored in `$getWorkflowStaticData('global')`, which persists across executions in n8n's database.
+- **Queue file management (WF3, WF4, WF5, WF7):** Drafts, approved items, and scheduled items are managed in `$getWorkflowStaticData('global')`. The local file-based queue remains the source of truth for manual review outside n8n.
+
+**Static data for deduplication:** n8n's `$getWorkflowStaticData('global')` persists key-value data across executions within n8n's database, independent of the filesystem. Use this for deduplication:
+
+```javascript
+// Replace fs-based dedup with n8n static data
+const staticData = $getWorkflowStaticData('global');
+if (!staticData.posted_hashes) {
+  staticData.posted_hashes = [];
+}
+
+const txHash = $input.first().json.tx_hash;
+if (staticData.posted_hashes.includes(txHash)) {
+  return []; // Already posted, skip
+}
+
+staticData.posted_hashes.push(txHash);
+// Keep last 500 hashes to avoid unbounded growth
+// Note: n8n static data has a size limit (typically 256KB per workflow on Cloud)
+if (staticData.posted_hashes.length > 500) {
+  staticData.posted_hashes = staticData.posted_hashes.slice(-500);
+}
+
+return $input.all();
+```
+
+The same pattern applies to WF4's `processed_urls` array (keep last 1000 URLs). Both data volumes are well within the 256KB static data limit.
+
+### Merge Node Pattern: Wait For All
+
+Workflows with parallel fan-out (multiple HTTP requests triggered simultaneously) require a Merge node configured in "Wait For All" mode before the downstream Code node that combines results. Without this, n8n's v1 execution order causes the downstream Code node to execute once per incoming branch, producing duplicate outputs.
+
+**Affected workflows and fix:**
+
+| Workflow | Fan-out branches | Downstream node | Fix |
+|----------|-----------------|-----------------|-----|
+| WF1 (Daily Metrics) | 4 API calls (Taostats Subnet, Taostats Pool, CoinGecko TAO, CoinGecko SN106) | Merge Data | Add Merge node (mode: "Wait For All", number of inputs: 4) between the 4 HTTP nodes and the Merge Data Code node |
+| WF3 (Weekly Recap) | 5 data fetches (Taostats 7d, CoinGecko TAO 7d, CoinGecko SN106 7d, Bridge Volume, GitHub Commits) | Merge All Data | Add Merge node (mode: "Wait For All", number of inputs: 5) before Merge All Data |
+| WF6 (Competitor Monitor) | 3 data sources (X API, Taostats Competitors, RSS Competitors) | Claude API Summarize | Add Merge node (mode: "Wait For All", number of inputs: 3) before Claude Summarize |
+| WF7 (Blog Distribution) | 3 Claude API calls (X Thread, LinkedIn Post, Discord Announcement) | Write All Drafts | Add Merge node (mode: "Wait For All", number of inputs: 3) before Write All Drafts |
+
+**Merge node configuration:**
+
+```json
+{
+  "parameters": {
+    "mode": "combine",
+    "combineBy": "combineAll",
+    "options": {}
+  },
+  "type": "n8n-nodes-base.merge",
+  "typeVersion": 3,
+  "position": [620, 240]
+}
+```
+
+Without this fix, each downstream node executes N times (where N is the number of input branches), producing N identical outputs. For WF1, this means 4 duplicate tweets could be posted. For WF3, this means 5 duplicate Claude API calls and 5 duplicate draft files.
+
+### Credential Setup Checklist (Post-Import)
+
+After importing workflow JSON files into n8n, the following credentials must be configured manually. Workflows will fail or reject requests until these are set up.
+
+**Step 1: Environment variables (all workflows)**
+
+Set all variables from the Environment Variables table above in n8n Settings > Variables. At minimum for Phase 2 testing:
+
+- [ ] `EMERGENCY_STOP` = `false`
+- [ ] `DRY_RUN` = `true`
+- [ ] `POSTING_API` = `opentweet`
+- [ ] `TAOSTATS_API_BASE` and `TAOSTATS_API_KEY`
+- [ ] `COINGECKO_API_BASE` (and `COINGECKO_API_KEY` if using demo key)
+- [ ] `OPENTWEET_API_KEY`
+- [ ] `CLAUDE_API_KEY`
+- [ ] `DISCORD_WEBHOOK_URL`
+- [ ] `GITHUB_TOKEN` and `GITHUB_ORG`
+- [ ] `BRIDGE_MONITOR_URL` and `BRIDGE_TX_THRESHOLD`
+- [ ] `LOG_FILE_PATH`, `QUEUE_DRAFTS_PATH`, `QUEUE_APPROVED_PATH`, `QUEUE_SCHEDULED_PATH`
+- [ ] `MAX_POSTS_PER_DAY` and `MIN_POST_GAP_MINUTES`
+
+**Step 2: Header Auth credentials (WF2 and WF7 webhooks)**
+
+Both WF2 (Bridge Transaction Alerts) and WF7 (Blog Distribution) use `"authentication": "headerAuth"` on their webhook triggers. After import:
+
+1. Go to n8n Credentials > Create New > Header Auth
+2. Set the header name (e.g., `X-Webhook-Secret`)
+3. Set a strong, randomly generated header value (minimum 32 characters)
+4. Assign the credential to the webhook node in WF2 and WF7
+5. Configure the sending service (Tracker/FastAPI for WF2, CMS for WF7) to include the same header and value in every POST request
+6. Test by sending a request without the header and confirming n8n returns HTTP 401
+
+**Step 3: OAuth 1.0a credentials (WF1 X API posting)**
+
+WF1's "Post via X API" node uses `"authentication": "oAuth1"`. After import:
+
+1. Go to n8n Credentials > Create New > Twitter OAuth API
+2. Enter: Consumer Key (`X_API_KEY`), Consumer Secret (`X_API_SECRET`), Access Token (`X_ACCESS_TOKEN`), Access Token Secret (`X_ACCESS_SECRET`)
+3. Assign the credential to the "Post via X API" node in WF1
+4. Note: this is only needed when `POSTING_API=x_api` (Phase 3+). For Phase 2 testing with OpenTweet, this can be deferred.
+
+**Step 4: Verify instance configuration**
+
+- [ ] n8n instance timezone is set to `America/New_York` (Settings > General)
+- [ ] Global error workflow is configured (Settings > Workflows > Error Workflow) to send notifications to a separate channel (e.g., email or Telegram) as a failsafe if Discord is down
+- [ ] Activate only WF1 through WF5. Keep WF6 and WF7 inactive (Phase 3+).
 
 ---
 
@@ -79,22 +220,28 @@ Fetches SN106 subnet metrics from Taostats and TAO market data from CoinGecko ev
 ### Trigger
 
 - **Type:** Cron
-- **Schedule:** `0 9 * * *` (9:00 AM ET daily, adjust for server timezone)
-- **Note:** 9:00 AM ET falls within the 14:00-16:00 UTC peak window per cadence.md (9 AM ET = 14:00 UTC in summer / 14:00 UTC in winter)
+- **Schedule:** `0 10 * * *` (10:00 AM ET daily)
+- **Timezone:** `America/New_York`
+- **Note:** 10:00 AM ET falls within the 14:00-16:00 UTC peak window per cadence.md in both seasons (10 AM EDT = 14:00 UTC in summer, 10 AM EST = 15:00 UTC in winter). The previous 9 AM ET schedule drifted outside the peak window during summer because 9 AM EDT = 13:00 UTC, not 14:00 UTC.
 
 ### Node-by-Node Specification
 
 ```
-[Cron Trigger] -> [Taostats API] -> [CoinGecko API] -> [Merge Data] -> [Format Tweet] -> [DRY_RUN Check] -> [Post or Log]
+[Cron Trigger] -> [Taostats Subnet API] -\
+                  [Taostats Pool API]    --> [Merge (Wait For All)] -> [Merge Data Code] -> [Format Tweet] -> [DRY_RUN Check] -> [Post or Log]
+                  [CoinGecko TAO API]    -/
+                  [CoinGecko SN106 API] -/
 ```
+
+**Note:** The Merge node (mode: "Wait For All") collects all 4 API responses before passing them to the Merge Data Code node. Without this, the Code node would execute 4 times, once per incoming branch, producing duplicate downstream outputs. See "Merge Node Pattern: Wait For All" in the Environment Variables section.
 
 #### Node 1: Cron Trigger
 - **Type:** Schedule Trigger
 - **Config:**
-  - Rule: `0 9 * * *` (daily at 9:00 AM ET)
+  - Rule: `0 10 * * *` (daily at 10:00 AM ET)
   - Timezone: `America/New_York`
 
-#### Node 2: Taostats API -- Subnet 106 Data
+#### Node 2: Taostats API: Subnet 106 Data
 - **Type:** HTTP Request
 - **Config:**
   - Method: `GET`
@@ -110,7 +257,7 @@ Fetches SN106 subnet metrics from Taostats and TAO market data from CoinGecko ev
   - `tempo` (block tempo)
   - Additional fields: check Taostats `/subnet/latest` endpoint
 
-#### Node 3: Taostats API -- Subnet 106 Pool/Price
+#### Node 3: Taostats API: Subnet 106 Pool/Price
 - **Type:** HTTP Request
 - **Config:**
   - Method: `GET`
@@ -125,7 +272,7 @@ Fetches SN106 subnet metrics from Taostats and TAO market data from CoinGecko ev
   - `price` (alpha price in TAO)
   - `market_cap`
 
-#### Node 4: CoinGecko API -- TAO Price
+#### Node 4: CoinGecko API: TAO Price
 - **Type:** HTTP Request
 - **Config:**
   - Method: `GET`
@@ -146,7 +293,7 @@ Fetches SN106 subnet metrics from Taostats and TAO market data from CoinGecko ev
   }
   ```
 
-#### Node 5: CoinGecko API -- SN106 Alpha Token Price
+#### Node 5: CoinGecko API: SN106 Alpha Token Price
 - **Type:** HTTP Request
 - **Config:**
   - Method: `GET`
@@ -296,12 +443,7 @@ Fetches SN106 subnet metrics from Taostats and TAO market data from CoinGecko ev
 - **Type:** Code (JavaScript)
 - **Config:**
   ```javascript
-  // Write to dry-run log
-  const fs = require('fs');
-  const logDir = $env.LOG_FILE_PATH || '/data/n8n/dry-run-logs/';
-  const date = new Date().toISOString().split('T')[0];
-  const logFile = `${logDir}workflow-1-daily-metrics-${date}.json`;
-
+  // DRY_RUN log: prepare data for Discord notification (n8n Cloud compatible)
   const logEntry = {
     workflow: 'daily-metrics',
     timestamp: new Date().toISOString(),
@@ -313,11 +455,9 @@ Fetches SN106 subnet metrics from Taostats and TAO market data from CoinGecko ev
     would_post_to: '@v0idai'
   };
 
-  fs.mkdirSync(logDir, { recursive: true });
-  fs.writeFileSync(logFile, JSON.stringify(logEntry, null, 2));
-
-  return [{ json: { status: 'logged', file: logFile, ...logEntry } }];
+  return [{ json: { status: 'logged', ...logEntry } }];
   ```
+  **Note:** Output is sent to Discord via the next node (DRY_RUN: Discord Log) rather than written to the filesystem. See "n8n Cloud Compatibility Notes" above.
 
 #### Node 12: Post via API (False path)
 - **Type:** Switch
@@ -418,10 +558,10 @@ Fetches SN106 subnet metrics from Taostats and TAO market data from CoinGecko ev
 
 When `DRY_RUN=true`:
 1. All API calls to Taostats and CoinGecko still execute (read-only, no side effects).
-2. The formatted tweet is written to `LOG_FILE_PATH/workflow-1-daily-metrics-YYYY-MM-DD.json`.
+2. The formatted tweet is sent to Discord via the DRY_RUN: Discord Log node.
 3. No post is made to any platform.
-4. Log file contains: full tweet text, character count, all raw API data, timestamp.
-5. Review the log file to validate data accuracy and tweet formatting before going live.
+4. Discord message contains: full tweet text, character count, key data points, timestamp.
+5. Review the Discord notification to validate data accuracy and tweet formatting before going live.
 
 ### Testing Instructions
 
@@ -432,8 +572,8 @@ When `DRY_RUN=true`:
    - Node 2-5: Verify API responses contain expected fields.
    - Node 6: Verify merge produces complete data object.
    - Node 9: Verify tweet text is within 280 chars and reads well.
-   - Node 11: Verify log file was written.
-5. Check the log file at `LOG_FILE_PATH/workflow-1-daily-metrics-YYYY-MM-DD.json`.
+   - Node 11: Verify Discord notification was sent with draft tweet.
+5. Check Discord for the "[DRY_RUN] Daily Metrics Draft" message.
 6. Run 3 consecutive days and review output for consistency.
 7. When satisfied, set `DRY_RUN=false` and execute once manually to verify posting works.
 
@@ -532,33 +672,29 @@ This spec implements both options as separate trigger nodes. Enable one, disable
 - **Type:** Code (JavaScript)
 - **Config:**
   ```javascript
-  // Prevent duplicate alerts for the same transaction
-  const fs = require('fs');
-  const stateFile = ($env.LOG_FILE_PATH || '/data/n8n/dry-run-logs/') + 'bridge-alert-state.json';
+  // Deduplicate using n8n static data for persistence across executions on n8n Cloud
+  const staticData = $getWorkflowStaticData('global');
 
-  let state = {};
-  try {
-    state = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
-  } catch (e) {
-    state = { posted_hashes: [] };
+  if (!staticData.posted_hashes) {
+    staticData.posted_hashes = [];
   }
 
   const txHash = $input.first().json.tx_hash;
 
-  if (state.posted_hashes.includes(txHash)) {
-    // Already posted, skip
-    return [];
+  if (staticData.posted_hashes.includes(txHash)) {
+    return []; // Already posted, skip
   }
 
-  // Add to state (keep last 500 hashes)
-  state.posted_hashes.push(txHash);
-  if (state.posted_hashes.length > 500) {
-    state.posted_hashes = state.posted_hashes.slice(-500);
+  staticData.posted_hashes.push(txHash);
+
+  // Keep only last 500 hashes to stay within static data size limits (~256KB)
+  if (staticData.posted_hashes.length > 500) {
+    staticData.posted_hashes = staticData.posted_hashes.slice(-500);
   }
-  fs.writeFileSync(stateFile, JSON.stringify(state, null, 2));
 
   return $input.all();
   ```
+  **Note:** Uses `$getWorkflowStaticData('global')` instead of filesystem state. See "n8n Cloud Compatibility Notes" above.
 
 #### Node 6: Format Tweet
 - **Type:** Code (JavaScript)
@@ -623,11 +759,7 @@ ${tx.explorer_url}
 - **Type:** Code (JavaScript)
 - **Config:**
   ```javascript
-  const fs = require('fs');
-  const logDir = $env.LOG_FILE_PATH || '/data/n8n/dry-run-logs/';
-  const date = new Date().toISOString().replace(/[:.]/g, '-');
-  const logFile = `${logDir}workflow-2-bridge-alert-${date}.json`;
-
+  // DRY_RUN log: prepare data for Discord notification (n8n Cloud compatible)
   const logEntry = {
     workflow: 'bridge-alert',
     timestamp: new Date().toISOString(),
@@ -640,11 +772,9 @@ ${tx.explorer_url}
     would_post_to: '@v0idai'
   };
 
-  fs.mkdirSync(logDir, { recursive: true });
-  fs.writeFileSync(logFile, JSON.stringify(logEntry, null, 2));
-
-  return [{ json: { status: 'logged', file: logFile } }];
+  return [{ json: { status: 'logged', ...logEntry } }];
   ```
+  **Note:** Output is sent to Discord via the next node rather than written to the filesystem. See "n8n Cloud Compatibility Notes" above.
 
 #### Node 9: Post via API
 - **Type:** Same Switch pattern as Workflow 1, Node 12 (OpenTweet / X API / Outstand).
@@ -668,7 +798,7 @@ When `DRY_RUN=true`:
 1. Webhook/cron triggers still fire.
 2. Bridge data is fetched and processed.
 3. Tweet is formatted and validated.
-4. Output written to `LOG_FILE_PATH/workflow-2-bridge-alert-{timestamp}.json`.
+4. Output is sent to Discord via the DRY_RUN: Discord Log node.
 5. No post is made to any platform.
 6. Deduplicate state is still updated (so switching to live won't re-post old txs).
 
@@ -695,7 +825,7 @@ When `DRY_RUN=true`:
 
 ### Description
 
-Every Friday at 2:00 PM ET, aggregates 7 days of data (SN106 metrics, TAO price movement, bridge volume, GitHub commits), sends it to Claude API to generate an 8-10 tweet thread, writes the thread to the drafts queue for human review, and notifies Vew via Discord. This workflow ALWAYS requires human approval -- it never auto-posts.
+Every Friday at 2:00 PM ET, aggregates 7 days of data (SN106 metrics, TAO price movement, bridge volume, GitHub commits), sends it to Claude API to generate an 8-10 tweet thread, writes the thread to the drafts queue for human review, and notifies Vew via Discord. This workflow ALWAYS requires human approval. It never auto-posts.
 
 ### Trigger
 
@@ -706,14 +836,20 @@ Every Friday at 2:00 PM ET, aggregates 7 days of data (SN106 metrics, TAO price 
 ### Node-by-Node Specification
 
 ```
-[Cron] -> [Parallel: Taostats 7d, CoinGecko 7d, Bridge Volume, GitHub Commits] -> [Merge All] -> [Claude API Generate Thread] -> [Write to Drafts Queue] -> [Discord Notification]
+[Cron] -> [Taostats 7d]          -\
+          [CoinGecko TAO 7d]      --> [Merge (Wait For All)] -> [Merge All Data Code] -> [Claude API Generate Thread] -> [Write to Drafts Queue] -> [Discord Notification]
+          [CoinGecko SN106 7d]   -/
+          [Bridge Volume]        -/
+          [GitHub Commits]       -/
 ```
+
+**Note:** The Merge node (mode: "Wait For All") collects all 5 data responses before passing them to the Merge All Data Code node. See "Merge Node Pattern: Wait For All" in the Environment Variables section.
 
 #### Node 1: Cron Trigger
 - **Type:** Schedule Trigger
 - **Config:** `0 14 * * 5`, timezone `America/New_York`
 
-#### Node 2a: Taostats -- 7-Day Subnet History
+#### Node 2a: Taostats: 7-Day Subnet History
 - **Type:** HTTP Request
 - **Config:**
   - Method: `GET`
@@ -721,7 +857,7 @@ Every Friday at 2:00 PM ET, aggregates 7 days of data (SN106 metrics, TAO price 
   - Headers: `Authorization: {{ $env.TAOSTATS_API_KEY }}`
   - Continue On Fail: `true`
 
-#### Node 2b: CoinGecko -- 7-Day TAO Price History
+#### Node 2b: CoinGecko: 7-Day TAO Price History
 - **Type:** HTTP Request
 - **Config:**
   - Method: `GET`
@@ -729,7 +865,7 @@ Every Friday at 2:00 PM ET, aggregates 7 days of data (SN106 metrics, TAO price 
   - Continue On Fail: `true`
 - **Expected Response:** Array of `[timestamp, price]` pairs.
 
-#### Node 2c: CoinGecko -- 7-Day SN106 Alpha Price History
+#### Node 2c: CoinGecko: 7-Day SN106 Alpha Price History
 - **Type:** HTTP Request
 - **Config:**
   - Method: `GET`
@@ -836,7 +972,7 @@ Every Friday at 2:00 PM ET, aggregates 7 days of data (SN106 metrics, TAO price 
   return [{ json: weekData }];
   ```
 
-#### Node 4: Claude API -- Generate Thread
+#### Node 4: Claude API: Generate Thread
 - **Type:** HTTP Request
 - **Config:**
   - Method: `POST`
@@ -902,43 +1038,41 @@ Every Friday at 2:00 PM ET, aggregates 7 days of data (SN106 metrics, TAO price 
 - **Type:** Code (JavaScript)
 - **Config:**
   ```javascript
-  const fs = require('fs');
-  const draftsDir = $env.QUEUE_DRAFTS_PATH || '/data/voidai/queue/drafts/';
+  // Store draft in n8n static data and prepare for Discord notification (n8n Cloud compatible)
+  const staticData = $getWorkflowStaticData('global');
   const date = new Date().toISOString().split('T')[0];
-  const filename = `weekly-recap-${date}.md`;
-  const filepath = `${draftsDir}${filename}`;
-
   const thread = $input.first().json.thread;
 
-  // Build YAML frontmatter + content (matches /queue skill format)
-  let content = `---
-type: x-thread
-account: "@v0idai"
-status: review
-created: ${new Date().toISOString()}
-source: workflow-3-weekly-recap
-requires_human_review: true
-tweet_count: ${thread.length}
-has_length_errors: ${$input.first().json.has_length_errors}
----
-
-# Weekly Recap Thread | ${date}
-
-`;
-
-  for (const tweet of thread) {
-    content += `## Tweet ${tweet.index} (${tweet.length} chars${tweet.over_limit ? ' -- OVER LIMIT' : ''})
-
-${tweet.text}
-
-`;
+  // Store the draft in static data for WF5 to pick up
+  if (!staticData.drafts) {
+    staticData.drafts = [];
   }
 
-  fs.mkdirSync(draftsDir, { recursive: true });
-  fs.writeFileSync(filepath, content);
+  const draft = {
+    id: `weekly-recap-${date}`,
+    type: 'x-thread',
+    account: '@v0idai',
+    status: 'review',
+    created: new Date().toISOString(),
+    source: 'workflow-3-weekly-recap',
+    requires_human_review: true,
+    tweet_count: thread.length,
+    has_length_errors: $input.first().json.has_length_errors,
+    thread: thread
+  };
 
-  return [{ json: { status: 'drafted', file: filepath, tweet_count: thread.length } }];
+  // Replace any existing draft for the same date
+  staticData.drafts = staticData.drafts.filter(d => d.id !== draft.id);
+  staticData.drafts.push(draft);
+
+  // Keep only last 20 drafts to stay within static data size limits
+  if (staticData.drafts.length > 20) {
+    staticData.drafts = staticData.drafts.slice(-20);
+  }
+
+  return [{ json: { status: 'drafted', draft_id: draft.id, tweet_count: thread.length } }];
   ```
+  **Note:** Drafts are stored in `$getWorkflowStaticData('global')` instead of the filesystem. The local file-based queue remains the source of truth for manual review. See "n8n Cloud Compatibility Notes" above.
 
 #### Node 7: Discord Notification
 - **Type:** HTTP Request
@@ -1003,26 +1137,26 @@ Every 4 hours, scans for Bittensor ecosystem news via RSS feeds (and X API searc
 - **Type:** Schedule Trigger
 - **Config:** `0 */4 * * *`, timezone `UTC`
 
-#### Node 2a: RSS Feed -- CoinDesk
+#### Node 2a: RSS Feed: CoinDesk
 - **Type:** RSS Feed Trigger / HTTP Request
 - **Config:**
   - URL: `https://www.coindesk.com/arc/outboundfeeds/rss/`
   - Note: Filter for "Bittensor" or "TAO" in title/description post-fetch.
   - Continue On Fail: `true`
 
-#### Node 2b: RSS Feed -- The Block
+#### Node 2b: RSS Feed: The Block
 - **Type:** HTTP Request
 - **Config:**
   - URL: `https://www.theblock.co/rss.xml`
   - Continue On Fail: `true`
 
-#### Node 2c: RSS Feed -- CoinTelegraph
+#### Node 2c: RSS Feed: CoinTelegraph
 - **Type:** HTTP Request
 - **Config:**
   - URL: `https://cointelegraph.com/rss`
   - Continue On Fail: `true`
 
-#### Node 2d: RSS Feed -- DL News
+#### Node 2d: RSS Feed: DL News
 - **Type:** HTTP Request
 - **Config:**
   - URL: `https://www.dlnews.com/rss/`
@@ -1087,21 +1221,16 @@ Every 4 hours, scans for Bittensor ecosystem news via RSS feeds (and X API searc
     return true;
   });
 
-  // Check against already-processed items
-  const fs = require('fs');
-  const stateFile = ($env.LOG_FILE_PATH || '/data/n8n/dry-run-logs/') + 'news-monitor-state.json';
-  let state = {};
-  try {
-    state = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
-  } catch (e) {
-    state = { processed_urls: [] };
+  // Check against already-processed items using n8n static data (Cloud compatible)
+  const staticData = $getWorkflowStaticData('global');
+  if (!staticData.processed_urls) {
+    staticData.processed_urls = [];
   }
 
-  const newItems = unique.filter(item => !state.processed_urls.includes(item.url));
+  const newItems = unique.filter(item => !staticData.processed_urls.includes(item.url));
 
-  // Update state
-  state.processed_urls = [...state.processed_urls, ...newItems.map(i => i.url)].slice(-1000);
-  fs.writeFileSync(stateFile, JSON.stringify(state, null, 2));
+  // Update state (keep last 1000 URLs to stay within ~256KB static data limit)
+  staticData.processed_urls = [...staticData.processed_urls, ...newItems.map(i => i.url)].slice(-1000);
 
   if (newItems.length === 0) {
     return [{ json: { no_new_items: true } }];
@@ -1117,7 +1246,7 @@ Every 4 hours, scans for Bittensor ecosystem news via RSS feeds (and X API searc
   - True: Stop (nothing new)
   - False: Continue to scoring
 
-#### Node 5: Claude API -- Score and Draft Commentary
+#### Node 5: Claude API: Score and Draft Commentary
 - **Type:** HTTP Request (loop over items)
 - **Config:**
   - Method: `POST`
@@ -1180,48 +1309,46 @@ Every 4 hours, scans for Bittensor ecosystem news via RSS feeds (and X API searc
 - **Type:** Code (JavaScript)
 - **Config:**
   ```javascript
-  const fs = require('fs');
-  const draftsDir = $env.QUEUE_DRAFTS_PATH || '/data/voidai/queue/drafts/';
+  // Store draft in n8n static data and prepare for Discord notification (n8n Cloud compatible)
+  const staticData = $getWorkflowStaticData('global');
   const item = $input.first().json;
   const slug = item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 50);
   const date = new Date().toISOString().split('T')[0];
-  const filename = `news-${date}-${slug}.md`;
-  const filepath = `${draftsDir}${filename}`;
+  const draftId = `news-${date}-${slug}`;
 
-  const content = `---
-type: x-single
-account: "@v0idai"
-status: review
-created: ${new Date().toISOString()}
-source: workflow-4-ecosystem-news
-requires_human_review: true
-relevance_score: ${item.score}
-news_source: ${item.source}
-news_url: ${item.url}
----
+  if (!staticData.drafts) {
+    staticData.drafts = [];
+  }
 
-# News Commentary | ${item.title}
+  const draft = {
+    id: draftId,
+    type: 'x-single',
+    account: '@v0idai',
+    status: 'review',
+    created: new Date().toISOString(),
+    source: 'workflow-4-ecosystem-news',
+    requires_human_review: true,
+    relevance_score: item.score,
+    news_source: item.source,
+    news_url: item.url,
+    title: item.title,
+    commentary: item.commentary,
+    hashtags: item.hashtags,
+    reasoning: item.reasoning
+  };
 
-## Original Article
-- **Title:** ${item.title}
-- **Source:** ${item.source}
-- **URL:** ${item.url}
-- **Relevance Score:** ${item.score}/10
-- **Reasoning:** ${item.reasoning}
+  // Avoid duplicates for the same article
+  staticData.drafts = staticData.drafts.filter(d => d.id !== draftId);
+  staticData.drafts.push(draft);
 
-## Draft Tweet (${item.commentary.length} chars)
+  // Keep only last 50 drafts to stay within static data size limits
+  if (staticData.drafts.length > 50) {
+    staticData.drafts = staticData.drafts.slice(-50);
+  }
 
-${item.commentary}
-
-## Suggested Hashtags
-${item.hashtags.join(' ')}
-`;
-
-  fs.mkdirSync(draftsDir, { recursive: true });
-  fs.writeFileSync(filepath, content);
-
-  return [{ json: { status: 'drafted', file: filepath, score: item.score, title: item.title } }];
+  return [{ json: { status: 'drafted', draft_id: draftId, score: item.score, title: item.title } }];
   ```
+  **Note:** Drafts are stored in `$getWorkflowStaticData('global')` instead of the filesystem. See "n8n Cloud Compatibility Notes" above.
 
 #### Node 9: Discord Notification (batch summary)
 - **Type:** Code + HTTP Request
@@ -1298,50 +1425,31 @@ Runs daily at 7:00 AM ET. Reads the `queue/approved/` directory for content item
 - **Type:** Code (JavaScript)
 - **Config:**
   ```javascript
-  const fs = require('fs');
-  const path = require('path');
-  const approvedDir = $env.QUEUE_APPROVED_PATH || '/data/voidai/queue/approved/';
+  // Read approved items from n8n static data (n8n Cloud compatible)
+  // Drafts approved by Vew are stored in static data with status: 'approved'
+  const staticData = $getWorkflowStaticData('global');
 
-  let files = [];
-  try {
-    files = fs.readdirSync(approvedDir)
-      .filter(f => f.endsWith('.md'))
-      .map(f => {
-        const content = fs.readFileSync(path.join(approvedDir, f), 'utf8');
-
-        // Parse YAML frontmatter
-        const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
-        const frontmatter = {};
-        if (fmMatch) {
-          fmMatch[1].split('\n').forEach(line => {
-            const [key, ...val] = line.split(':');
-            if (key && val.length) {
-              frontmatter[key.trim()] = val.join(':').trim().replace(/^["']|["']$/g, '');
-            }
-          });
-        }
-
-        // Extract tweet text (content after frontmatter)
-        const bodyMatch = content.match(/---\n[\s\S]*?\n---\n([\s\S]*)/);
-        const body = bodyMatch ? bodyMatch[1].trim() : '';
-
-        return {
-          filename: f,
-          filepath: path.join(approvedDir, f),
-          frontmatter,
-          body,
-          account: frontmatter.account || '@v0idai',
-          type: frontmatter.type || 'x-single',
-          scheduled_date: frontmatter.scheduled_date || null,
-          priority: parseInt(frontmatter.priority || '5', 10)
-        };
-      });
-  } catch (e) {
-    return [{ json: { error: 'Could not read approved queue', details: e.message, items: [] } }];
+  if (!staticData.approved_items) {
+    staticData.approved_items = [];
   }
 
-  return [{ json: { items: files, count: files.length } }];
+  const items = staticData.approved_items.map(item => ({
+    id: item.id,
+    account: item.account || '@v0idai',
+    type: item.type || 'x-single',
+    scheduled_date: item.scheduled_date || null,
+    priority: parseInt(item.priority || '5', 10),
+    body: item.body || item.commentary || '',
+    source: item.source || 'unknown'
+  }));
+
+  if (items.length === 0) {
+    return [{ json: { no_items: true, items: [], count: 0 } }];
+  }
+
+  return [{ json: { items, count: items.length } }];
   ```
+  **Note:** Uses `$getWorkflowStaticData('global')` instead of reading the filesystem. The local file-based queue remains the source of truth for manual review. See "n8n Cloud Compatibility Notes" above.
 
 #### Node 3: Filter Today's Items
 - **Type:** Code (JavaScript)
@@ -1432,7 +1540,7 @@ Runs daily at 7:00 AM ET. Reads the `queue/approved/` directory for content item
 
   // Define time slots (UTC hours)
   const timeSlots = [
-    { hour: 14, minute: 0 },  // 9:00 AM ET (primary)
+    { hour: 14, minute: 0 },  // 10:00 AM ET (primary)
     { hour: 15, minute: 30 }, // 10:30 AM ET
     { hour: 17, minute: 0 },  // 12:00 PM ET
     { hour: 20, minute: 0 },  // 3:00 PM ET (secondary peak)
@@ -1468,33 +1576,27 @@ Runs daily at 7:00 AM ET. Reads the `queue/approved/` directory for content item
 - **Type:** Code (JavaScript)
 - **Config:**
   ```javascript
-  const fs = require('fs');
-  const logDir = $env.LOG_FILE_PATH || '/data/n8n/dry-run-logs/';
-  const date = new Date().toISOString().split('T')[0];
-  const logFile = `${logDir}workflow-5-schedule-${date}.json`;
-
+  // DRY_RUN log: prepare data for Discord notification (n8n Cloud compatible)
   const logEntry = {
     workflow: 'content-calendar-scheduler',
     timestamp: new Date().toISOString(),
     dry_run: true,
     scheduled_items: $input.first().json.items.map(item => ({
-      filename: item.filename,
+      id: item.id,
       account: item.account,
       type: item.type,
       scheduled_post_at: item.scheduled_post_at,
       preview: item.body?.slice(0, 100) + '...'
     })),
     deferred_items: $input.first().json.deferred.map(item => ({
-      filename: item.filename,
+      id: item.id,
       reason: item.deferred_reason
     }))
   };
 
-  fs.mkdirSync(logDir, { recursive: true });
-  fs.writeFileSync(logFile, JSON.stringify(logEntry, null, 2));
-
-  return [{ json: { status: 'schedule_logged', file: logFile } }];
+  return [{ json: { status: 'schedule_logged', ...logEntry } }];
   ```
+  **Note:** Output is sent to Discord via the next node rather than written to the filesystem. See "n8n Cloud Compatibility Notes" above.
 
 #### Node 8b: Schedule Posts (Production)
 - **Type:** Code + HTTP Request loop
@@ -1533,34 +1635,35 @@ Runs daily at 7:00 AM ET. Reads the `queue/approved/` directory for content item
 - **Type:** Code (JavaScript)
 - **Config:**
   ```javascript
-  const fs = require('fs');
-  const path = require('path');
-  const approvedDir = $env.QUEUE_APPROVED_PATH || '/data/voidai/queue/approved/';
-  const scheduledDir = $env.QUEUE_SCHEDULED_PATH || '/data/voidai/queue/scheduled/';
+  // Update item status in n8n static data (n8n Cloud compatible)
+  const staticData = $getWorkflowStaticData('global');
   const items = $input.first().json.items || $input.first().json.results || [];
 
-  fs.mkdirSync(scheduledDir, { recursive: true });
+  if (!staticData.scheduled_items) {
+    staticData.scheduled_items = [];
+  }
 
   for (const item of items) {
-    const src = path.join(approvedDir, item.filename);
-    const dest = path.join(scheduledDir, item.filename);
-
-    try {
-      // Read, update frontmatter, write to scheduled/
-      let content = fs.readFileSync(src, 'utf8');
-      content = content.replace(
-        /status: approved/,
-        `status: scheduled\nscheduled_post_at: ${item.scheduled_post_at}`
-      );
-      fs.writeFileSync(dest, content);
-      fs.unlinkSync(src); // Remove from approved/
-    } catch (e) {
-      // Log error but continue with other items
+    // Move from approved to scheduled in static data
+    if (staticData.approved_items) {
+      staticData.approved_items = staticData.approved_items.filter(a => a.id !== item.id);
     }
+
+    staticData.scheduled_items.push({
+      ...item,
+      status: 'scheduled',
+      scheduled_post_at: item.scheduled_post_at
+    });
+  }
+
+  // Keep only last 100 scheduled items
+  if (staticData.scheduled_items.length > 100) {
+    staticData.scheduled_items = staticData.scheduled_items.slice(-100);
   }
 
   return [{ json: { moved: items.length } }];
   ```
+  **Note:** Status transitions happen in `$getWorkflowStaticData('global')` instead of moving files between directories. See "n8n Cloud Compatibility Notes" above.
 
 #### Node 10: Discord Summary
 - **Type:** HTTP Request
@@ -1586,11 +1689,11 @@ Runs daily at 7:00 AM ET. Reads the `queue/approved/` directory for content item
 ### DRY_RUN Behavior
 
 When `DRY_RUN=true`:
-1. Approved queue is read and cadence rules are enforced.
+1. Approved queue (in static data) is read and cadence rules are enforced.
 2. Posting times are assigned.
-3. Full schedule is written to log file.
+3. Full schedule is sent to Discord via the DRY_RUN: Discord Log node.
 4. No API calls to posting services.
-5. Files are NOT moved from approved/ to scheduled/ (they stay for the next test run).
+5. Items are NOT moved from approved to scheduled in static data (they stay for the next test run).
 6. Discord summary notes "[DRY_RUN]" prefix.
 
 ### Testing Instructions
@@ -1623,13 +1726,17 @@ Daily scan of competitor activity (Project Rubicon / @gtaoventures, TaoFi, Tenso
 ### Node-by-Node Specification
 
 ```
-[Cron] -> [Parallel: X API Search, Taostats Competitor Subnets, RSS Search] -> [Claude API Summarize] -> [Discord DM to Vew]
+[Cron] -> [X API Search]              -\
+          [Taostats Competitor Subnets] --> [Merge (Wait For All)] -> [Claude API Summarize] -> [Discord DM to Vew]
+          [RSS Search]                 -/
 ```
+
+**Note:** The Merge node (mode: "Wait For All") collects all 3 data source responses before passing them to Claude. See "Merge Node Pattern: Wait For All" in the Environment Variables section.
 
 #### Node 1: Cron Trigger
 - **Config:** `0 8 * * *`, timezone `America/New_York`
 
-#### Node 2a: X API Search -- Competitors
+#### Node 2a: X API Search: Competitors
 - **Type:** HTTP Request
 - **Config:**
   - URL: `https://api.twitter.com/2/tweets/search/recent?query=(from:gtaoventures OR "Project Rubicon" OR "TaoFi" OR "Tensorplex") -is:retweet&max_results=50&tweet.fields=created_at,public_metrics`
@@ -1637,17 +1744,17 @@ Daily scan of competitor activity (Project Rubicon / @gtaoventures, TaoFi, Tenso
   - Continue On Fail: `true`
   - **Note:** Requires X API Basic ($200/mo). Disabled until Phase 3.
 
-#### Node 2b: Taostats -- Competitor Subnet Data
+#### Node 2b: Taostats: Competitor Subnet Data
 - **Type:** HTTP Request (multiple)
 - **Config:** Fetch subnet data for known competitor subnets.
   - URL: `{{ $env.TAOSTATS_API_BASE }}/subnet/latest?netuid={competitor_netuid}`
   - Repeat for each competitor subnet.
   - Continue On Fail: `true`
 
-#### Node 2c: RSS Search -- Competitors
+#### Node 2c: RSS Search: Competitors
 - **Type:** Same RSS feeds as Workflow 4, filtered for competitor keywords.
 
-#### Node 3: Claude API -- Summarize Competitor Activity
+#### Node 3: Claude API: Summarize Competitor Activity
 - **Type:** HTTP Request
 - **Config:**
   - URL: `https://api.anthropic.com/v1/messages`
@@ -1705,23 +1812,27 @@ Triggered when a new blog post is published. Reads the blog content, uses Claude
 ### Node-by-Node Specification
 
 ```
-[Webhook] -> [Claude API: Generate X Thread] -> [Claude API: Generate LinkedIn Post] -> [Claude API: Generate Discord Announcement] -> [Write All to Drafts] -> [Discord Notification]
+[Webhook] -> [Claude API: X Thread]       -\
+             [Claude API: LinkedIn Post]    --> [Merge (Wait For All)] -> [Write All to Drafts] -> [Discord Notification]
+             [Claude API: Discord Announce] -/
 ```
+
+**Note:** The Merge node (mode: "Wait For All") collects all 3 Claude API responses before passing them to the Write All to Drafts node. See "Merge Node Pattern: Wait For All" in the Environment Variables section.
 
 #### Node 1: Webhook Trigger
 - **Config:** `POST /blog-published`
 
-#### Node 2: Claude API -- X Thread (10-12 tweets)
+#### Node 2: Claude API: X Thread (10-12 tweets)
 - **Type:** HTTP Request
 - **Config:** Similar to Workflow 3 Node 4, but prompt is:
   "Convert this blog post into a 10-12 tweet X thread for @v0idai. First tweet is the hook. Each tweet under 280 chars. Include link to blog in tweet 2 or 3. End with CTA. Follow all VoidAI voice and compliance rules."
 
-#### Node 3: Claude API -- LinkedIn Post
+#### Node 3: Claude API: LinkedIn Post
 - **Type:** HTTP Request
 - **Config:** Prompt:
   "Convert this blog post into a LinkedIn post for VoidAI company page. Professional, thought-leadership tone. 200-400 words. Include blog link. Add relevant hashtags (#Bittensor #DeFi #CrossChain #Web3)."
 
-#### Node 4: Claude API -- Discord Announcement
+#### Node 4: Claude API: Discord Announcement
 - **Type:** HTTP Request
 - **Config:** Prompt:
   "Convert this blog post into a Discord announcement for #announcements channel. Casual but informative. Include blog link. Use Discord markdown formatting. Keep under 2000 characters."
@@ -1754,11 +1865,11 @@ Same as Workflows 3-4: always writes to drafts queue. Human review gate is the s
 - **Auth:** API key in header (`Authorization: {key}`)
 - **Free tier:** Available, rate limits apply
 - **Key endpoints used:**
-  - `GET /subnet/latest?netuid=106` -- SN106 subnet data
-  - `GET /dtao/pool/latest?netuid=106` -- SN106 dTAO pool data (alpha price, reserves)
-  - `GET /dtao/pool/history?netuid=106&period=7d` -- 7-day pool history
-  - `GET /validator/yield` -- Validator yield data
-  - `GET /account/latest?address={ss58}` -- Account data
+  - `GET /subnet/latest?netuid=106`: SN106 subnet data
+  - `GET /dtao/pool/latest?netuid=106`: SN106 dTAO pool data (alpha price, reserves)
+  - `GET /dtao/pool/history?netuid=106&period=7d`: 7-day pool history
+  - `GET /validator/yield`: Validator yield data
+  - `GET /account/latest?address={ss58}`: Account data
 - **Note:** Verify exact endpoint paths against Taostats API documentation. The paths above are based on common patterns. Use the `getTaostatsApiRoutes` MCP tool to get the canonical route list.
 
 ### CoinGecko API
@@ -1779,8 +1890,8 @@ Same as Workflows 3-4: always writes to drafts queue. Human review gate is the s
 
 - **Plan:** Basic ($200/mo)
 - **Key endpoints:**
-  - `POST /2/tweets` -- Post tweet
-  - `GET /2/tweets/search/recent` -- Search recent tweets
+  - `POST /2/tweets`: Post tweet
+  - `GET /2/tweets/search/recent`: Search recent tweets
 - **Auth:** OAuth 1.0a for posting, Bearer token for search
 
 ### OpenTweet (Phase 1-2 trial)
@@ -1829,10 +1940,10 @@ For each workflow:
 1. **Run all 5 workflows in sequence** (manual triggers).
 2. **Verify no conflicts:** Check that workflows don't interfere with each other's state files.
 3. **Full day simulation:**
-   - 7:00 AM: Workflow 5 (Content Calendar) runs -- verify it reads queue correctly.
-   - 9:00 AM: Workflow 1 (Daily Metrics) runs -- verify tweet is generated.
-   - Every 4 hours: Workflow 4 (News Monitor) runs -- verify items are scored.
-   - On demand: Workflow 2 (Bridge Alerts) fires on webhook -- verify alert is generated.
+   - 7:00 AM: Workflow 5 (Content Calendar) runs. Verify it reads queue correctly.
+   - 10:00 AM: Workflow 1 (Daily Metrics) runs. Verify tweet is generated.
+   - Every 4 hours: Workflow 4 (News Monitor) runs. Verify items are scored.
+   - On demand: Workflow 2 (Bridge Alerts) fires on webhook. Verify alert is generated.
 4. **Check resource usage:** Monitor n8n's execution logs for excessive API calls or long-running nodes.
 
 ### Phase 3: Go-Live Checklist
@@ -1868,13 +1979,13 @@ If anything goes wrong after go-live:
 
 | Slot | Workflow | Trigger | Critical? |
 |------|----------|---------|-----------|
-| 1 | Daily Metrics Post | Cron 9 AM ET daily | Yes |
+| 1 | Daily Metrics Post | Cron 10 AM ET daily | Yes |
 | 2 | Bridge Transaction Alerts | Webhook / Cron 15min | Yes |
 | 3 | Weekly Recap Thread | Cron Fri 2 PM ET | Yes |
 | 4 | Ecosystem News Monitor | Cron every 4 hours | Yes |
 | 5 | Content Calendar Scheduler | Cron 7 AM ET daily | Yes |
-| -- | Competitor Monitor | Cron 8 AM ET daily | Phase 3+ (swap slot) |
-| -- | Blog Distribution | Webhook | Phase 3+ (swap slot) |
+| 6* | Competitor Monitor | Cron 8 AM ET daily | Phase 3+ (swap slot) |
+| 7* | Blog Distribution | Webhook | Phase 3+ (swap slot) |
 
 **Swap strategy:** When upgrading beyond free tier, activate Workflows 6 and 7 first. If staying on free tier and needing Workflow 6 or 7, the most swappable slot is Workflow 4 (News Monitor), which can be run manually instead.
 
@@ -1885,3 +1996,4 @@ If anything goes wrong after go-live:
 | Date | Change |
 |------|--------|
 | 2026-03-15 | Initial creation. 7 workflows specified (5 active + 2 Phase 3+). |
+| 2026-03-15 | Post-audit updates: corrected DST/cron from 9 AM to 10 AM ET; added DRY_RUN fail-safe logic, n8n Cloud compatibility notes, Merge node (Wait For All) pattern documentation, credential setup checklist; fixed double-hyphen compliance violation in WF3. |

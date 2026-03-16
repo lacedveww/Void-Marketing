@@ -15,7 +15,7 @@
 | Cross-chain Bridge | Live | app.voidai.com/bridge-chains | Bittensor <> Solana/EVM bridge via Chainlink CCIP |
 | SN106 Staking | Live | app.voidai.com/stake | Subnet 106 staking and liquidity provisioning |
 | SDK | Live | @voidaisdk/bridge-sdk | Developer SDK for bridge integrations |
-| Lending Platform | Upcoming (~5 weeks) | TBD | DeFi lending for TAO ecosystem |
+| Lending Platform | Upcoming (target: late April 2026) | TBD | DeFi lending for TAO ecosystem |
 | Documentation | Live | docs.voidai.com | Developer and user documentation |
 
 ## Token / Asset
