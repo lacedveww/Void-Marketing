@@ -1,0 +1,313 @@
+{
+  "name": "VoidAI - Competitor Monitor [Phase 3+]",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Daily 8AM ET",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "notes": "Phase 3+ workflow. Daily competitor intelligence digest. DOES NOT POST PUBLICLY."
+    },
+    {
+      "parameters": {
+        "jsCode": "// EMERGENCY STOP CHECK\n// Must be the first code node in every workflow, right after the trigger.\n// Checks the EMERGENCY_STOP environment variable. If true, sends a\n// notification to Discord and halts the workflow (returns empty array).\n//\n// Referenced in: crisis.md, n8n-workflow-specs.md\n// Variable: EMERGENCY_STOP (Settings > Variables)\n\nconst emergencyStop = $env.EMERGENCY_STOP;\n\nif (emergencyStop === 'true' || emergencyStop === true) {\n  const workflowName = $workflow.name || 'Unknown Workflow';\n  const timestamp = new Date().toISOString();\n\n  const discordUrl = $env.DISCORD_WEBHOOK_URL;\n  if (discordUrl) {\n    try {\n      await fetch(discordUrl, {\n        method: 'POST',\n        headers: { 'Content-Type': 'application/json' },\n        body: JSON.stringify({\n          content: `**EMERGENCY STOP ACTIVE** | Workflow \"${workflowName}\" halted at ${timestamp}. No content was published. Set EMERGENCY_STOP=false in n8n variables to resume.`\n        })\n      });\n    } catch (e) {\n      // Discord notification failed, but we still halt.\n    }\n  }\n\n  return [];\n}\n\nreturn $input.all();"
+      },
+      "id": "emergency-stop-check",
+      "name": "Emergency Stop Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [125, 0],
+      "notes": "KILL SWITCH: Checks EMERGENCY_STOP env var. If true, notifies Discord and halts the workflow. Must be first node after trigger.",
+      "onError": "stopWorkflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "// PRE-POST EMERGENCY STOP CHECK\n// Second check right before sending intel digest to Discord.\n// Catches mid-execution activation of EMERGENCY_STOP.\n\nconst emergencyStop = $env.EMERGENCY_STOP;\n\nif (emergencyStop === 'true' || emergencyStop === true) {\n  return [];\n}\n\nreturn $input.all();"
+      },
+      "id": "emergency-stop-pre-post",
+      "name": "Emergency Stop Pre-Post",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1700, 150],
+      "notes": "KILL SWITCH: Second EMERGENCY_STOP check before Discord intel digest. Catches mid-execution stop activation.",
+      "onError": "stopWorkflow"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.twitter.com/2/tweets/search/recent",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "query", "value": "(from:gtaoventures OR \"Project Rubicon\" OR \"TaoFi\" OR \"Tensorplex\") -is:retweet" },
+            { "name": "max_results", "value": "50" },
+            { "name": "tweet.fields", "value": "created_at,public_metrics,author_id" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.X_API_BEARER_TOKEN }}" }
+          ]
+        },
+        "options": { "timeout": 15000 }
+      },
+      "id": "x-search-competitors",
+      "name": "X: Competitor Tweets",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [250, -50],
+      "continueOnFail": true,
+      "notes": "Search X for competitor activity. Requires X API Basic ($200/mo)."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.twitter.com/2/tweets/search/recent",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "query", "value": "(\"VoidAI\" OR \"@v0idai\" OR \"SN106\") -from:v0idai -is:retweet" },
+            { "name": "max_results", "value": "50" },
+            { "name": "tweet.fields", "value": "created_at,public_metrics,author_id" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.X_API_BEARER_TOKEN }}" }
+          ]
+        },
+        "options": { "timeout": 15000 }
+      },
+      "id": "x-search-mentions",
+      "name": "X: VoidAI Mentions",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [250, 50],
+      "continueOnFail": true,
+      "notes": "Track what people are saying about VoidAI. Useful for sentiment monitoring."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.TAOSTATS_API_BASE }}/subnet/latest",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "netuid", "value": "106" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "={{ $env.TAOSTATS_API_KEY }}" }
+          ]
+        },
+        "options": { "timeout": 15000 }
+      },
+      "id": "taostats-sn106",
+      "name": "Taostats: SN106",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [250, 150],
+      "continueOnFail": true,
+      "notes": "Our own subnet data for comparison."
+    },
+    {
+      "parameters": {
+        "mode": "append",
+        "options": {},
+        "numberInputs": 3
+      },
+      "id": "wait-for-all-apis",
+      "name": "Wait For All APIs",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [500, 50],
+      "notes": "SECURITY FIX: Wait for all 3 API responses before merging. Prevents Merge Intelligence from executing 3x (once per branch)."
+    },
+    {
+      "parameters": {
+        "jsCode": "const competitorTweets = $('X: Competitor Tweets').first().json;\nconst mentions = $('X: VoidAI Mentions').first().json;\nconst sn106 = $('Taostats: SN106').first().json;\n\nconst digest = {\n  competitor_tweets: competitorTweets?.data || [],\n  competitor_count: competitorTweets?.data?.length || 0,\n  voidai_mentions: mentions?.data || [],\n  mention_count: mentions?.data?.length || 0,\n  sn106_data: sn106 || {},\n  generated_at: new Date().toISOString()\n};\n\nreturn [{ json: digest }];"
+      },
+      "id": "merge-intel",
+      "name": "Merge Intelligence",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [750, 50]
+    },
+    {
+      "parameters": {
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nif (!staticData.intel_digests) staticData.intel_digests = {};\n\nconst data = $input.first().json;\nconst date = new Date().toISOString().split('T')[0];\nconst dateDisplay = new Date().toLocaleDateString('en-US', {\n  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',\n  timeZone: 'America/New_York'\n});\n\nstaticData.intel_digests[date] = {\n  type: 'competitor-intel',\n  status: 'collected',\n  collected_at: new Date().toISOString(),\n  data: {\n    competitor_tweets: data.competitor_tweets,\n    competitor_count: data.competitor_count,\n    voidai_mentions: data.voidai_mentions,\n    mention_count: data.mention_count,\n    sn106_data: data.sn106_data\n  }\n};\n\n// Cleanup: keep last 14 days\nconst keys = Object.keys(staticData.intel_digests).sort();\nif (keys.length > 14) {\n  keys.slice(0, keys.length - 14).forEach(k => delete staticData.intel_digests[k]);\n}\n\nreturn [{ json: {\n  message: `**Competitor Intel Data Collected | ${dateDisplay}**\\n\\nCompetitor tweets found: ${data.competitor_count}\\nVoidAI mentions found: ${data.mention_count}\\n\\nRaw data stored in workflow static data. Review in n8n execution log for details.`,\n  date: dateDisplay,\n  competitor_count: data.competitor_count,\n  mention_count: data.mention_count\n} }];"
+      },
+      "id": "store-intel-data",
+      "name": "Store Intel Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1000, 50],
+      "notes": "Store raw competitor intelligence data in workflow static data. No Claude API needed. Review raw data in n8n execution logs."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "dry-run",
+              "leftValue": "={{ $env.DRY_RUN }}",
+              "rightValue": "false",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "dry-run-check",
+      "name": "DRY_RUN?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1500, 50],
+      "notes": "FAIL-SAFE: Only send to Discord when DRY_RUN is strictly 'false'. Any other value (true, unset, typo) routes to dry-run log."
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst date = new Date().toISOString();\n\nreturn [{ json: {\n  status: 'dry_run',\n  timestamp: date,\n  message: 'Competitor monitor data collected but not delivered (DRY_RUN is not false)',\n  competitor_count: data.competitor_count || 0,\n  mention_count: data.mention_count || 0\n} }];"
+      },
+      "id": "dry-run-log",
+      "name": "DRY_RUN Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1750, -50],
+      "notes": "Log dry-run details. Output sent to Discord dry-run channel for visibility instead of filesystem."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"**[DRY RUN] Competitor Monitor**\\n\\nDigest preview: {{ $json.digest_preview }}\\n\\nDRY_RUN is not set to 'false'. Digest not delivered to intel channel.\"\n}",
+        "options": {}
+      },
+      "id": "dry-run-discord",
+      "name": "Discord: DRY_RUN Log",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2000, -50],
+      "notes": "Send dry-run log to Discord instead of writing to filesystem."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"{{ $json.message }}\"\n}",
+        "options": {}
+      },
+      "id": "discord-dm",
+      "name": "Discord: Intel Digest",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1750, 150],
+      "notes": "Send competitor digest to private Discord channel. NEVER posts publicly."
+    }
+  ],
+  "connections": {
+    "Daily 8AM ET": {
+      "main": [
+        [{ "node": "Emergency Stop Check", "type": "main", "index": 0 }]
+      ]
+    },
+    "Emergency Stop Check": {
+      "main": [
+        [
+          { "node": "X: Competitor Tweets", "type": "main", "index": 0 },
+          { "node": "X: VoidAI Mentions", "type": "main", "index": 0 },
+          { "node": "Taostats: SN106", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "X: Competitor Tweets": {
+      "main": [
+        [{ "node": "Wait For All APIs", "type": "main", "index": 0 }]
+      ]
+    },
+    "X: VoidAI Mentions": {
+      "main": [
+        [{ "node": "Wait For All APIs", "type": "main", "index": 1 }]
+      ]
+    },
+    "Taostats: SN106": {
+      "main": [
+        [{ "node": "Wait For All APIs", "type": "main", "index": 2 }]
+      ]
+    },
+    "Wait For All APIs": {
+      "main": [
+        [{ "node": "Merge Intelligence", "type": "main", "index": 0 }]
+      ]
+    },
+    "Merge Intelligence": {
+      "main": [
+        [{ "node": "Store Intel Data", "type": "main", "index": 0 }]
+      ]
+    },
+    "Store Intel Data": {
+      "main": [
+        [{ "node": "DRY_RUN?", "type": "main", "index": 0 }]
+      ]
+    },
+    "DRY_RUN?": {
+      "main": [
+        [{ "node": "Emergency Stop Pre-Post", "type": "main", "index": 0 }],
+        [{ "node": "DRY_RUN Log", "type": "main", "index": 0 }]
+      ]
+    },
+    "Emergency Stop Pre-Post": {
+      "main": [
+        [{ "node": "Discord: Intel Digest", "type": "main", "index": 0 }]
+      ]
+    },
+    "DRY_RUN Log": {
+      "main": [
+        [{ "node": "Discord: DRY_RUN Log", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/New_York",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  },
+  "staticData": null,
+  "tags": [
+    { "name": "competitor" },
+    { "name": "intelligence" },
+    { "name": "phase-3" }
+  ],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "voidai-marketing"
+  }
+}

@@ -1,0 +1,355 @@
+{
+  "name": "VoidAI - Weekly Recap Thread",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 14 * * 5"
+            }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Friday 2PM ET",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "notes": "Trigger: Friday 2:00 PM ET. Set n8n timezone to America/New_York."
+    },
+    {
+      "parameters": {
+        "jsCode": "// EMERGENCY STOP CHECK\n// Must be the first code node in every workflow, right after the trigger.\n// Checks the EMERGENCY_STOP environment variable. If true, sends a\n// notification to Discord and halts the workflow (returns empty array).\n//\n// Referenced in: crisis.md, n8n-workflow-specs.md\n// Variable: EMERGENCY_STOP (Settings > Variables)\n\nconst emergencyStop = $env.EMERGENCY_STOP;\n\nif (emergencyStop === 'true' || emergencyStop === true) {\n  const workflowName = $workflow.name || 'Unknown Workflow';\n  const timestamp = new Date().toISOString();\n\n  const discordUrl = $env.DISCORD_WEBHOOK_URL;\n  if (discordUrl) {\n    try {\n      await fetch(discordUrl, {\n        method: 'POST',\n        headers: { 'Content-Type': 'application/json' },\n        body: JSON.stringify({\n          content: `**EMERGENCY STOP ACTIVE** | Workflow \"${workflowName}\" halted at ${timestamp}. No content was published. Set EMERGENCY_STOP=false in n8n variables to resume.`\n        })\n      });\n    } catch (e) {\n      // Discord notification failed, but we still halt.\n    }\n  }\n\n  return [];\n}\n\nreturn $input.all();"
+      },
+      "id": "emergency-stop-check",
+      "name": "Emergency Stop Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [125, 0],
+      "notes": "KILL SWITCH: Checks EMERGENCY_STOP env var. If true, notifies Discord and halts the workflow. Must be first node after trigger.",
+      "onError": "stopWorkflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "// PRE-POST EMERGENCY STOP CHECK\n// Second check right before writing drafts and sending Discord notifications.\n// Catches mid-execution activation of EMERGENCY_STOP.\n\nconst emergencyStop = $env.EMERGENCY_STOP;\n\nif (emergencyStop === 'true' || emergencyStop === true) {\n  return [];\n}\n\nreturn $input.all();"
+      },
+      "id": "emergency-stop-pre-post",
+      "name": "Emergency Stop Pre-Post",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1150, 150],
+      "notes": "KILL SWITCH: Second EMERGENCY_STOP check before writing data summary. Catches mid-execution stop activation.",
+      "onError": "stopWorkflow"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.TAOSTATS_API_BASE }}/dtao/pool/history",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "netuid", "value": "106" },
+            { "name": "period", "value": "7d" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "={{ $env.TAOSTATS_API_KEY }}" }
+          ]
+        },
+        "options": { "timeout": 30000 }
+      },
+      "id": "taostats-7d",
+      "name": "Taostats 7d History",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [250, -150],
+      "continueOnFail": true,
+      "notes": "SN106 pool history for the past 7 days."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.COINGECKO_API_BASE }}/coins/bittensor/market_chart",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "vs_currency", "value": "usd" },
+            { "name": "days", "value": "7" }
+          ]
+        },
+        "options": { "timeout": 30000 }
+      },
+      "id": "coingecko-tao-7d",
+      "name": "CoinGecko TAO 7d",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [250, -50],
+      "continueOnFail": true,
+      "notes": "TAO price chart data for the past 7 days."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.COINGECKO_API_BASE }}/coins/liquidity-provisioning/market_chart",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "vs_currency", "value": "usd" },
+            { "name": "days", "value": "7" }
+          ]
+        },
+        "options": { "timeout": 30000 }
+      },
+      "id": "coingecko-sn106-7d",
+      "name": "CoinGecko SN106 7d",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [250, 50],
+      "continueOnFail": true,
+      "notes": "SN106 alpha token price chart for the past 7 days."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.BRIDGE_MONITOR_URL }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "period", "value": "7d" },
+            { "name": "aggregate", "value": "true" }
+          ]
+        },
+        "options": { "timeout": 15000 }
+      },
+      "id": "bridge-volume",
+      "name": "Bridge Volume 7d",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [250, 150],
+      "continueOnFail": true,
+      "notes": "Weekly bridge volume from Tracker/FastAPI. May not be available yet."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.github.com/orgs/{{ $env.GITHUB_ORG }}/repos?per_page=100&sort=pushed",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.GITHUB_TOKEN }}" }
+          ]
+        },
+        "options": { "timeout": 15000 }
+      },
+      "id": "github-repos",
+      "name": "GitHub Repos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [250, 250],
+      "continueOnFail": true,
+      "notes": "Fetch repo list to count active repos in last 7 days."
+    },
+    {
+      "parameters": {
+        "mode": "append",
+        "numberInputs": 5,
+        "options": {}
+      },
+      "id": "wait-for-all",
+      "name": "Wait For All APIs",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [500, 50],
+      "notes": "Wait for all 5 parallel HTTP requests to complete before proceeding. Uses append mode with 5 inputs so the node waits for data on every branch."
+    },
+    {
+      "parameters": {
+        "jsCode": "const taostats = $('Taostats 7d History').first().json;\nconst taoPrices = $('CoinGecko TAO 7d').first().json;\nconst alphaPrices = $('CoinGecko SN106 7d').first().json;\nconst bridge = $('Bridge Volume 7d').first().json;\nconst repos = $('GitHub Repos').first().json;\n\nlet taoWeeklyChange = 'N/A';\nif (taoPrices?.prices?.length >= 2) {\n  const start = taoPrices.prices[0][1];\n  const end = taoPrices.prices[taoPrices.prices.length - 1][1];\n  taoWeeklyChange = ((end - start) / start * 100).toFixed(1);\n}\n\nlet alphaWeeklyChange = 'N/A';\nif (alphaPrices?.prices?.length >= 2) {\n  const start = alphaPrices.prices[0][1];\n  const end = alphaPrices.prices[alphaPrices.prices.length - 1][1];\n  alphaWeeklyChange = ((end - start) / start * 100).toFixed(1);\n}\n\nlet activeRepos = 'N/A';\nif (Array.isArray(repos)) {\n  const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();\n  activeRepos = repos.filter(r => r.pushed_at > oneWeekAgo && !r.fork).length;\n}\n\nconst weekData = {\n  tao_current_price: taoPrices?.prices?.length ? taoPrices.prices[taoPrices.prices.length - 1][1] : 'N/A',\n  tao_weekly_change_pct: taoWeeklyChange,\n  alpha_current_price: alphaPrices?.prices?.length ? alphaPrices.prices[alphaPrices.prices.length - 1][1] : 'N/A',\n  alpha_weekly_change_pct: alphaWeeklyChange,\n  bridge_total_tao: bridge?.total_tao_bridged ?? 'N/A',\n  bridge_tx_count: bridge?.transaction_count ?? 'N/A',\n  bridge_unique_wallets: bridge?.unique_wallets ?? 'N/A',\n  bridge_chains: bridge?.chains ?? {},\n  github_active_repos: activeRepos,\n  sn106_pool_data: taostats ?? {},\n  week_ending: new Date().toLocaleDateString('en-US', {\n    year: 'numeric', month: 'long', day: 'numeric',\n    timeZone: 'America/New_York'\n  })\n};\n\nreturn [{ json: weekData }];"
+      },
+      "id": "merge-all",
+      "name": "Merge All Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 50],
+      "notes": "Merge all 7-day data sources into a single object for the data summary."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "dry-run-check",
+              "leftValue": "={{ $env.DRY_RUN }}",
+              "rightValue": "false",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "dry-run-check",
+      "name": "DRY_RUN?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [900, 50],
+      "notes": "Safe default: DRY_RUN must be strictly 'false' to proceed. Any other value (true, undefined, empty) routes to dry-run log."
+    },
+    {
+      "parameters": {
+        "jsCode": "// DRY_RUN log: prepare data summary for Discord notification\nconst data = $input.first().json;\n\nconst summary = [\n  `TAO: $${data.tao_current_price} (${data.tao_weekly_change_pct}% weekly)`,\n  `Alpha: $${data.alpha_current_price} (${data.alpha_weekly_change_pct}% weekly)`,\n  `Bridge: ${data.bridge_total_tao} TAO bridged`,\n  `GitHub: ${data.github_active_repos} active repos`,\n].join('\\n');\n\nreturn [{ json: { status: 'dry_run', summary, week_ending: data.week_ending, raw_data: data } }];"
+      },
+      "id": "dry-run-log",
+      "name": "DRY_RUN Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1150, -50],
+      "notes": "Prepare dry-run data summary for Discord notification. No filesystem writes for n8n Cloud compatibility."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"**[DRY_RUN] Weekly Recap Data Collected**\\nWeek ending: {{ $json.week_ending }}\\n\\nData summary:\\n```{{ $json.summary }}```\\n\\nData collection only. Run /generate-thread to create content.\"\n}",
+        "options": {}
+      },
+      "id": "dry-run-discord",
+      "name": "DRY_RUN: Discord Log",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1400, -50],
+      "notes": "Send dry-run data summary to Discord for review."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Write data summary to static data for later content generation.\n// No Claude API call. Content generation happens manually via /generate-thread.\nconst data = $input.first().json;\nconst date = new Date().toISOString().split('T')[0];\nconst collectedAt = new Date().toISOString();\n\nconst dataSummary = {\n  type: 'weekly-recap-data',\n  status: 'pending_content_generation',\n  collected_at: collectedAt,\n  data: data,\n  content_brief: 'Generate a weekly recap thread from this data using /generate-thread'\n};\n\n// Store in static data for retrieval\nconst staticData = $getWorkflowStaticData('global');\nif (!staticData.drafts) {\n  staticData.drafts = {};\n}\nstaticData.drafts[`weekly-recap-${date}`] = dataSummary;\n\n// Clean up old entries (keep last 4 weeks)\nconst draftKeys = Object.keys(staticData.drafts).sort();\nif (draftKeys.length > 4) {\n  for (const oldKey of draftKeys.slice(0, draftKeys.length - 4)) {\n    delete staticData.drafts[oldKey];\n  }\n}\n\n// Build a human-readable metrics preview for Discord\nconst metricsPreview = [\n  `TAO: $${data.tao_current_price} (${data.tao_weekly_change_pct}% weekly)`,\n  `Alpha: $${data.alpha_current_price} (${data.alpha_weekly_change_pct}% weekly)`,\n  `Bridge: ${data.bridge_total_tao} TAO bridged, ${data.bridge_tx_count} txns, ${data.bridge_unique_wallets} wallets`,\n  `GitHub: ${data.github_active_repos} active repos`\n].join('\\n');\n\nreturn [{\n  json: {\n    status: 'data_collected',\n    draft_key: `weekly-recap-${date}`,\n    week_ending: data.week_ending,\n    metrics_preview: metricsPreview\n  }\n}];"
+      },
+      "id": "write-data-summary",
+      "name": "Write Data Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1400, 150],
+      "notes": "Store collected metrics in n8n static data (n8n Cloud compatible). No Claude API call. Run /generate-thread manually to create content."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"**Weekly Recap: Data Collected**\\n\\nWeek ending: {{ $json.week_ending }}\\nDraft key: `{{ $json.draft_key }}`\\n\\nKey metrics:\\n```{{ $json.metrics_preview }}```\\n\\nRun `/generate-thread` in Claude Code to create the recap thread from this data.\\n\\n_No content was generated automatically. Human content creation required._\"\n}",
+        "options": {}
+      },
+      "id": "discord-data-ready",
+      "name": "Discord: Data Ready",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1650, 150],
+      "notes": "Notify that weekly data is collected and ready for manual content generation via /generate-thread."
+    }
+  ],
+  "connections": {
+    "Friday 2PM ET": {
+      "main": [
+        [{ "node": "Emergency Stop Check", "type": "main", "index": 0 }]
+      ]
+    },
+    "Emergency Stop Check": {
+      "main": [
+        [
+          { "node": "Taostats 7d History", "type": "main", "index": 0 },
+          { "node": "CoinGecko TAO 7d", "type": "main", "index": 0 },
+          { "node": "CoinGecko SN106 7d", "type": "main", "index": 0 },
+          { "node": "Bridge Volume 7d", "type": "main", "index": 0 },
+          { "node": "GitHub Repos", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Taostats 7d History": {
+      "main": [
+        [{ "node": "Wait For All APIs", "type": "main", "index": 0 }]
+      ]
+    },
+    "CoinGecko TAO 7d": {
+      "main": [
+        [{ "node": "Wait For All APIs", "type": "main", "index": 1 }]
+      ]
+    },
+    "CoinGecko SN106 7d": {
+      "main": [
+        [{ "node": "Wait For All APIs", "type": "main", "index": 2 }]
+      ]
+    },
+    "Bridge Volume 7d": {
+      "main": [
+        [{ "node": "Wait For All APIs", "type": "main", "index": 3 }]
+      ]
+    },
+    "GitHub Repos": {
+      "main": [
+        [{ "node": "Wait For All APIs", "type": "main", "index": 4 }]
+      ]
+    },
+    "Wait For All APIs": {
+      "main": [
+        [{ "node": "Merge All Data", "type": "main", "index": 0 }]
+      ]
+    },
+    "Merge All Data": {
+      "main": [
+        [{ "node": "DRY_RUN?", "type": "main", "index": 0 }]
+      ]
+    },
+    "DRY_RUN?": {
+      "main": [
+        [{ "node": "Emergency Stop Pre-Post", "type": "main", "index": 0 }],
+        [{ "node": "DRY_RUN Log", "type": "main", "index": 0 }]
+      ]
+    },
+    "DRY_RUN Log": {
+      "main": [
+        [{ "node": "DRY_RUN: Discord Log", "type": "main", "index": 0 }]
+      ]
+    },
+    "Emergency Stop Pre-Post": {
+      "main": [
+        [{ "node": "Write Data Summary", "type": "main", "index": 0 }]
+      ]
+    },
+    "Write Data Summary": {
+      "main": [
+        [{ "node": "Discord: Data Ready", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/New_York",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  },
+  "staticData": null,
+  "tags": [
+    { "name": "weekly" },
+    { "name": "thread" },
+    { "name": "requires-review" },
+    { "name": "data-collection" }
+  ],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "voidai-marketing"
+  }
+}

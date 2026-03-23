@@ -1,0 +1,82 @@
+[
+  {
+    "post_id": "mock-metrics-001",
+    "content_preview": "TAO at $425. SN106 emissions holding steady at 12.5 TAO/day. 42 bridge transactions in 24h.",
+    "engagement_rate_pct": 2.66,
+    "hook_type": "data-lead",
+    "format": "metrics-update",
+    "pillar": "bridge-build",
+    "engagement": {
+      "likes": 47,
+      "retweets": 12,
+      "replies": 8,
+      "bookmarks": 15,
+      "views": 3200,
+      "quotes": 3
+    }
+  },
+  {
+    "post_id": "mock-defi-005",
+    "content_preview": "VoidAI bridge now processes $125K daily volume across 4 chains.",
+    "engagement_rate_pct": 2.57,
+    "hook_type": "data-lead",
+    "format": "metrics-update",
+    "pillar": "bridge-build",
+    "engagement": {
+      "likes": 31,
+      "retweets": 8,
+      "replies": 4,
+      "bookmarks": 9,
+      "views": 2100,
+      "quotes": 2
+    }
+  },
+  {
+    "post_id": "mock-thread-002",
+    "content_preview": "SN106 just crossed 50 validators. Here is what that means for TAO liquidity.",
+    "engagement_rate_pct": 2.27,
+    "hook_type": "milestone",
+    "format": "thread",
+    "pillar": "ecosystem-intelligence",
+    "engagement": {
+      "likes": 89,
+      "retweets": 34,
+      "replies": 22,
+      "bookmarks": 41,
+      "views": 8500,
+      "quotes": 7
+    }
+  },
+  {
+    "post_id": "mock-news-003",
+    "content_preview": "Bittensor crosses 100 active subnets. SN106 liquidity provisioning has been live since May 2025.",
+    "engagement_rate_pct": 2.17,
+    "hook_type": "news-commentary",
+    "format": "single-news",
+    "pillar": "ecosystem-intelligence",
+    "engagement": {
+      "likes": 23,
+      "retweets": 5,
+      "replies": 3,
+      "bookmarks": 7,
+      "views": 1800,
+      "quotes": 1
+    }
+  },
+  {
+    "post_id": "mock-teaser-004",
+    "content_preview": "What if you could borrow against your TAO without selling? Something is coming to SN106.",
+    "engagement_rate_pct": 2.15,
+    "hook_type": "curiosity-gap",
+    "format": "teaser",
+    "pillar": "lending-teaser",
+    "engagement": {
+      "likes": 112,
+      "retweets": 45,
+      "replies": 31,
+      "bookmarks": 67,
+      "views": 12400,
+      "quotes": 11
+    }
+  }
+]

@@ -1,0 +1,75 @@
+{
+  "total_posts_analyzed": 5,
+  "avg_engagement_rate_pct": 2.36,
+  "best_performing_post": "mock-teaser-004",
+  "best_engagement_rate": 2.15,
+  "best_raw_engagement": 266,
+  "worst_performing_post": "mock-news-003",
+  "worst_engagement_rate": 2.17,
+  "total_likes": 302,
+  "total_retweets": 104,
+  "total_replies": 68,
+  "total_views": 28000,
+  "by_pillar": {
+    "bridge-build": {
+      "posts": 2,
+      "avg_engagement_rate": 2.62,
+      "total_views": 5300
+    },
+    "ecosystem-intelligence": {
+      "posts": 2,
+      "avg_engagement_rate": 2.22,
+      "total_views": 10300
+    },
+    "lending-teaser": {
+      "posts": 1,
+      "avg_engagement_rate": 2.15,
+      "total_views": 12400
+    }
+  },
+  "by_content_type": {
+    "single": {
+      "posts": 4,
+      "avg_engagement_rate": 2.39
+    },
+    "thread": {
+      "posts": 1,
+      "avg_engagement_rate": 2.27
+    }
+  },
+  "by_hook_type": {
+    "data-lead": {
+      "posts": 2,
+      "avg_engagement_rate": 2.62
+    },
+    "milestone": {
+      "posts": 1,
+      "avg_engagement_rate": 2.27
+    },
+    "news-commentary": {
+      "posts": 1,
+      "avg_engagement_rate": 2.17
+    },
+    "curiosity-gap": {
+      "posts": 1,
+      "avg_engagement_rate": 2.15
+    }
+  },
+  "top_hooks": [
+    "Data-lead hooks (metrics first) averaged 2.62% engagement",
+    "Curiosity-gap hooks drove highest raw engagement (266 interactions on 12.4K views)",
+    "Milestone hooks performed well for threads (2.27% on 8.5K views)"
+  ],
+  "patterns": [
+    "Teaser content with curiosity gaps gets 4x the views of standard metrics posts",
+    "Threads outperform singles on raw engagement but have lower engagement rate",
+    "Data-lead hooks consistently hit above baseline engagement rate",
+    "Bridge-build pillar has highest engagement rate, ecosystem-intelligence has highest reach"
+  ],
+  "recommendations": [
+    "REPEAT: curiosity-gap hooks for product teasers (highest views and raw engagement)",
+    "REPEAT: data-lead hooks for metrics posts (highest engagement rate)",
+    "TEST: combine data-lead hook with thread format",
+    "AVOID: pure news commentary without VoidAI angle (lowest engagement)"
+  ]
+}
