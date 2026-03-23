@@ -69,6 +69,7 @@ fi
 METRICS_DATA=$(cat "$METRICS_FILE")
 log "Loaded metrics from $METRICS_FILE"
 
+<<<<<<< HEAD
 # Load performance summary (feedback loop: learn from past engagement data)
 PERFORMANCE_SUMMARY_FILE="$PROJECT_ROOT/companies/voidai/automations/data/performance-summary.json"
 TOP_PERFORMERS_FILE="$PROJECT_ROOT/companies/voidai/automations/data/top-performers.json"
@@ -101,6 +102,8 @@ PERFORMANCE FEEDBACK: No engagement data available yet. Use default voice and ho
 "
 fi
 
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 # Load voice rules
 VOICE_FILE="$COMPANY_DIR/voice.md"
 if [[ ! -f "$VOICE_FILE" ]]; then
@@ -190,8 +193,11 @@ FORMATTING RULES:
 - Use Bittensor-native terminology: subnet, alpha token, dTAO, SN106, emissions, metagraph.
 - Use DeFi terminology: TVL, bridge volume, liquidity depth.
 
+<<<<<<< HEAD
 $PERFORMANCE_CONTEXT
 
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 DAILY METRICS DATA:
 $METRICS_DATA
 

@@ -101,6 +101,7 @@ This file is the self-improving feedback loop for VoidAI's brand voice. After ev
 
 ---
 
+<<<<<<< HEAD
 ## Automated Feedback Loop Integration
 
 This section documents how the analytics feedback loop automatically informs and updates voice learnings. This is the key Larry/OpenClaw playbook insight: content improves by learning from its own performance data, not just from static rules.
@@ -184,6 +185,8 @@ The Friday 4PM ET cron job should generate an entry using this format and append
 
 ---
 
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 ## Engagement Rate Baselines
 
 *Initial baselines. Update after first 2 weeks of posting with real data.*

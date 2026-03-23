@@ -4,7 +4,10 @@
 
 - **Company name**: VoidAI
 - **One-liner**: "The economic infrastructure layer that connects Bittensor's intelligence to the world's liquidity."
+<<<<<<< HEAD
 - **Tagline placement**: This one-liner MUST appear in: (1) @v0idai X bio, (2) pinned tweet on @v0idai, (3) @v0idai banner image, (4) the opening line of any major announcement thread, (5) LinkedIn company description. Audit quarterly to ensure consistency across all placements. If the one-liner is ever updated, update ALL placements within 24 hours.
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 - **Industry**: Crypto / DeFi / Bittensor
 - **Org**: github.com/v0idai
 - **Repo count**: 34 total (2 public: SN106, SubnetsBot; 32 private)
@@ -65,4 +68,7 @@
 |------|--------|-------------|
 | 2026-03-13 | Initial company config extracted from CLAUDE.md | Vew |
 | 2026-03-13 | Added docs.voidai.com to product table (config audit remediation) | Vew |
+<<<<<<< HEAD
 | 2026-03-22 | Added tagline placement requirements (bio, pinned tweet, banner, announcements, LinkedIn) per X Playbook tip 9 | Vew |
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b

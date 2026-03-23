@@ -9,6 +9,7 @@
 | Alpha & Education | 25% | Technical deep-dives, staking guides, LP tutorials, yield comparisons, "how VoidAI works" |
 | Community & Culture | 10% | Memes, community milestones, partner celebrations, Spaces, AMAs |
 
+<<<<<<< HEAD
 ## Audience Personas
 
 VoidAI's content must speak to specific audiences, not a generic "crypto audience." Each persona has different motivations, knowledge levels, and content needs. Map every piece of content to at least one primary persona.
@@ -73,6 +74,8 @@ VoidAI's content must speak to specific audiences, not a generic "crypto audienc
 | Degens & Speculators | Fanpage satellite, Meme satellite | Bittensor Ecosystem satellite |
 | Builders & Developers | @v0idai (main) | AI x Crypto satellite |
 
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 ## Pillar Descriptions
 
 ### Bridge & Build (40%)
@@ -88,9 +91,12 @@ Positioning VoidAI as an informed participant in the Bittensor ecosystem, not ju
 
 **Best formats**: Data threads, subnet spotlights, emissions analysis posts, weekly ecosystem recaps
 **Key topics**: Subnet rankings and mindshare, dTAO flow analysis, cross-chain liquidity trends, Bittensor network upgrades, halving impact analysis
+<<<<<<< HEAD
 **High-priority content topics (March 2026):**
 - Covenant-72B: largest decentralized LLM training run (72B params, ~1.1T tokens on SN3). See `research/covenant-72b-decentralized-training.md`
 - On-device AI trend (Qwen3.5 35B on iPhone, Perplexity local AI) and narrative synergy with Bittensor's decentralized approach. See `research/on-device-ai-decentralized-narrative.md`
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 
 ### Alpha & Education (25%)
 
@@ -117,6 +123,7 @@ Light touch, high engagement. Memes, polls, community celebrations. This pillar 
 | AI x Crypto | 20% | 40% | 30% | 10% |
 | Meme / Culture | 10% | 20% | 0% | 70% |
 
+<<<<<<< HEAD
 ## Content Experimentation by Pillar
 
 Each pillar should run at least one A/B experiment per week. The content experimentation loop (see `automations/pipeline-architecture.md` Section 13) defines the full process. Here are pillar-specific experiment priorities:
@@ -130,6 +137,8 @@ Each pillar should run at least one A/B experiment per week. The content experim
 
 Track results in `brand/voice-learnings.md`. After 4+ data points per variant, declare a winner and update the pillar's "Best formats" guidance above.
 
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 ## Anchor Metrics (Repeat Across All Content)
 
 Always reference these numbers when available (pull latest data from `companies/voidai/metrics.md`):
@@ -147,5 +156,8 @@ Always reference these numbers when available (pull latest data from `companies/
 | Date | Change | Approved by |
 |------|--------|-------------|
 | 2026-03-13 | Initial pillars config extracted from CLAUDE.md | Vew |
+<<<<<<< HEAD
 | 2026-03-22 | Added 5 audience personas (validators/miners, TAO holders/delegators, DeFi users, degens, builders) with pillar mapping and account routing per X Playbook tip 7 | Vew |
 | 2026-03-22 | Added high-priority content topics to Ecosystem Intelligence (Covenant-72B, on-device AI), added Content Experimentation by Pillar section with per-pillar A/B test priorities | Claude Code |
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b

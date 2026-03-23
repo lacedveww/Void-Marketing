@@ -11,6 +11,7 @@ Activate this protocol immediately if ANY of the following occur:
 - Competitor attack or disinformation campaign targeting VoidAI
 - Leaked internal documents or architecture details
 
+<<<<<<< HEAD
 ## Proactive Communication Triggers (Don't Wait for the Danger Zone)
 
 These are NOT crises but early warning signs that require increased communication before they become crises. The goal: never let the narrative get away from VoidAI.
@@ -58,6 +59,8 @@ These are NOT crises but early warning signs that require increased communicatio
 
 ---
 
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 ## Immediate Response (First 30 Minutes)
 
 1. **ACTIVATE THE KILL SWITCH** (see Technical Kill Switch below). Target: under 60 seconds.
@@ -260,4 +263,7 @@ Follow these steps in order. Do not skip steps. Do not rush.
 |------|--------|-------------|
 | 2026-03-15 | Added Technical Kill Switch (EMERGENCY_STOP), activation procedure, recovery procedure, JS code node spec | Vew |
 | 2026-03-13 | Initial crisis protocol extracted from CLAUDE.md (config audit remediation) | Vew |
+<<<<<<< HEAD
 | 2026-03-22 | Added Proactive Communication Triggers: SN106 ranking drop, emissions decline, extended quiet period per X Playbook tip 5 | Vew |
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b

@@ -1,7 +1,11 @@
 # VoidAI Marketing Pipeline Architecture
 
 **Status:** CURRENT
+<<<<<<< HEAD
 **Last Updated:** 2026-03-22
+=======
+**Last Updated:** 2026-03-15
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 **Author:** Vew (with Claude Code assistance)
 **Canonical for:** End-to-end automation pipeline, system connections, data flows, environment configuration, deployment procedures
 **Dependencies:** `CLAUDE.md` (compliance/voice), `roadmap/staged-implementation-breakdown.md` (phased plan), `roadmap/voidai-marketing-roadmap.md` (strategy), `automations/x-lead-nurturing-architecture.md` (lead nurturing, Phase 4), `accounts.md` (account personas), `cadence.md` (timing rules)
@@ -23,12 +27,15 @@
     - [9.2 Credential Rotation Runbook](#92-credential-rotation-runbook)
 10. [Failure Modes and Recovery](#10-failure-modes-and-recovery)
 11. [Operational Checklists](#11-operational-checklists)
+<<<<<<< HEAD
 12. [Sub-Agent Content Generation Architecture](#12-sub-agent-content-generation-architecture)
 13. [Content Experimentation Loop](#13-content-experimentation-loop-autoresearch-for-content)
 14. [Research Pipeline Tools](#14-research-pipeline-tools)
 15. [VoidAI as AI CMO Showcase](#15-voidai-as-ai-cmo-showcase)
 16. [Analytics Feedback Loop Architecture](#16-analytics-feedback-loop-architecture)
 17. [LarryBrain Skill Marketplace Evaluation](#17-larrybrain-skill-marketplace-evaluation)
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 
 ---
 
@@ -99,7 +106,11 @@
 |    /seo-audit                                                              |
 |                                                                            |
 |  MCP Servers:                                                              |
+<<<<<<< HEAD
 |    Canva, Apify, GitHub, Taostats, Slack, AlphaXiv (arXiv search)         |
+=======
+|    Canva, Apify, GitHub, Taostats, Slack                                  |
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 |                                                                            |
 +=======|================================================================+===+
         |
@@ -168,6 +179,7 @@
 |       -> Queue for review                                                  |
 |       -> voice-learnings.md update recommendations                         |
 |                                                                            |
+<<<<<<< HEAD
 +=======|================================================================+===+
         |
         v
@@ -198,6 +210,8 @@
 |       |                                                                    |
 |       +-------> feeds back into CONTENT GENERATION (closed loop)          |
 |                                                                            |
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 +===========================================================================+
 ```
 
@@ -1145,6 +1159,7 @@ When something goes wrong, fill in this template and save to `companies/voidai/i
 
 ---
 
+<<<<<<< HEAD
 ## 12. Sub-Agent Content Generation Architecture
 
 Adapted from Anthropic's internal ad workflow (source: @itsolelehmann, 9.1K likes, 4.4M views), where a single non-technical marketer uses Claude Code with specialized sub-agents. Their flow: export ad performance CSV, Claude identifies underperformers, deploys specialized sub-agents (one for 30-char headlines, one for 90-char descriptions), Figma plugin auto-inserts copy, MCP server connects to Meta API for real-time performance, memory system learns from experiments. Result: ad creation 2hrs to 15min, 10x creative output.
@@ -1270,6 +1285,8 @@ Offer "AI CMO for crypto projects" as a service or product, leveraging the exist
 
 ---
 
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 ## Appendix A: Quick Reference Card
 
 ### Emergency Stops
@@ -1316,6 +1333,7 @@ Offer "AI CMO for crypto projects" as a service or product, leveraging the exist
 
 ---
 
+<<<<<<< HEAD
 ## 16. Analytics Feedback Loop Architecture
 
 This section documents the feedback loop that closes the gap between content publishing and content improvement. Inspired by the Larry/OpenClaw marketing playbook (Oliver Henry, @oliverhenry): generate content, post it, track analytics, learn from data, generate better content.
@@ -1439,11 +1457,16 @@ Before subscribing to LarryBrain Pro ($29.99/mo), evaluate against these criteri
 
 ---
 
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 ## Changelog
 
 | Date | Change |
 |------|--------|
 | 2026-03-15 | Initial pipeline architecture document created. Covers full system: data sources, processing, content generation, queue, publishing, monitoring, testing, environment config, deployment phases, failure recovery. |
 | 2026-03-15 | Post-audit updates: corrected all WF1 cron references from 9 AM to 10 AM ET; added Section 9.1 (Crisis Kill Switch Procedure) and Section 9.2 (Credential Rotation Runbook); updated DRY_RUN fail-safe default documentation in Section 8.1; updated DAILY_METRICS_TIME in Section 8.3; added EMERGENCY_STOP to Appendix A Emergency Stops table. |
+<<<<<<< HEAD
 | 2026-03-22 | Added Sections 16-17 (Analytics Feedback Loop Architecture, LarryBrain Skill Marketplace Evaluation). Feedback loop closes the biggest gap: generate -> post -> track -> learn -> generate better. |
 | 2026-03-22 | Added Sections 12-15: Sub-Agent Content Generation Architecture (per-account sub-agents, batch generation), Content Experimentation Loop (autoresearch for content), Research Pipeline Tools (AlphaXiv MCP for arXiv search), VoidAI as AI CMO Showcase (Okara competitive response, strategic options). Added AlphaXiv to MCP servers in system diagram. Renumbered sections 12-17 for sequential file order. Updated TOC. |
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b

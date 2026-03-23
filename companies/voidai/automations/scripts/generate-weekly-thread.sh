@@ -67,6 +67,7 @@ fi
 METRICS_DATA=$(cat "$METRICS_FILE")
 log "Loaded weekly metrics from $METRICS_FILE"
 
+<<<<<<< HEAD
 # Load performance summary (feedback loop)
 PERFORMANCE_SUMMARY_FILE="$PROJECT_ROOT/companies/voidai/automations/data/performance-summary.json"
 TOP_PERFORMERS_FILE="$PROJECT_ROOT/companies/voidai/automations/data/top-performers.json"
@@ -100,6 +101,8 @@ PERFORMANCE FEEDBACK: No engagement data available yet. Use default voice and ho
 "
 fi
 
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 # Load voice and compliance files
 VOICE_FILE="$COMPANY_DIR/voice.md"
 COMPLIANCE_FILE="$COMPANY_DIR/compliance.md"
@@ -184,8 +187,11 @@ FORMATTING RULES:
 - Use DeFi terminology where relevant: TVL, bridge volume, liquidity.
 - The hook tweet should NOT start with \"This week\" or \"Weekly update\". Open with the most compelling data point.
 
+<<<<<<< HEAD
 $PERFORMANCE_CONTEXT
 
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 WEEKLY METRICS DATA:
 $METRICS_DATA
 

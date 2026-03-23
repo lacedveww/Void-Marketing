@@ -121,6 +121,7 @@ These are the key numbers to reference across all content. Pull latest data when
 6. **Subnet count (128-129)**: Cap is 128 with competitive replacement. Exact number fluctuates.
 7. **Post-halving emission data**: Verified across multiple sources. Halving occurred December 15, 2025.
 
+<<<<<<< HEAD
 ## Community Sentiment Tracking
 
 Community expectations are a leading indicator. Sentiment shifts precede engagement drops. Track these signals proactively, especially around the lending platform launch (target: late April 2026).
@@ -240,6 +241,8 @@ Performance alerts trigger when:
 - Average engagement drops >30% vs previous collection (flag for voice calibration)
 - Any pillar drops below 50% of its baseline for 2+ consecutive weeks
 
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 ## Metrics Update Cadence
 
 | Category | Update Frequency |
@@ -248,11 +251,14 @@ Performance alerts trigger when:
 | Market context (TAO price, ecosystem) | Weekly |
 | Token data (SN106 price, volume) | Weekly |
 | Mindshare rank | Weekly via taostats.io |
+<<<<<<< HEAD
 | Community sentiment signals | Weekly (daily monitoring, weekly summary) |
 | Content engagement (per-post) | Daily via collect-engagement.sh (10PM ET) |
 | Content performance summary | Daily (auto-feeds into generation prompts) |
 | Voice calibration (weekly summary) | Weekly via Friday 4PM ET cron job |
 | Conversion tracking (UTM) | When GA4 is configured on voidai.com |
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 
 ---
 
@@ -261,5 +267,8 @@ Performance alerts trigger when:
 | Date | Change | Approved by |
 |------|--------|-------------|
 | 2026-03-13 | Initial metrics baseline created from research/metrics-baseline.md | Vew |
+<<<<<<< HEAD
 | 2026-03-22 | Added community sentiment tracking, lending platform expectations management, sentiment health baselines per X Playbook tips 10, 5 | Vew |
 | 2026-03-22 | Added Content Performance Metrics section: per-post engagement tracking, pillar performance comparison, hook/format tracking, conversion metrics, engagement baselines. Feedback loop data from collect-engagement.sh. | Vew |
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b

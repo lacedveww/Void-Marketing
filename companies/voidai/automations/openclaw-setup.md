@@ -2,7 +2,11 @@
 
 **Replaces**: n8n Cloud (orchestration)
 **Cost**: $0/mo (self-hosted, free APIs)
+<<<<<<< HEAD
 **Last updated**: 2026-03-22
+=======
+**Last updated**: 2026-03-16
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 
 ---
 
@@ -169,6 +173,7 @@ openclaw cron add \
   --to "channel:YOUR_CHANNEL_ID"
 ```
 
+<<<<<<< HEAD
 ### Job 5: Engagement Analytics Collector (FEEDBACK LOOP)
 
 This is the critical feedback loop job inspired by the Larry/OpenClaw playbook.
@@ -233,6 +238,9 @@ openclaw cron add \
 ```
 
 ### Job 7: Competitor Monitor (replaces WF6, Phase 3+)
+=======
+### Job 5: Competitor Monitor (replaces WF6, Phase 3+)
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 
 ```bash
 openclaw cron add \
@@ -247,6 +255,7 @@ openclaw cron add \
   --model "google/gemini-3-flash-preview"
 ```
 
+<<<<<<< HEAD
 ### Job 8: Community Monitor
 
 ```bash
@@ -279,6 +288,8 @@ Output a summary with: new posts (max 5), engagement opportunities with suggeste
   --model "google/gemini-2.5-flash"
 ```
 
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 ## 5. Emergency Stop
 
 To halt all cron jobs immediately:
@@ -344,10 +355,16 @@ export DISCORD_WEBHOOK_URL="<from .env>"
 - [ ] Taostats API key set in env
 - [ ] GitHub PAT set in env
 - [ ] OpenTweet API key set in env
+<<<<<<< HEAD
 - [ ] All 8 cron jobs created (Phase 2 + Community Monitor + Feedback Loop)
 - [ ] DRY_RUN test: collect-metrics.sh (verify API data flows)
 - [ ] DRY_RUN test: collect-engagement.sh (verify engagement collection)
 - [ ] DRY_RUN test: generate-daily-tweet.sh (verify claude -p works + feedback injection)
+=======
+- [ ] All 5 cron jobs created (Phase 2)
+- [ ] DRY_RUN test: collect-metrics.sh (verify API data flows)
+- [ ] DRY_RUN test: generate-daily-tweet.sh (verify claude -p works)
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 - [ ] DRY_RUN test: post-to-x.sh (verify OpenTweet posting)
 - [ ] DRY_RUN test: each cron job via `openclaw cron run`
 - [ ] Verify Discord notifications arrive (both OpenClaw announce and webhook)
@@ -363,7 +380,11 @@ export DISCORD_WEBHOOK_URL="<from .env>"
 | Fri 2PM ET | Weekly Recap | Collect 7d data, generate thread, post via OpenTweet |
 | Every 4h | News Monitor | Scan RSS, generate tweets for relevant items |
 | Daily 7AM ET | Content Scheduler | Post approved queue items via OpenTweet |
+<<<<<<< HEAD
 | Daily 10PM ET | Engagement Collector | Collect post engagement data, update performance-summary.json for feedback loop |
 | Fri 4PM ET | Voice Calibration | Analyze week's engagement, update voice-learnings.md, check calibration triggers |
 | Daily 8AM ET | Competitor Intel | Collect competitor data, report to Discord |
 | Every 4h | Community Monitor | Check X accounts for posts, sentiment, engagement opportunities |
+=======
+| Daily 8AM ET | Competitor Intel | Collect competitor data, report to Discord |
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b

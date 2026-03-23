@@ -30,6 +30,7 @@ Note: The main @v0idai account naturally runs at ~55% Builder-Credibility and ~0
 - Make price predictions or guarantee returns
 - Post without a clear call to action or insight
 - Use em dashes anywhere in content. Use commas, periods, colons, or line breaks instead. Em dashes are banned across all platforms and accounts.
+<<<<<<< HEAD
 - **Post price charts, token price screenshots, or candlestick graphics** from the official @v0idai account or any satellite account. Price discussion belongs in community conversations, not official channels. This includes: chart screenshots, price action commentary ("we pumped," "ATH incoming"), market cap milestones framed as hype, and any content that could be construed as price promotion. Exception: referencing factual market data in analytical context (e.g., "TAO market cap crossed $X, here's what it means for subnet economics") is permitted when the framing is analytical, not promotional.
 - **Make promises with specific deadlines**. Use ranges ("Q2 2026," "coming weeks") not exact dates ("launching April 28"). If a deadline is announced publicly, see Deadline Communication Policy below.
 
@@ -134,6 +135,8 @@ Public deadlines create expectations. Missed deadlines destroy trust. Handle wit
 - Frame as "we'd rather ship it right than ship it fast"
 - Reference VoidAI's track record of shipping (bridge, staking, SDK all delivered)
 - Do NOT promise a new date. Say "we'll share updates as we hit milestones"
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 
 ## Banned AI Phrases (Auto-Fail Any Content With These)
 
@@ -247,4 +250,7 @@ When generating ANY content, Claude MUST read these files in order:
 | Date | Change | Approved by |
 |------|--------|-------------|
 | 2026-03-13 | Initial voice config extracted from CLAUDE.md | Vew |
+<<<<<<< HEAD
 | 2026-03-22 | Added: RT guidelines (tip 3), price/chart ban (tips 14-15), narrative building guidance (tip 11), teasing guidelines (tips 12, 17), announcement framing (tip 13), deadline communication policy (tip 16) per X Playbook | Vew |
+=======
+>>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
