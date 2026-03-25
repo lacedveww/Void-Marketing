@@ -11,7 +11,7 @@ Last updated: 2026-03-25
 | Handle | Name | Why Monitor | Priority |
 |--------|------|-------------|----------|
 | @helloitsaustin | Austin (Anthropic Growth) | AI-native growth marketing tactics, Claude-powered strategies | High |
-| @v21studio | v21 Studio (London) | Web3 design trends, branding standards, visual identity | High |
+| @v21studio | v21 Studio (London) | Web3 design trends, branding standards, visual identity. Visit website & repo for deeper context | High |
 | @areatechnology_ | Area Technology | Visual tech trends, design innovation | Medium |
 
 ## News and Media
@@ -40,9 +40,12 @@ Last updated: 2026-03-25
 | Handle | Name | Why Monitor | Priority |
 |--------|------|-------------|----------|
 | @oliverhenry | Oliver Henry (Larry creator) | OpenClaw marketing playbook, AI agent strategies. 22.4K followers | High |
+| @larryclawrence | Larry (OpenClaw bot) | OpenClaw's AI marketing bot by Oliver Henry. Monitor for automated marketing tactics and playbook demos | High |
 | @itsolelehmann | Ole Lehmann | AI marketing content, Claude Code workflow documentation (9.1K likes, 4.4M views thread) | High |
-| @askOkara | Okara AI CMO | AI CMO product evolution, competitive feature tracking. 27.6K likes launch tweet | High |
+| @askOkara | Okara AI CMO | AI CMO product evolution, competitive feature tracking. 27.6K likes launch tweet. MONITOR HEAVILY — visit website & repo for deeper context | High |
 | @askalphaxiv | AlphaXiv MCP | Research tool updates, arXiv search capabilities | Medium |
+| @marketing | Marketing | Great posts & insights on marketing strategy | High |
+| @claudeai | Claude AI | Great posts on AI capabilities, product marketing | High |
 
 ---
 
@@ -108,6 +111,13 @@ People who openly share what works on X. Study their content for actionable stra
 | Handle | Name | Focus | Priority |
 |--------|------|-------|----------|
 | @helloitsaustin | Austin (Anthropic) | AI-native growth, Claude Code workflows | High |
+| @cleardigitalinc | Clear Digital Inc | Digital marketing insights and strategy | High |
+| @martinabutters | Martina Butters | Marketing insights and strategy | High |
+| @ernestosoftware | Ernesto Software | Software marketing insights | High |
+| @iamgdsa | GDSA | Marketing insights and strategy | High |
+| @aiedge | AI Edge | AI marketing insights | High |
+| @coreyganim | Corey Ganim | Marketing insights and strategy | High |
+| @natiakourdadze | Natia Kourdadze | Marketing insights and strategy | High |
 | @Codie_Sanchez | Codie Sanchez | Business growth, unconventional marketing, large following | Medium |
 | @SahilBloom | Sahil Bloom | Newsletter growth, content frameworks, audience building | Medium |
 | @thesamparr | Sam Parr (The Hustle/MFM) | Media entrepreneurship, content monetization | Medium |
