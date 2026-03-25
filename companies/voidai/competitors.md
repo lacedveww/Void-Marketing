@@ -80,6 +80,8 @@
 
 ## Bittensor Community Monitoring
 
+For the full monitoring account lists used by the Intelligence Sweep, see `monitoring/content-accounts.md` (Tier 1) and `monitoring/marketing-accounts.md` (Tier 2). This file tracks competitive landscape analysis and is the canonical source for competitor-specific information.
+
 Daily monitoring of key Bittensor ecosystem accounts for news, sentiment, and content opportunities.
 
 | Account | Type | Why Monitor |
@@ -137,3 +139,4 @@ Based on Altcoin Buzz "Top 10 Bittensor Subnets by Mindshare" (September 2025):
 |------|--------|-------------|
 | 2026-03-13 | Initial competitor config extracted from CLAUDE.md and roadmap | Vew |
 | 2026-03-22 | Expanded Okara AI CMO analysis, added Anthropic Claude Code ad workflow as reference, added deep competitive analysis of Okara vs VoidAI pipeline | Claude Code |
+| 2026-03-25 | Added monitoring/ directory reference for Intelligence Sweep account lists (content-accounts.md Tier 1, marketing-accounts.md Tier 2) | Claude Code |

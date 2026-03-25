@@ -1,7 +1,7 @@
 # VoidAI Marketing Pipeline Architecture
 
 **Status:** CURRENT
-**Last Updated:** 2026-03-22
+**Last Updated:** 2026-03-25
 **Author:** Vew (with Claude Code assistance)
 **Canonical for:** End-to-end automation pipeline, system connections, data flows, environment configuration, deployment procedures
 **Dependencies:** `CLAUDE.md` (compliance/voice), `roadmap/staged-implementation-breakdown.md` (phased plan), `roadmap/voidai-marketing-roadmap.md` (strategy), `automations/x-lead-nurturing-architecture.md` (lead nurturing, Phase 4), `accounts.md` (account personas), `cadence.md` (timing rules)
@@ -29,6 +29,7 @@
 15. [VoidAI as AI CMO Showcase](#15-voidai-as-ai-cmo-showcase)
 16. [Analytics Feedback Loop Architecture](#16-analytics-feedback-loop-architecture)
 17. [LarryBrain Skill Marketplace Evaluation](#17-larrybrain-skill-marketplace-evaluation)
+18. [Three-Pillar Framework & Intelligence Sweep Data Flow](#18-three-pillar-framework--intelligence-sweep-data-flow)
 
 ---
 
@@ -1439,6 +1440,100 @@ Before subscribing to LarryBrain Pro ($29.99/mo), evaluate against these criteri
 
 ---
 
+## 18. Three-Pillar Framework & Intelligence Sweep Data Flow
+
+> **Full framework documentation:** `engine/frameworks/three-pillar-generation.md`
+
+### Overview
+
+Content generation is organized into three pillars:
+
+| Pillar | Source | Daily Output | Role |
+|--------|--------|-------------|------|
+| A: X/Twitter Intelligence | Intelligence Sweep (8AM + 8PM ET) | 2-3 posts | Reactive content from community monitoring |
+| B: SEO & Google News | News feeds, research pipeline | 1-2 posts | Proactive content from industry trends |
+| C: Analytics Feedback | Engagement Collector (10PM ET) | 0 (optimizer) | Performance data fed back into A+B generation |
+
+### Intelligence Sweep Data Flow
+
+```
+8AM ET / 8PM ET: Intelligence Sweep (SILENT)
+    |
+    |-- Reads: monitoring/content-accounts.md (Tier 1)
+    |-- Reads: monitoring/marketing-accounts.md (Tier 2)
+    |-- Runs:  collect-news.sh, collect-metrics.sh
+    |
+    v
+data/sweep-YYYY-MM-DD-HHMM.json
+    |
+    v
+9AM ET: Morning Summary
+    |-- Reads: sweep JSON + performance-summary.json
+    |-- Generates: structured brief (market, stories, opportunities, suggestions)
+    |-- Delivers: Discord + Telegram
+    |
+    v
+10:30AM ET: Draft Review + Scheduler
+    |-- Reads: morning summary + Pillar C feedback
+    |-- Generates: 3-5 draft posts (Pillar A: 2-3, Pillar B: 1-2)
+    |-- Approval: human review gate
+    |-- Schedules: approved posts via OpenTweet
+    |
+    v
+10PM ET: Engagement Collector (SILENT)
+    |-- Collects: likes, RTs, replies, views, bookmarks
+    |-- Updates: performance-summary.json, top-performers.json
+    |-- Feeds back into next morning's content generation
+    |
+    v
+Fri 12PM ET: Weekly Recap + Calibration
+    |-- Generates: recap thread for @v0idai
+    |-- Analyzes: week's engagement patterns
+    |-- Updates: brand/voice-learnings.md
+    |-- Checks: voice calibration triggers
+```
+
+### Sweep JSON Output Structure
+
+```json
+{
+  "collected_at": "2026-03-25T12:00:00Z",
+  "sweep_type": "morning",
+  "accounts_checked": ["@bittensor", "@TheBittensorHub", "..."],
+  "new_posts": [
+    {
+      "account": "@handle",
+      "text": "...",
+      "engagement": { "likes": 0, "rts": 0, "replies": 0, "views": 0 },
+      "content_angle": "suggested angle for VoidAI content",
+      "priority": "high|medium|low"
+    }
+  ],
+  "engagement_opportunities": [
+    {
+      "account": "@handle",
+      "post_url": "...",
+      "suggested_action": "reply|quote-tweet",
+      "draft_hook": "..."
+    }
+  ],
+  "competitor_mentions": [],
+  "trending_topics": [],
+  "ecosystem_news": [],
+  "metrics_snapshot": {}
+}
+```
+
+### Monitoring Account Tiers
+
+The Intelligence Sweep reads from two monitoring files:
+- **Tier 1** (`monitoring/content-accounts.md`): Bittensor core accounts, builders, analysts. Checked every sweep. High-priority signals.
+- **Tier 2** (`monitoring/marketing-accounts.md`): Marketing/design accounts, AI marketing tools. Checked every sweep. Lower-priority but valuable for trend detection.
+
+For the full account lists, see `monitoring/content-accounts.md` and `monitoring/marketing-accounts.md`.
+
+---
+
 ## Changelog
 
 | Date | Change |
@@ -1447,3 +1542,4 @@ Before subscribing to LarryBrain Pro ($29.99/mo), evaluate against these criteri
 | 2026-03-15 | Post-audit updates: corrected all WF1 cron references from 9 AM to 10 AM ET; added Section 9.1 (Crisis Kill Switch Procedure) and Section 9.2 (Credential Rotation Runbook); updated DRY_RUN fail-safe default documentation in Section 8.1; updated DAILY_METRICS_TIME in Section 8.3; added EMERGENCY_STOP to Appendix A Emergency Stops table. |
 | 2026-03-22 | Added Sections 16-17 (Analytics Feedback Loop Architecture, LarryBrain Skill Marketplace Evaluation). Feedback loop closes the biggest gap: generate -> post -> track -> learn -> generate better. |
 | 2026-03-22 | Added Sections 12-15: Sub-Agent Content Generation Architecture (per-account sub-agents, batch generation), Content Experimentation Loop (autoresearch for content), Research Pipeline Tools (AlphaXiv MCP for arXiv search), VoidAI as AI CMO Showcase (Okara competitive response, strategic options). Added AlphaXiv to MCP servers in system diagram. Renumbered sections 12-17 for sequential file order. Updated TOC. |
+| 2026-03-25 | Added Section 18: Three-Pillar Framework & Intelligence Sweep Data Flow. Documents three-pillar content generation system, sweep JSON structure, monitoring account tiers, and full data flow from sweep to calibration. Updated TOC. |
