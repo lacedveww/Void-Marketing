@@ -1,131 +1,100 @@
-# Content Monitoring Accounts (Tier 1)
+# Tier 1: Content & News Monitoring Accounts
 
-Accounts monitored by the Intelligence Sweep (8AM/8PM ET) for content ideas, competitive intel, ecosystem news, and engagement opportunities. These are the primary signal sources for VoidAI's content pipeline.
+Accounts monitored by the Intelligence Sweep (8AM/8PM ET) for content ideas,
+ecosystem news, competitor activity, and engagement opportunities.
+
+**Monitoring Rule:** When multiple subnets share an owner/parent, monitor and report them as a GROUP. Track the parent account alongside individual subnet accounts.
 
 Last updated: 2026-03-25
 
 ---
 
-## Bittensor Core
+## Bittensor Core (always monitor)
 
-| Handle | Name | Why Monitor | Priority |
-|--------|------|-------------|----------|
-| @bittensor_ | Bittensor (Official) | Protocol announcements, network upgrades, governance | Critical |
-| @opentensor | Opentensor Foundation | Foundation updates, grants, core development | Critical |
-| @TheBittensorHub | TAO Community Hub | Ecosystem aggregation, 15.9K followers, trending topics, subnet lists | High |
-| @BittensorNews | Bittensor News | Breaking ecosystem news, coverage | High |
-| @bittingthembits | Andy (Community Influencer) | TAO community sentiment, 11K followers, engagement patterns, hot takes | High |
-| @TAOCommunityHub | TAO Community Hub (alt) | Comprehensive subnet lists, community updates | Medium |
-| @SubnetStation | Bittensor Subnet Station | Subnet-focused aggregation and analysis | Medium |
-| @taoinsider | TAO Insider | Insider ecosystem coverage, subnet spotlights | Medium |
+- @bittensor_ — Protocol announcements, governance, upgrades
+- @opentensor — Bittensor development, technical updates
+- @TheBittensorHub — Community sentiment, trending topics, ecosystem pulse
+- @BittensorNews — Breaking news, partnerships, launches
+- @bittingthembits — Community discourse, engagement patterns, grassroots sentiment
+- @TAOCommunityHub — Community aggregation, ecosystem roundups
+- @taoportal — Important ecosystem posts and info
 
 ## Builders & Analysts
 
-| Handle | Name | Why Monitor | Priority |
-|--------|------|-------------|----------|
-| @Victor_crypto_2 | Victor (OAK Research) | Subnet analysis, marketing strategy insights, competitive intelligence | High |
-| @tplr_ai | Templar/Covenant AI (SN3) | Decentralized training milestones, Covenant-72B achievement. 12.4K followers | High |
-| @siamkidd | The Realistic Trader | SubnetAlpha.ai creator, ecosystem analysis | Medium |
-
-## Competitors (Direct)
-
-| Handle | Name | What They Do | Priority |
-|--------|------|--------------|----------|
-| @gtaoventures | gTAO Ventures / Project Rubicon | Cross-chain infrastructure, Base/Coinbase pathway. Primary competitor | Critical |
-| @TensorplexLabs | Tensorplex | Bittensor bridge (different approach), TAO bridging | High |
-| @TaoFi_io | TaoFi | USDC bridge via Hyperlane, alternative bridging | High |
-
-Note: Verify Tensorplex and TaoFi handles on X. These are best-guess handles based on project names.
-
-## Competitors (General Bridges)
-
-| Handle | Name | Relevance | Priority |
-|--------|------|-----------|----------|
-| @wormaborholenet | Wormhole | Cross-chain bridge comparison | Low |
-| @LayerZero_Labs | LayerZero | Messaging protocol comparison | Low |
-| @axelarnet | Axelar | Cross-chain interop comparison | Low |
-
-Note: Verify these handles on X. Monitor weekly, not daily.
+- @Victor_crypto_2 — Subnet analysis, OAK Research, ecosystem deep dives
+- @siamkidd — Bittensor ecosystem analysis
 
 ---
 
-## Top Bittensor Subnet Accounts
+## Top 25 Subnets by Market Cap
 
-Monitored for ecosystem intelligence, marketing tactics, content opportunities, and subnet performance signals. Organized by approximate market cap / emissions weight.
+### Const Group — @const_reborn (MONITOR HEAVILY)
+Bittensor co-founder. Carries hype across all his subnets. Any post = high signal.
+- SN4 — Targon | @TargonCompute
+- SN120 — Affine | @affine_io
+- SN51 — lium.io | @lium_io
+- SN56 — Gradients | @gradients_ai
 
-### Tier A: Major Subnets (top emissions, high mindshare)
+### Covenant Group — @covenant_ai (MONITOR)
+Orchestrates 3 subnet "orders." Track parent + all children together.
+- SN3 — Templar | @tplr_ai
+- SN81 — Grail | @grail_ai
+- SN39 — Basilica | @basilic_ai
 
-| Handle | Subnet | What They Do | Followers (est.) | Priority |
-|--------|--------|--------------|-------------------|----------|
-| @tplr_ai | SN3 - Templar | Decentralized LLM pretraining (Covenant-72B). Largest decentral training run | 12.4K | High |
-| @manifoldlabs | SN4 - Targon | Decentralized AI inference and GPU compute marketplace | TBD | High |
-| @rayon_labs | SN19/56/64 - Nineteen/Gradients/Chutes | Serverless AI compute, inference, training. "Rayon Trio" ~23.7% of emissions | TBD | High |
-| @MacrocosmosAI | SN1/9/13/25 - Apex/IOTA/Data Universe/Mainframe | LLM pre-training, data collection, scientific compute | TBD | High |
-| @OpenKaito | SN5 - OpenKaito/Kaito AI | Decentralized web search and indexing, X/Discord data | TBD | High |
-| @NousResearch | SN6 - Numinous/Infinite Games | LLM fine-tuning, evaluation systems | TBD | High |
-| @taoshi_io | SN8 - Vanta (PTN) | Proprietary Trading Network, DeFi, forex. Launched 0xMarkets exchange | TBD | High |
+### Macrocosmos Group — @MacrocosmosAI
+- SN1 — Apex | @MacrocosmosAI
+- SN9 — IOTA | @MacrocosmosAI
 
-### Tier B: Notable Subnets (growing mindshare, active marketing)
+### OMEGA Labs Group — @omegalabsai
+- SN24 — Quasar | @omegalabsai
 
-| Handle | Subnet | What They Do | Priority |
-|--------|--------|--------------|----------|
-| @SturdyFinance | SN10 - Sturdy | DeFi yield optimization on Bittensor. First Yuma-incubated subnet | High |
-| @dippy_ai | SN11 - Dippy Studio | AI companion app (1M+ users), generative media. Pivoted from roleplay LLM | Medium |
-| @omegalabsai | SN21/24 - Any-to-Any/Omega | Multimodal AGI datasets, voice-to-voice generation | Medium |
-| @zeussubnet | SN18 - Zeus | Environmental forecasting, climate AI. Top revenue generator | Medium |
-| @BitMindAI | SN34 - BitMind | Deepfake detection, AI-generated content authentication | Medium |
-| @hippius_subnet | SN75 - Hippius | Decentralized cloud storage, on-chain usage tracking | Medium |
-| @bitads_ai | SN16 - BitAds | Decentralized marketing subnet, performance-based (real sales) | Medium |
-| @computehorde | SN12 - ComputeHorde | Decentralized GPU compute for subnet validation | Medium |
-
-### Tier C: Emerging / Niche Subnets (monitor weekly)
-
-| Handle | Subnet | What They Do | Priority |
-|--------|--------|--------------|----------|
-| @LiumAI | SN51 - Lium | Large-scale GPU cluster (500+ H100s), sovereign compute | Medium |
-| @RidgesAI | SN62 - Ridges | Specialized coding agents, bug fixing, test generation | Low |
-| @AffineAI | SN120 - Affine | Infrastructure layer connecting multiple subnets for inference | Low |
-| @nodexo_ai | SN27 - Nodexo | Compute subnet | Low |
-| @DaturaAI | SN22 - Desearch | Decentralized search, X/Reddit/Google data analysis | Low |
-| @subvortex_ai | SN7 - Subvortex | Network infrastructure | Low |
-| @xtaohq | xTAO | Bittensor company, ecosystem builder | Low |
-
-Note: Many handles in Tier C are best-guess based on project names. Verify on X and update. Handles marked with "TBD" followers should be updated after first sweep.
+### Independent Top Subnets
+| Rank | Subnet | Name | X Handle |
+|------|--------|------|----------|
+| 1 | SN64 | Chutes | @chutes_ai |
+| 6 | SN62 | Ridges | @ridges_ai |
+| 7 | SN8 | Vanta | @vantaSN8 |
+| 8 | SN44 | Score | @webuildscore |
+| 10 | SN75 | Hippius | @hippius_subnet |
+| 12 | SN68 | NOVA | @metanova_labs |
+| 16 | SN19 | Blockmachi | @rayon_labs |
+| 17 | SN29 | Coldint/AI-ASSeSS | @AI_assess |
+| 18 | SN34 | BitMind | @BitMindAI |
+| 20 | SN17 | 404-GEN | @404gen_ |
+| 21 | SN93 | Bitcast | @Bitcast_network |
+| 22 | SN5 | Hone | @traininghone |
+| 23 | SN85 | Vidaio | @vidaio_ |
+| 24 | SN63 | Quantum Inn. | @qBitTensorLabs |
+| 25 | SN11 | TrajectoryRL | @TrajectoryRL |
 
 ---
 
-## How to Use This File
+## Additional Subnets to Monitor
 
-The Intelligence Sweep job reads this file at 8AM and 8PM ET. For each account:
-1. Check for new posts since last sweep
-2. Capture: post text, engagement metrics (likes, RTs, replies, views)
-3. Analyze sentiment on high-engagement posts (50+ likes)
-4. Flag posts mentioning VoidAI, SN106, or competitors
-5. Identify content opportunities and engagement targets
-
-### Adding New Accounts
-
-When adding accounts, include:
-- Verified X handle (check it exists)
-- Subnet number if applicable
-- Brief description of what they do
-- Priority level (Critical/High/Medium/Low)
-- Date added
-
-### Removing Accounts
-
-Move to "Archived" section at bottom rather than deleting. Include reason and date.
+| Subnet | Name | X Handle | Notes |
+|--------|------|----------|-------|
+| SN18 | Zeus (weather) | @zeussubnet | |
+| SN7 | SubVortex | @SubVortexTao | Infrastructure |
+| SN12 | ComputeHorde | @ComputeHorde | GPU compute |
+| SN13 | Data Universe | @MacrocosmosAI | Macrocosmos group |
+| SN14 | TAOHash | @TAOHash | PoW mining |
+| SN16 | BitAds | @BitAds_AI | Marketing techniques |
+| SN20 | BitAgent | @TeamRizzoAI | Agentic AI |
+| SN21 | Any-to-Any | @omegalabsai | OMEGA group |
+| SN22 | Desearch | @desearch_ai | Search engine |
+| SN6 | Numinous | @numinous_ai | Forecasting |
 
 ---
 
-## Archived Accounts
+## Heavy Monitoring (prioritize in every sweep report)
 
-(None yet)
+- **@const_reborn** — Bittensor co-founder, runs 4 top subnets (SN4, SN120, SN51, SN56). Any post = high signal.
+- **@covenant_ai** — Parent of Templar/Grail/Basilica. Track all 3 orders together.
+- **@taoportal** — Important ecosystem posts and info.
+- **SN23 Nuance** (@NuanceSubnet) — Track heavily for "Bittensor posts of the week" data. Use their curated top posts to improve our Bittensor content.
+- **SN16 BitAds** (@BitAds_AI) — Track for marketing techniques and ad strategies.
 
----
+## Competitor Monitoring (lending platform intelligence)
 
-## Changelog
-
-| Date | Change |
-|------|--------|
-| 2026-03-25 | Initial creation with Bittensor core, competitors, and 25+ subnet accounts |
+- **SN10 Sturdy** (@SturdyFinance) — AI-optimized DeFi yield aggregator. Similar to VoidAI's lending platform for subnet tokens. Monitor heavily.
+- **SN15 BitQuant** (@BitQuantAI) — AI-powered DeFi intelligence. Similar lending/finance concept. Monitor heavily.
