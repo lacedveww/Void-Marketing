@@ -73,16 +73,11 @@
 
 ## Competitor Monitoring
 
-<<<<<<< HEAD
 - **Frequency**: Daily automated monitoring via OpenClaw cron (Competitor Intel job)
-=======
-- **Frequency**: Daily automated monitoring via n8n Workflow 6 (Competitor Monitor)
->>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 - **Accounts to monitor**: @gtaoventures, Tensorplex, TaoFi, Wormhole, LayerZero, Axelar
 - **Signals to watch**: New features, partnerships, community sentiment, mindshare changes, pricing/fee changes, security incidents
 - **Weekly output**: Competitor digest included in weekly recap. Flags any response-framework scenarios for immediate attention.
 
-<<<<<<< HEAD
 ## Bittensor Community Monitoring
 
 Daily monitoring of key Bittensor ecosystem accounts for news, sentiment, and content opportunities.
@@ -128,8 +123,6 @@ Daily monitoring of key Bittensor ecosystem accounts for news, sentiment, and co
 
 **Strategic question:** Could VoidAI's marketing pipeline be exposed as a product or showcase? See pipeline-architecture.md Section "VoidAI as AI CMO Showcase" for notes on this.
 
-=======
->>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 ## SN106 Positioning Among Peers
 
 Based on Altcoin Buzz "Top 10 Bittensor Subnets by Mindshare" (September 2025):
@@ -143,7 +136,4 @@ Based on Altcoin Buzz "Top 10 Bittensor Subnets by Mindshare" (September 2025):
 | Date | Change | Approved by |
 |------|--------|-------------|
 | 2026-03-13 | Initial competitor config extracted from CLAUDE.md and roadmap | Vew |
-<<<<<<< HEAD
 | 2026-03-22 | Expanded Okara AI CMO analysis, added Anthropic Claude Code ad workflow as reference, added deep competitive analysis of Okara vs VoidAI pipeline | Claude Code |
-=======
->>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b

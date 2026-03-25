@@ -95,7 +95,6 @@ fi
 
 log "Processing news: \"$NEWS_TITLE\" from $NEWS_SOURCE"
 
-<<<<<<< HEAD
 # Load performance summary (feedback loop)
 PERFORMANCE_SUMMARY_FILE="$PROJECT_ROOT/companies/voidai/automations/data/performance-summary.json"
 PERFORMANCE_CONTEXT=""
@@ -109,8 +108,6 @@ $(echo "$PERF_DATA" | jq -r '.recommendations // [] | .[:2][] // empty' 2>/dev/n
   log "Loaded performance feedback for news tweet"
 fi
 
-=======
->>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 # Load voice and compliance
 VOICE_FILE="$COMPANY_DIR/voice.md"
 COMPLIANCE_FILE="$COMPANY_DIR/compliance.md"
@@ -183,11 +180,8 @@ FORMATTING RULES:
 - Do NOT include the news URL in the tweet (it will be added separately as a quote tweet or link).
 - Do NOT include disclaimers in the tweet body.
 
-<<<<<<< HEAD
 $PERFORMANCE_CONTEXT
 
-=======
->>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 NEWS ITEM:
 <user_content>
 Title: $SAFE_TITLE

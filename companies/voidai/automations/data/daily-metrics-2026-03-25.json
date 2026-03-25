@@ -1,0 +1,50 @@
+{
+  "collected_at": "2026-03-25T20:42:42Z",
+  "date": "2026-03-25",
+  "dry_run": true,
+  "tao": {
+    "price_usd": 348.97,
+    "price_change_1h_pct": -1.96,
+    "price_change_24h_pct": 3.39,
+    "price_change_7d_pct": 30.73,
+    "price_change_30d_pct": 107.32,
+    "market_cap_usd": 3758237847,
+    "fully_diluted_market_cap_usd": 7328315642,
+    "volume_24h_usd": 1211537033,
+    "circulating_supply": 10769595
+  },
+  "sn106": {
+    "subnet_id": 106,
+    "name": "VoidAI / Liquidity Provisioning",
+    "validators": 11,
+    "active_validators": 11,
+    "active_miners": 1,
+    "active_keys": 256,
+    "max_neurons": 256,
+    "emission_rao": "0",
+    "projected_emission_rao": "0",
+    "tempo": 360,
+    "fee_rate": "0.00050354772259098192",
+    "registration_cost_rao": "133585556570",
+    "neuron_registration_cost_rao": "500000",
+    "net_flow_1_day_rao": "-188226065369",
+    "net_flow_7_days_rao": "-532469113960",
+    "net_flow_30_days_rao": "-1230442212340",
+    "recycled_lifetime_rao": "43257550282",
+    "recycled_24h_rao": "0",
+    "alpha_price_tao_estimate": 0.00050354772259098192
+  },
+  "network": {
+    "total_staked_rao": "7353067603457808",
+    "total_issued_rao": "10770389433224995",
+    "total_subnets": 129
+  },
+  "bridge": {
+    "chains_supported": [
+      "Bittensor",
+      "Solana",
+      "Ethereum",
+      "Base"
+    ]
+  }
+}

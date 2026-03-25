@@ -146,7 +146,6 @@ All satellite accounts MUST comply with these requirements:
 
 ---
 
-<<<<<<< HEAD
 ## Sub-Agent Specialization Pattern
 
 Inspired by Anthropic's internal ad workflow (where a single non-technical marketer uses Claude Code with specialized sub-agents for headlines vs. descriptions), each satellite account should be treated as a specialized content generation sub-agent tuned to its voice and audience.
@@ -179,8 +178,6 @@ When generating content for a specific account, Claude Code should:
 
 ---
 
-=======
->>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 ## Inter-Account Coordination Rules
 
 These rules prevent satellite accounts from appearing coordinated or astroturfed.
@@ -214,7 +211,6 @@ These rules prevent satellite accounts from appearing coordinated or astroturfed
 - Main account may RT satellite content maximum 1x/week per satellite
 - Satellite accounts may mention @v0idai maximum 2x/week (organic fan behavior, not shill behavior)
 
-<<<<<<< HEAD
 ## Founder Account Strategy: Hansel Melo (@v0idai personal)
 
 Founder communication is a force multiplier. In Bittensor, community members want to know the person behind the subnet, not just the brand. Hansel's personal presence on X is critical for VoidAI's credibility.
@@ -294,8 +290,6 @@ X is the primary channel but not the only one. VoidAI must maintain consistent p
 
 ---
 
-=======
->>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 ## Owned Accounts (Internal Assets)
 
 > **CONFIDENTIAL**: This section contains operational details about VoidAI-controlled accounts. Do not share externally or include in any public-facing content. Exposure would compromise satellite account independence.
@@ -314,8 +308,5 @@ These accounts are VoidAI-owned. Do NOT target them for outreach, DMs, or relati
 | Date | Change | Approved by |
 |------|--------|-------------|
 | 2026-03-13 | Initial accounts config extracted from CLAUDE.md | Vew |
-<<<<<<< HEAD
 | 2026-03-22 | Added Sub-Agent Specialization Pattern section with per-account sub-agent specs, batch generation guidance, and account-specific memory tracking | Claude Code |
 | 2026-03-22 | Added founder account strategy (tips 18-19), content routing rules (tip 20), cross-platform presence guidance for Discord/Telegram (tip 21) per X Playbook | Vew |
-=======
->>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b

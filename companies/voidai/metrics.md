@@ -83,6 +83,41 @@ These are the key numbers to reference across all content. Pull latest data when
 | Key Mechanism | Concentrated liquidity on Raydium CLMM | VoidAI docs |
 | Registration Date | ~May 2025 | On-chain data |
 
+### SN106 Automated Metrics (from collect-metrics.sh)
+
+These fields are collected daily from the Taostats API and stored in `automations/data/daily-metrics-YYYY-MM-DD.json`.
+
+| JSON Field | Description | Source |
+|-----------|-------------|--------|
+| `sn106.validators` | Total validator count | Taostats subnet endpoint |
+| `sn106.active_validators` | Active validator count | Taostats subnet endpoint |
+| `sn106.active_miners` | Active miner count | Taostats subnet endpoint |
+| `sn106.active_keys` | Total registered keys (UIDs) | Taostats subnet endpoint |
+| `sn106.max_neurons` | Max neuron slots | Taostats subnet endpoint |
+| `sn106.emission_rao` | Current emission (rao) | Taostats subnet endpoint |
+| `sn106.projected_emission_rao` | Projected emission (rao) | Taostats subnet endpoint |
+| `sn106.tempo` | Subnet tempo (blocks per epoch) | Taostats subnet endpoint |
+| `sn106.fee_rate` | Subnet fee rate (exchange rate proxy) | Taostats subnet endpoint |
+| `sn106.registration_cost_rao` | Subnet registration cost (rao) | Taostats subnet endpoint |
+| `sn106.neuron_registration_cost_rao` | Neuron registration cost (rao) | Taostats subnet endpoint |
+| `sn106.net_flow_1_day_rao` | Net TAO flow, 1 day (rao) | Taostats subnet endpoint |
+| `sn106.net_flow_7_days_rao` | Net TAO flow, 7 days (rao) | Taostats subnet endpoint |
+| `sn106.net_flow_30_days_rao` | Net TAO flow, 30 days (rao) | Taostats subnet endpoint |
+| `sn106.recycled_lifetime_rao` | Total TAO recycled lifetime (rao) | Taostats subnet endpoint |
+| `sn106.recycled_24h_rao` | TAO recycled last 24h (rao) | Taostats subnet endpoint |
+| `sn106.alpha_price_tao_estimate` | Alpha token price estimate (TAO) | Derived from fee_rate |
+| `sn106.alpha_price_usd_estimate` | Alpha token price estimate (USD) | Derived from fee_rate * TAO price |
+| `tao.price_usd` | TAO price in USD | Taostats price endpoint |
+| `tao.price_change_24h_pct` | TAO 24h price change % | Taostats price endpoint |
+| `tao.price_change_7d_pct` | TAO 7d price change % | Taostats price endpoint |
+| `tao.price_change_30d_pct` | TAO 30d price change % | Taostats price endpoint |
+| `tao.market_cap_usd` | TAO market cap (USD) | Taostats price endpoint |
+| `tao.volume_24h_usd` | TAO 24h trading volume (USD) | Taostats price endpoint |
+| `network.total_staked_rao` | Total TAO staked across network (rao) | Taostats stats endpoint |
+| `network.total_subnets` | Total active subnets | Taostats stats endpoint |
+
+**Note on alpha token price**: The Taostats API does not have a dedicated alpha/dTAO token price endpoint. The `fee_rate` field from the subnet endpoint is used as an exchange rate proxy. For precise token pricing, check CoinGecko (listed as "Liquidity Provisioning").
+
 ## Token Metrics: VOID (SN106 Alpha Token)
 
 | Metric | Value | Source |
@@ -121,7 +156,6 @@ These are the key numbers to reference across all content. Pull latest data when
 6. **Subnet count (128-129)**: Cap is 128 with competitive replacement. Exact number fluctuates.
 7. **Post-halving emission data**: Verified across multiple sources. Halving occurred December 15, 2025.
 
-<<<<<<< HEAD
 ## Community Sentiment Tracking
 
 Community expectations are a leading indicator. Sentiment shifts precede engagement drops. Track these signals proactively, especially around the lending platform launch (target: late April 2026).
@@ -241,8 +275,6 @@ Performance alerts trigger when:
 - Average engagement drops >30% vs previous collection (flag for voice calibration)
 - Any pillar drops below 50% of its baseline for 2+ consecutive weeks
 
-=======
->>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 ## Metrics Update Cadence
 
 | Category | Update Frequency |
@@ -251,14 +283,11 @@ Performance alerts trigger when:
 | Market context (TAO price, ecosystem) | Weekly |
 | Token data (SN106 price, volume) | Weekly |
 | Mindshare rank | Weekly via taostats.io |
-<<<<<<< HEAD
 | Community sentiment signals | Weekly (daily monitoring, weekly summary) |
 | Content engagement (per-post) | Daily via collect-engagement.sh (10PM ET) |
 | Content performance summary | Daily (auto-feeds into generation prompts) |
 | Voice calibration (weekly summary) | Weekly via Friday 4PM ET cron job |
 | Conversion tracking (UTM) | When GA4 is configured on voidai.com |
-=======
->>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 
 ---
 
@@ -267,8 +296,6 @@ Performance alerts trigger when:
 | Date | Change | Approved by |
 |------|--------|-------------|
 | 2026-03-13 | Initial metrics baseline created from research/metrics-baseline.md | Vew |
-<<<<<<< HEAD
 | 2026-03-22 | Added community sentiment tracking, lending platform expectations management, sentiment health baselines per X Playbook tips 10, 5 | Vew |
 | 2026-03-22 | Added Content Performance Metrics section: per-post engagement tracking, pillar performance comparison, hook/format tracking, conversion metrics, engagement baselines. Feedback loop data from collect-engagement.sh. | Vew |
-=======
->>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
+| 2026-03-25 | Added SN106 Automated Metrics table documenting all JSON fields from collect-metrics.sh. Resolved merge conflicts. | Vew |

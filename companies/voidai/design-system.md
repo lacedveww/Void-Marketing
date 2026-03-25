@@ -32,7 +32,6 @@
 | LinkedIn | Post image | 1200x627 |
 | Blog (voidai.com) | Hero image | 1200x630 |
 
-<<<<<<< HEAD
 ## X (Twitter) Visual Identity Standards
 
 Consistency across all visual touchpoints on X builds recognition. When someone sees a VoidAI post, they should recognize it before reading the text.
@@ -62,8 +61,6 @@ Consistency across all visual touchpoints on X builds recognition. When someone 
 - No walls of emojis in any visual or text content
 - No "announcement" graphics that are just text on a colored background. If it's just text, post it as text
 
-=======
->>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 ---
 
 ## Changelog
@@ -71,7 +68,4 @@ Consistency across all visual touchpoints on X builds recognition. When someone 
 | Date | Change | Approved by |
 |------|--------|-------------|
 | 2026-03-13 | Initial design system extracted from CLAUDE.md | Vew |
-<<<<<<< HEAD
 | 2026-03-22 | Added X-specific visual identity standards: profile consistency rules, post image standards, visual DON'Ts per X Playbook tip 6 | Vew |
-=======
->>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b

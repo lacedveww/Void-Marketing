@@ -101,7 +101,6 @@ This file is the self-improving feedback loop for VoidAI's brand voice. After ev
 
 ---
 
-<<<<<<< HEAD
 ## Automated Feedback Loop Integration
 
 This section documents how the analytics feedback loop automatically informs and updates voice learnings. This is the key Larry/OpenClaw playbook insight: content improves by learning from its own performance data, not just from static rules.
@@ -185,20 +184,9 @@ The Friday 4PM ET cron job should generate an entry using this format and append
 
 ---
 
-=======
->>>>>>> d1c3b17ca9aeb15b33c7b1f6d4f75a9d734fca6b
 ## Engagement Rate Baselines
 
-*Initial baselines. Update after first 2 weeks of posting with real data.*
-
-| Account | Target Engagement Rate | Source |
-|---------|:----------------------:|--------|
-| Main @v0idai | >1.29% | Existing @v0idai performance data |
-| Fanpage | >1.5% | Gen Z community average (organic, 1-5% range) |
-| Bittensor Ecosystem | >2.0% | Bittensor community average from x-voice-analysis.md |
-| DeFi / Cross-Chain | >1.5% | DeFi community average (organic, 1-5% range) |
-
-Target for all accounts within 60 days: >1.5% average engagement rate.
+For current engagement baselines, see `metrics.md` (Engagement Baselines section). This file tracks voice-specific learnings and calibration only.
 
 ---
 
