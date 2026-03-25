@@ -69,7 +69,7 @@ All VoidAI content generation flows through three pillars, each with a distinct 
 
 ## Pillar C: Analytics Feedback (Optimizer)
 
-**Source:** Engagement Collector (10PM ET, silent collection) + Weekly Voice Calibration (Fri 12PM ET)
+**Source:** Engagement Collector (10PM ET, silent collection) + Weekly Voice Calibration (Fri 10:30 AM ET)
 **Output:** Does NOT generate content directly
 **Role:** Optimizes Pillars A and B by feeding performance data back into generation prompts
 
@@ -126,20 +126,21 @@ Pillar C requires live posting data to function. During DRY_RUN and early soft-l
 - Output: `data/sweep-YYYY-MM-DD-{morning|evening}.json`
 - **No messages sent** -- pure data collection
 
-### Step 2: Morning Summary (9AM ET, ~9:30AM delivery)
+### Step 2: Morning Summary (8:30 AM ET)
 - Reads latest sweep data + overnight news
 - Generates a structured brief: top stories, engagement opportunities, suggested content angles
-- Delivered to Discord/Telegram for Vew's review
+- Delivered to Telegram for Vew's review (5-6 messages)
 - Includes: priority flags, suggested account routing, draft hooks
+- **PAUSES** -- waits for Vew's response before continuing to Step 3
 
-### Step 3: Content Drafting (10:30AM ET)
+### Step 3: Content Drafting (reply-gated, on Vew's response)
 - Reads morning summary + performance feedback (Pillar C data)
 - Generates 3-5 draft posts across Pillars A and B
 - Each draft includes: text, target account, pillar tag, suggested post time, hook type
 - Drafts queued in `queue/drafts/` with metadata
 
-### Step 4: Human Approval (10:30AM ET, interactive)
-- Drafts presented for Vew's review in Discord/Telegram
+### Step 4: Human Approval (reply-gated, on draft delivery)
+- Drafts presented for Vew's review in Telegram
 - Options: approve, edit, reject, reschedule
 - Approved drafts move to `queue/approved/`
 - Rejected drafts logged with reason for voice calibration learning
@@ -157,7 +158,7 @@ Pillar C requires live posting data to function. During DRY_RUN and early soft-l
 - Flags significant drops (>30% below average)
 - **No messages sent** -- pure data collection
 
-### Step 7: Weekly Calibration (Friday 12PM ET)
+### Step 7: Weekly Calibration (Friday 10:30 AM ET)
 - Analyzes full week of engagement data
 - Generates Weekly Recap thread (posted to @v0idai)
 - Runs voice calibration checks against `engine/frameworks/voice-calibration-loop.md` triggers
@@ -172,3 +173,4 @@ Pillar C requires live posting data to function. During DRY_RUN and early soft-l
 | Date | Change |
 |------|--------|
 | 2026-03-25 | Initial framework document created. Three-pillar generation system with daily targets, 7-step process, and pre-launch notes for Pillar C. |
+| 2026-03-25 | Updated to reply-gated workflow: Step 2 at 8:30AM (was 9AM), Steps 3-4 are reply-gated (were timed at 10:30AM), Step 7 at Fri 10:30AM (was Fri 12PM). Pillar C weekly calibration reference updated. |

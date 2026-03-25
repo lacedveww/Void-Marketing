@@ -13,17 +13,19 @@
 
 ## Daily Pipeline Rhythm
 
-The automated pipeline follows this daily schedule (all times Eastern):
+The automated pipeline follows this daily schedule (all times Eastern). The morning window uses a reply-gated sequential chain where each step waits for Vew's response before proceeding.
 
-| Time (ET) | Event | Details |
-|-----------|-------|---------|
-| 8:00 AM | Intelligence Sweep (SILENT) | Data collection from monitored X accounts, news, metrics |
-| 9:00 AM (~9:30 delivery) | Morning Summary | Full brief delivered to Discord/Telegram for review |
-| 10:30 AM | Draft Review + Content Scheduler | Content generation, approval workflow, scheduling |
-| 12:00 PM (not Fri) | System Health Check | API/cron/queue status check, closes active content window |
-| 8:00 PM | Intelligence Sweep (SILENT) | Evening data collection |
-| 10:00 PM | Engagement Collector (SILENT) | Performance data collection for next-day feedback |
-| Fri 12:00 PM | Weekly Recap + Calibration | Replaces health check on Fridays |
+```
+8:00 AM  -- Intelligence Sweep (SILENT, automatic)
+8:30 AM  -- Morning Summary delivered (automatic, 5-6 messages)
+           PAUSED -- waits for Vew's response
+[on response] -- Draft Review -> Scheduling -> Content Schedule -> Health Check
+10:00 AM -- Health Check (automatic fallback if chain not complete)
+10:30 AM -- FRIDAYS: Weekly Recap + Voice Calibration
+-------- ACTIVE WINDOW ENDS --------
+8:00 PM  -- Intelligence Sweep (SILENT)
+10:00 PM -- Engagement Collector (SILENT)
+```
 
 **Daily content target:** 3-5 posts across Pillars A (X Intelligence, 2-3 posts) and B (SEO/News, 1-2 posts). See `engine/frameworks/three-pillar-generation.md`.
 
@@ -34,7 +36,7 @@ The automated pipeline follows this daily schedule (all times Eastern):
 - Space posts minimum gap as listed above per account
 - Peak windows are initial estimates. Update based on `brand/voice-learnings.md` engagement data after 2 weeks
 - Minimum viable cadence: at least 4 posts/week per satellite account to maintain algorithmic momentum
-- Content calendar rhythm: Morning Summary at 9:30AM ET sets the day's agenda; content approval at 10:30AM ET; System Health Check at 12PM ET closes active window. Plan weekly on Monday, review Friday (aligns with Weekly Recap + Calibration)
+- Content calendar rhythm: Morning Summary at 8:30AM ET sets the day's agenda; reply-gated chain handles draft review, scheduling, and health check on Vew's responses; Health Check fallback at 10AM ET. Plan weekly on Monday, review Friday (aligns with Weekly Recap + Calibration at 10:30AM)
 
 ## Consistency Accountability
 
@@ -70,3 +72,4 @@ Cross-platform rule: X always gets announcements first. Discord and Telegram fol
 | 2026-03-13 | Initial cadence config extracted from CLAUDE.md | Vew |
 | 2026-03-22 | Added @v0idai daily minimum floor (1 post/day, no exceptions), consistency accountability trigger, and cross-platform presence guidance per X Playbook tips 1, 21 | Vew |
 | 2026-03-25 | Added Daily Pipeline Rhythm table (6-job schedule), updated content calendar rhythm to reference Morning Summary/Draft Review/Health Check times, added 3-5 daily target reference to three-pillar framework | Claude Code |
+| 2026-03-25 | Compacted to 5-job reply-gated schedule: Morning Summary at 8:30AM starts sequential chain, Health Check at 10AM as fallback, Weekly Recap at Fri 10:30AM. Updated pipeline rhythm and calendar rhythm references. | Claude Code |

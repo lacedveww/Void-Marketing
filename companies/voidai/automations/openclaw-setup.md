@@ -98,7 +98,7 @@ Add to your `~/.openclaw/openclaw.json`:
 
 Run these commands to create each scheduled job. All times are America/New_York.
 
-The pipeline uses 6 jobs organized around the Three-Pillar Generation Framework (see `engine/frameworks/three-pillar-generation.md`). Two jobs are silent data collectors; four produce messages for review.
+The pipeline uses 5 jobs organized around the Three-Pillar Generation Framework (see `engine/frameworks/three-pillar-generation.md`). Two jobs are silent data collectors; three produce messages. The Morning Summary is the start of a reply-gated sequential chain that absorbs Draft Review, Scheduling, and Health Check as downstream steps triggered by Vew's responses.
 
 ### Job 1: Intelligence Sweep (SILENT)
 
@@ -133,17 +133,21 @@ openclaw cron add \
 6. Do NOT announce results. This is silent collection only."
 ```
 
-### Job 2: Morning Summary
+### Job 2: Morning Summary (Reply-Gated Chain Start)
 
-Reads the latest sweep data and overnight news, generates a structured brief for Vew's review. This is the primary decision-making input for the day's content.
+Reads the latest sweep data and overnight news, generates a structured brief for Vew's review. This is the START of the reply-gated sequential chain. After delivering the summary, it waits for Vew's response, then proceeds through Draft Review, Scheduling Prompt, Content Scheduler, and Health Check as sequential steps.
+
+**Note:** Job 3 (Draft Review + Content Scheduler) from the previous 6-job setup has been absorbed into this chain. It is no longer a separate timed cron job.
 
 ```bash
 openclaw cron add \
   --name "VoidAI Morning Summary" \
-  --cron "0 9 * * *" \
+  --cron "30 8 * * *" \
   --tz "America/New_York" \
   --session isolated \
-  --message "Generate the VoidAI Morning Summary brief. Execute these steps:
+  --message "Generate the VoidAI Morning Summary brief and run the reply-gated chain. Execute these steps:
+
+STEP 1 - MORNING SUMMARY:
 1. Read the latest sweep JSON from companies/voidai/automations/data/ (most recent sweep-*.json)
 2. Read the latest performance-summary.json (Pillar C feedback data)
 3. Read the latest daily-metrics JSON for current market context
@@ -154,52 +158,49 @@ openclaw cron add \
    D. COMPETITOR ACTIVITY: Any notable moves from gTAO/Tensorplex/TaoFi (or 'Nothing notable')
    E. CONTENT SUGGESTIONS: 3-5 draft post ideas across Pillars A+B with pillar tag, target account, and hook
    F. PERFORMANCE NOTE: Yesterday's engagement highlights from Pillar C (or 'Insufficient data' if pre-launch)
-5. Deliver the brief to Discord and Telegram." \
-  --announce \
-  --channel discord \
-  --to "channel:YOUR_CHANNEL_ID"
-```
+5. Deliver the brief to Telegram (5-6 messages).
+6. PAUSE - wait for Vew's response before continuing.
 
-### Job 3: Draft Review + Content Scheduler
-
-Generates content drafts from the morning summary, presents them for approval, and schedules approved posts. This is the daily content production job.
-
-```bash
-openclaw cron add \
-  --name "VoidAI Draft Review + Scheduler" \
-  --cron "30 10 * * *" \
-  --tz "America/New_York" \
-  --session isolated \
-  --message "Run the VoidAI content generation and scheduling pipeline. Execute these steps:
-1. Read the Morning Summary brief from today (if not available, generate from latest sweep data)
-2. Read performance-summary.json for Pillar C feedback injection
-3. Generate 3-5 draft posts across Pillars A and B:
+STEP 2 - DRAFT REVIEW (on Vew's response):
+7. Generate 3-5 draft posts across Pillars A and B:
    - Pillar A (X Intelligence): 2-3 posts from sweep data (news, QTs, narrative threads)
    - Pillar B (SEO/News): 1-2 posts from news feeds and research pipeline
    - Each draft includes: text, target account, pillar tag, suggested post time, hook type
-4. Run: bash companies/voidai/automations/scripts/generate-daily-tweet.sh with today's metrics
-5. Present all drafts for Vew's review with approve/edit/reject options
-6. For approved drafts:
-   - Move to queue/approved/
-   - If DRY_RUN is not 'true', schedule via post-to-x.sh respecting cadence rules (MAX_POSTS_PER_DAY=6, MIN_POST_GAP_MINUTES=180)
-7. Log rejected drafts with reason for voice calibration learning
-8. Report: drafts generated, approved, rejected, scheduled." \
+8. Run: bash companies/voidai/automations/scripts/generate-daily-tweet.sh with today's metrics
+9. Present all drafts for Vew's review with approve/edit/reject options
+10. Wait for Vew's approval.
+
+STEP 3 - SCHEDULING (on Vew's approval):
+11. Ask Vew for preferred posting times.
+12. Wait for Vew's response with times.
+
+STEP 4 - CONTENT SCHEDULER (on Vew's time preferences):
+13. For approved drafts:
+    - Move to queue/approved/
+    - If DRY_RUN is not 'true', schedule via post-to-x.sh respecting cadence rules (MAX_POSTS_PER_DAY=6, MIN_POST_GAP_MINUTES=180)
+14. Show full day schedule to Vew for confirmation.
+15. Wait for Vew's confirmation.
+
+STEP 5 - HEALTH CHECK (on Vew's confirmation):
+16. Run system health check (API connectivity, cron status, queue audit, posting status).
+17. Log rejected drafts with reason for voice calibration learning.
+18. Report: drafts generated, approved, rejected, scheduled, system status." \
   --announce \
-  --channel discord \
+  --channel telegram \
   --to "channel:YOUR_CHANNEL_ID"
 ```
 
-### Job 4: System Health Check
+### Job 3: System Health Check (Fallback)
 
-Midday operational check. Verifies APIs, cron jobs, and queue status. Closes the active content window for the day.
+Fallback health check. Runs automatically if the morning reply-gated chain hasn't completed by 10AM. Also runs daily including Fridays as a safety net.
 
 ```bash
 openclaw cron add \
   --name "VoidAI System Health Check" \
-  --cron "0 12 * * 1-4,6-7" \
+  --cron "0 10 * * *" \
   --tz "America/New_York" \
   --session isolated \
-  --message "Run the VoidAI System Health Check. Execute these steps:
+  --message "Run the VoidAI System Health Check (fallback). Execute these steps:
 1. Verify API connectivity:
    - Taostats API: curl companies/voidai/automations/scripts/collect-metrics.sh --dry-run
    - OpenTweet API: check key validity
@@ -219,7 +220,7 @@ openclaw cron add \
   --to "channel:YOUR_CHANNEL_ID"
 ```
 
-### Job 5: Engagement Collector (SILENT)
+### Job 4: Engagement Collector (SILENT)
 
 Nightly collection of engagement data for all posts from the day. This is the Pillar C data collection job. Feeds into content generation the next morning.
 
@@ -238,14 +239,14 @@ openclaw cron add \
 5. Do NOT announce results. This is silent collection only. The data will be automatically loaded by content generation scripts tomorrow."
 ```
 
-### Job 6: Weekly Recap + Voice Calibration
+### Job 5: Weekly Recap + Voice Calibration
 
-Runs every Friday at noon. Generates the weekly recap thread, runs voice calibration analysis, and proposes adjustments. This closes the full feedback loop: post -> measure -> learn -> adjust -> post better.
+Runs every Friday at 10:30 AM. Generates the weekly recap thread, runs voice calibration analysis, and proposes adjustments. This closes the full feedback loop: post -> measure -> learn -> adjust -> post better.
 
 ```bash
 openclaw cron add \
   --name "VoidAI Weekly Recap + Calibration" \
-  --cron "0 12 * * 5" \
+  --cron "30 10 * * 5" \
   --tz "America/New_York" \
   --session isolated \
   --message "Run the VoidAI Weekly Recap and Voice Calibration. Execute these steps:
@@ -343,7 +344,7 @@ export DISCORD_WEBHOOK_URL="<from .env>"
 - [ ] Taostats API key set in env
 - [ ] GitHub PAT set in env
 - [ ] OpenTweet API key set in env
-- [ ] All 6 cron jobs created (Intelligence Sweep, Morning Summary, Draft Review, Health Check, Engagement Collector, Weekly Recap)
+- [ ] All 5 cron jobs created (Intelligence Sweep, Morning Summary [reply-gated chain], Health Check [fallback], Engagement Collector, Weekly Recap)
 - [ ] Monitoring files in place: `monitoring/content-accounts.md` (Tier 1) and `monitoring/marketing-accounts.md` (Tier 2)
 - [ ] DRY_RUN test: collect-metrics.sh (verify API data flows)
 - [ ] DRY_RUN test: collect-engagement.sh (verify engagement collection)
@@ -361,9 +362,8 @@ export DISCORD_WEBHOOK_URL="<from .env>"
 
 | Schedule | Job | What it does | Messages? |
 |----------|-----|-------------|-----------|
-| 8AM + 8PM ET | Intelligence Sweep | SILENT data collection from monitored X accounts, news, metrics | No |
-| 9AM ET (~9:30AM) | Morning Summary | Full summary brief: market snapshot, top stories, engagement ops, content suggestions | Yes |
-| 10:30AM ET | Draft Review + Scheduler | Content generation, approval workflow, scheduling approved posts | Yes |
-| 12PM ET (not Fri) | System Health Check | API connectivity, cron status, queue audit, posting status | Yes |
-| 10PM ET | Engagement Collector | SILENT performance data collection, updates performance-summary.json | No |
-| Fri 12PM ET | Weekly Recap + Calibration | Recap thread + voice calibration analysis + weight adjustment proposals | Yes |
+| 8:00 AM + 8:00 PM ET | Intelligence Sweep | SILENT data collection: X accounts, subnets, marketing intel, news, SEO, competitors | No (silent) |
+| 8:30 AM ET | Morning Summary → Draft Review → Scheduling → Health Check | Reply-gated chain: delivers summary, waits for response, then runs draft review, scheduling prompt, content scheduler, and health check as sequential steps | Yes (Telegram) |
+| 10:00 AM ET | Health Check (fallback) | Runs automatically if the morning chain hasn't completed by 10AM. Also runs daily including Fridays. | Yes (Telegram) |
+| 10:00 PM ET | Engagement Collector | SILENT: collects post engagement data, updates performance files | No (silent) |
+| 10:30 AM Fridays | Weekly Recap + Calibration | Generates recap thread, voice calibration, updates voice-learnings.md | Yes (Telegram) |

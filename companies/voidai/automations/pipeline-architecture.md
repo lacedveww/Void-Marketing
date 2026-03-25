@@ -30,6 +30,7 @@
 16. [Analytics Feedback Loop Architecture](#16-analytics-feedback-loop-architecture)
 17. [LarryBrain Skill Marketplace Evaluation](#17-larrybrain-skill-marketplace-evaluation)
 18. [Three-Pillar Framework & Intelligence Sweep Data Flow](#18-three-pillar-framework--intelligence-sweep-data-flow)
+19. [Reply-Gated Sequential Workflow](#19-reply-gated-sequential-workflow)
 
 ---
 
@@ -1457,7 +1458,7 @@ Content generation is organized into three pillars:
 ### Intelligence Sweep Data Flow
 
 ```
-8AM ET / 8PM ET: Intelligence Sweep (SILENT)
+8:00 AM ET / 8:00 PM ET: Intelligence Sweep (SILENT)
     |
     |-- Reads: monitoring/content-accounts.md (Tier 1)
     |-- Reads: monitoring/marketing-accounts.md (Tier 2)
@@ -1467,26 +1468,30 @@ Content generation is organized into three pillars:
 data/sweep-YYYY-MM-DD-HHMM.json
     |
     v
-9AM ET: Morning Summary
+8:30 AM ET: Morning Summary (reply-gated chain start)
     |-- Reads: sweep JSON + performance-summary.json
     |-- Generates: structured brief (market, stories, opportunities, suggestions)
-    |-- Delivers: Discord + Telegram
+    |-- Delivers: Telegram (5-6 messages)
+    |-- PAUSES: waits for Vew's response
     |
-    v
-10:30AM ET: Draft Review + Scheduler
+    v  [on Vew's response]
+Draft Review -> Scheduling -> Content Schedule -> Health Check
     |-- Reads: morning summary + Pillar C feedback
     |-- Generates: 3-5 draft posts (Pillar A: 2-3, Pillar B: 1-2)
-    |-- Approval: human review gate
+    |-- Approval: reply-gated human review
     |-- Schedules: approved posts via OpenTweet
     |
     v
-10PM ET: Engagement Collector (SILENT)
+10:00 AM ET: Health Check (fallback if chain not complete)
+    |
+    v
+10:00 PM ET: Engagement Collector (SILENT)
     |-- Collects: likes, RTs, replies, views, bookmarks
     |-- Updates: performance-summary.json, top-performers.json
     |-- Feeds back into next morning's content generation
     |
     v
-Fri 12PM ET: Weekly Recap + Calibration
+Fri 10:30 AM ET: Weekly Recap + Calibration
     |-- Generates: recap thread for @v0idai
     |-- Analyzes: week's engagement patterns
     |-- Updates: brand/voice-learnings.md
@@ -1534,6 +1539,27 @@ For the full account lists, see `monitoring/content-accounts.md` and `monitoring
 
 ---
 
+## 19. Reply-Gated Sequential Workflow
+
+The morning pipeline is NOT a series of independent timed cron jobs. It is a SEQUENTIAL CHAIN where each step waits for Vew's response before proceeding.
+
+### Chain Flow:
+1. 8:00 AM -- Intelligence Sweep fires automatically (silent)
+2. 8:30 AM -- Morning Summary fires automatically, delivers 5-6 messages, then waits
+3. [Vew responds] -- Draft Review activates (three-pillar content generation + approval)
+4. [Vew approves] -- Scheduling Prompt (asks for posting times)
+5. [Vew provides times] -- Content Scheduler (shows full day schedule)
+6. [Vew confirms] -- Health Check runs
+7. Session ends
+
+### Key Rules:
+- NO timeout on responses. If Vew doesn't respond until 5PM, the chain starts at that point.
+- Only the next day's 8:30 AM cycle cancels any pending chain.
+- Bookend jobs (Intelligence Sweep 8AM/8PM, Engagement Collector 10PM) always fire on schedule regardless of chain state.
+- Health Check at 10AM runs as fallback if the chain hasn't reached it yet.
+
+---
+
 ## Changelog
 
 | Date | Change |
@@ -1543,3 +1569,4 @@ For the full account lists, see `monitoring/content-accounts.md` and `monitoring
 | 2026-03-22 | Added Sections 16-17 (Analytics Feedback Loop Architecture, LarryBrain Skill Marketplace Evaluation). Feedback loop closes the biggest gap: generate -> post -> track -> learn -> generate better. |
 | 2026-03-22 | Added Sections 12-15: Sub-Agent Content Generation Architecture (per-account sub-agents, batch generation), Content Experimentation Loop (autoresearch for content), Research Pipeline Tools (AlphaXiv MCP for arXiv search), VoidAI as AI CMO Showcase (Okara competitive response, strategic options). Added AlphaXiv to MCP servers in system diagram. Renumbered sections 12-17 for sequential file order. Updated TOC. |
 | 2026-03-25 | Added Section 18: Three-Pillar Framework & Intelligence Sweep Data Flow. Documents three-pillar content generation system, sweep JSON structure, monitoring account tiers, and full data flow from sweep to calibration. Updated TOC. |
+| 2026-03-25 | Added Section 19: Reply-Gated Sequential Workflow. Compacted schedule from 6 to 5 jobs. Morning Summary at 8:30AM starts reply-gated chain absorbing Draft Review. Health Check moved to 10AM as fallback. Weekly Recap moved to Fri 10:30AM. Updated Section 18 data flow diagram. |
