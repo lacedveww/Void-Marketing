@@ -194,3 +194,4 @@ Pillar C requires live posting data to function. During DRY_RUN and early soft-l
 | 2026-03-25 | Lending pivot: added lending keywords to Pillar A+B coverage and routing. Updated account routing from 6 to 4 accounts. Removed Meme/Culture and AI x Crypto routing. Added Daily/Informational routing. |
 | 2026-03-25 | Updated Step 3 (Content Drafting) to per-account sequential generation with account-specific persona loading. Replaces single-batch drafting with 4-account mini-review cycles. |
 | 2026-03-25 | Two-stage curation: Step 3 generates 8 variants with hook diversity, Step 3b adds Gemini 6-dimension scoring layer, Step 4 presents curated top 4 to Vew. Preference logging for all variants. |
+| 2026-03-26 | Removed DeFi/Cross-Chain account. Updated account routing and generation order to 3 accounts: @v0idai -> Daily/Info -> Bittensor Ecosystem. |

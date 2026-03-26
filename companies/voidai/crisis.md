@@ -258,4 +258,5 @@ Follow these steps in order. Do not skip steps. Do not rush.
 | 2026-03-15 | Added Technical Kill Switch (EMERGENCY_STOP), activation procedure, recovery procedure, JS code node spec | Vew |
 | 2026-03-13 | Initial crisis protocol extracted from CLAUDE.md (config audit remediation) | Vew |
 | 2026-03-22 | Added Proactive Communication Triggers: SN106 ranking drop, emissions decline, extended quiet period per X Playbook tip 5 | Vew |
+| 2026-03-26 | Removed DeFi/Cross-Chain satellite. Simplified per-account crisis behavior to 3 accounts (1 main + 2 satellites). | Vew |
 | 2026-03-25 | Lending pivot: added lending crisis triggers (exploit, delay, TVL drop, utilization spike, liquidation cascade), updated per-account behavior for 4 accounts, updated recovery resume order. | Vew |

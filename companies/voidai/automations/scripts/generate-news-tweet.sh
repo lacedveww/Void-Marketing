@@ -53,7 +53,7 @@ log() {
 
 usage() {
   echo "Usage: $0 [--variants N] [--account NAME] <news-item-json-file | ->" >&2
-  echo "  --account: v0idai (default), daily-info, bittensor, defi" >&2
+  echo "  --account: v0idai (default), daily-info, bittensor" >&2
   echo "  Use - to read from stdin" >&2
   exit 1
 }

@@ -46,7 +46,7 @@ log() {
 
 usage() {
   echo "Usage: $0 [--variants N] [--account NAME] <metrics-json-file>" >&2
-  echo "  --account: v0idai (default), daily-info, bittensor, defi" >&2
+  echo "  --account: v0idai (default), daily-info, bittensor" >&2
   exit 1
 }
 
