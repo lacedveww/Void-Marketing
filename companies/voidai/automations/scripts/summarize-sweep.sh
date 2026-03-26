@@ -17,13 +17,30 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
 DATA_DIR="$PROJECT_ROOT/companies/voidai/automations/data"
 
-# Find sweep file
+# Find sweep file — pick the best one, not just the latest
+# A "good" sweep has actual X account data (>5KB). Failed sweeps are ~2KB with 0 posts.
+find_best_sweep() {
+  local pattern="$1"
+  for f in $(ls -t $pattern 2>/dev/null); do
+    local size=$(wc -c < "$f" 2>/dev/null || echo 0)
+    local posts=$(jq '.x_accounts.total_posts // 0' "$f" 2>/dev/null || echo 0)
+    if [[ "$size" -gt 5000 && "$posts" -gt 0 ]]; then
+      echo "$f"
+      return 0
+    fi
+  done
+  # No good sweep found, return latest anyway
+  ls -t $pattern 2>/dev/null | head -1
+}
+
 if [[ $# -ge 1 && -f "$1" ]]; then
   SWEEP_FILE="$1"
 else
-  SWEEP_FILE=$(ls -t "$DATA_DIR"/sweep-$(date +%Y-%m-%d)*.json 2>/dev/null | head -1)
+  # Try today's sweeps first (prefer ones with actual data)
+  SWEEP_FILE=$(find_best_sweep "$DATA_DIR/sweep-$(date +%Y-%m-%d)*.json")
   if [[ -z "$SWEEP_FILE" ]]; then
-    SWEEP_FILE=$(ls -t "$DATA_DIR"/sweep-*.json 2>/dev/null | head -1)
+    # Fall back to any recent sweep with data
+    SWEEP_FILE=$(find_best_sweep "$DATA_DIR/sweep-*.json")
   fi
 fi
 
