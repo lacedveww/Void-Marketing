@@ -346,7 +346,7 @@ Test with DRY_RUN first (already set to true in .env).
 
 ## 7. Environment Variables
 
-These are already set in `/Users/vew/Apps/Void-AI/.env`. Also export them in your shell profile so OpenClaw cron jobs can access them:
+These are already set in `C:/Users/vew24/Apps/Void-Marketing-main/.env`. Also export them in your shell profile so OpenClaw cron jobs can access them:
 
 ```bash
 export GEMINI_API_KEY="<from .env>"
@@ -355,9 +355,17 @@ export GITHUB_TOKEN="<from .env>"
 export OPENTWEET_API_KEY="<from .env>"
 export TELEGRAM_BOT_TOKEN="<from .env>"
 export DISCORD_WEBHOOK_URL="<from .env>"
+
+# Apify (required for collect-x-accounts.sh in Intelligence Sweep)
+export APIFY_API_TOKEN="<from .env>"           # API token from https://console.apify.com/account/integrations
+export MAX_APIFY_DAILY_COST="1.00"             # Daily spend cap in USD (default: 1.00)
+export MAX_APIFY_MONTHLY_COST="27.00"          # Monthly spend cap in USD (default: 27.00)
+export APIFY_COST_PER_RUN="0.50"               # Cost cap per actor run in USD (default: 0.50)
 ```
 
-**Note**: All values are in `/Users/vew/Apps/Void-AI/.env`. Copy them from there.
+**Apify plan**: Starter Monthly ($29/month prepaid, Bronze discount). Actor: apidojo/tweet-scraper ($0.0004/tweet).
+
+**Note**: All values are in `C:/Users/vew24/Apps/Void-Marketing-main/.env`. Copy them from there.
 
 ## 8. Migration Checklist
 
