@@ -53,12 +53,16 @@ DRY_RUN="${_CALLER_DRY_RUN:-${DRY_RUN:-true}}"
 OPENTWEET_API_BASE="${OPENTWEET_API_BASE:-https://opentweet.io/api/v1/}"
 HTTP_TIMEOUT="${HTTP_TIMEOUT:-30}"
 
+# Posting account: currently @flowerncoins (Vew's personal) until @v0idai access granted
+# Switch to @v0idai after end-of-month presentation
+POSTING_ACCOUNT="${POSTING_ACCOUNT:-flowerncoins}"
+
 log() {
   echo "[post-to-x] $(date '+%Y-%m-%d %H:%M:%S') $*" >&2
 }
 
 # Log effective mode on startup for debugging
-log "DRY_RUN=$DRY_RUN (caller=${_CALLER_DRY_RUN:-<unset>})"
+log "DRY_RUN=$DRY_RUN, posting_account=@$POSTING_ACCOUNT (caller=${_CALLER_DRY_RUN:-<unset>})"
 
 usage() {
   echo "Usage:" >&2

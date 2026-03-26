@@ -52,16 +52,19 @@ log() {
 }
 
 usage() {
-  echo "Usage: $0 [--variants N] <news-item-json-file | ->" >&2
+  echo "Usage: $0 [--variants N] [--account NAME] <news-item-json-file | ->" >&2
+  echo "  --account: v0idai (default), daily-info, bittensor, defi" >&2
   echo "  Use - to read from stdin" >&2
   exit 1
 }
 
 # Parse optional flags before positional args
 VARIANTS=1
+ACCOUNT="v0idai"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --variants) VARIANTS="$2"; shift 2 ;;
+    --account) ACCOUNT="$2"; shift 2 ;;
     *) break ;;
   esac
 done
@@ -105,6 +108,29 @@ fi
 
 log "Processing news: \"$NEWS_TITLE\" from $NEWS_SOURCE"
 
+# Load account persona from accounts.md
+ACCOUNTS_FILE="$COMPANY_DIR/accounts.md"
+if [[ -f "$ACCOUNTS_FILE" ]]; then
+  case "$ACCOUNT" in
+    v0idai)      ACCOUNT_SECTION="Account 1" ; ACCOUNT_NAME="@v0idai (Main)" ;;
+    daily-info)  ACCOUNT_SECTION="Account 2" ; ACCOUNT_NAME="VoidAI Daily/Informational" ;;
+    bittensor)   ACCOUNT_SECTION="Account 3" ; ACCOUNT_NAME="Bittensor Ecosystem Analyst" ;;
+    defi)        ACCOUNT_SECTION="Account 4" ; ACCOUNT_NAME="DeFi / Cross-Chain Alpha" ;;
+    *)           ACCOUNT_SECTION="Account 1" ; ACCOUNT_NAME="@v0idai (Main)" ;;
+  esac
+  # Extract from "## Account N:" to next "## Account" or "---" separator
+  ACCOUNT_PERSONA=$(sed -n "/^## ${ACCOUNT_SECTION}:/,/^## Account [0-9]/p" "$ACCOUNTS_FILE" | sed '$d')
+  if [[ -z "$ACCOUNT_PERSONA" ]]; then
+    # Fallback: try extracting to end of file (for last account)
+    ACCOUNT_PERSONA=$(sed -n "/^## ${ACCOUNT_SECTION}:/,\$p" "$ACCOUNTS_FILE")
+  fi
+  log "Loaded persona for $ACCOUNT_NAME"
+else
+  ACCOUNT_PERSONA=""
+  ACCOUNT_NAME="@v0idai (Main)"
+  log "WARNING: accounts.md not found, using default persona"
+fi
+
 # Load performance summary (feedback loop)
 PERFORMANCE_SUMMARY_FILE="$PROJECT_ROOT/companies/voidai/automations/data/performance-summary.json"
 PERFORMANCE_CONTEXT=""
@@ -144,7 +170,7 @@ if [[ "$DRY_RUN" == "true" ]]; then
     for i in $(seq 1 "$VARIANTS"); do
       IDX=$(( (i - 1) % 8 ))
       [[ $i -gt 1 ]] && MOCK_VARIANTS+=","
-      MOCK_VARIANTS+="{\"id\":\"v${i}\",\"content\":\"[DRY_RUN] Mock news variant ${i} tweet text\",\"hook_type\":\"${HOOK_TYPES[$IDX]}\",\"tone\":\"${TONES[$IDX]}\",\"format\":\"news-commentary\",\"content_type\":\"tweet\",\"account\":\"v0idai\",\"pillar\":\"ecosystem-intelligence\",\"topic\":\"$(echo "$NEWS_TITLE" | sed 's/"/\\"/g')\",\"word_count\":8}"
+      MOCK_VARIANTS+="{\"id\":\"v${i}\",\"content\":\"[DRY_RUN] Mock news variant ${i} tweet text\",\"hook_type\":\"${HOOK_TYPES[$IDX]}\",\"tone\":\"${TONES[$IDX]}\",\"format\":\"news-commentary\",\"content_type\":\"tweet\",\"account\":\"${ACCOUNT}\",\"pillar\":\"ecosystem-intelligence\",\"topic\":\"$(echo "$NEWS_TITLE" | sed 's/"/\\"/g')\",\"word_count\":8}"
     done
     MOCK_VARIANTS+="]"
     jq -n \
@@ -164,10 +190,11 @@ if [[ "$DRY_RUN" == "true" ]]; then
       --arg title "$NEWS_TITLE" \
       --arg source "$NEWS_SOURCE" \
       --arg ts "$TIMESTAMP" \
+      --arg account "$ACCOUNT" \
       '{
         "tweet": "[DRY_RUN] Would generate news commentary tweet",
         "platform": "x",
-        "account": "v0idai",
+        "account": $account,
         "pillar": "ecosystem-intelligence",
         "content_type": "single",
         "status": "dry_run",
@@ -187,12 +214,12 @@ SAFE_SUMMARY=$(echo "$NEWS_SUMMARY" | sed -E 's/(ignore previous|system prompt|a
 # Build the prompt
 if [[ "$VARIANTS" -gt 1 ]]; then
   # --- Multi-variant prompt ---
-  PROMPT="You are generating tweets for the @v0idai X account about a news item.
+  PROMPT="You are generating tweets for the ${ACCOUNT_NAME} X account about a news item.
 
 VoidAI is Bittensor DeFi Infrastructure (bridge + staking + lending). The lending platform is the current primary focus.
 VoidAI operates 4 X accounts (1 main + 3 satellites: Daily/Informational, Bittensor Ecosystem, DeFi/Cross-Chain).
 
-Generate exactly $VARIANTS tweet variants about the topic below for the @v0idai account.
+Generate exactly $VARIANTS tweet variants about the topic below for the ${ACCOUNT_NAME} account.
 
 MANDATORY DIVERSITY — each variant must use a DIFFERENT hook type:
 - Variants 1-2: data-lead hooks (open with a specific number or metric)
@@ -215,6 +242,9 @@ explain why it matters for TAO holders or subnet builders, or share a unique tak
 
 VOICE RULES:
 $VOICE_RULES
+
+ACCOUNT PERSONA (match this voice exactly):
+${ACCOUNT_PERSONA}
 
 COMPLIANCE RULES (mandatory):
 $COMPLIANCE_RULES
@@ -255,7 +285,7 @@ Return ONLY valid JSON, no markdown fences, no explanation:
       \"tone\": \"analytical\",
       \"format\": \"news-commentary\",
       \"content_type\": \"tweet\",
-      \"account\": \"v0idai\",
+      \"account\": \"${ACCOUNT}\",
       \"pillar\": \"ecosystem-intelligence\",
       \"topic\": \"<topic from news item>\",
       \"word_count\": <number>
@@ -268,7 +298,7 @@ Generate all $VARIANTS variants now."
 
 else
   # --- Single-variant prompt (original) ---
-  PROMPT="You are generating a single tweet for the @v0idai X account about a news item.
+  PROMPT="You are generating a single tweet for the ${ACCOUNT_NAME} X account about a news item.
 
 VoidAI is Bittensor DeFi Infrastructure (bridge + staking + lending). The lending platform is the current primary focus.
 VoidAI operates 4 X accounts (1 main + 3 satellites: Daily/Informational, Bittensor Ecosystem, DeFi/Cross-Chain).
@@ -281,6 +311,9 @@ explain why it matters for TAO holders or subnet builders, or share a unique tak
 
 VOICE RULES:
 $VOICE_RULES
+
+ACCOUNT PERSONA (match this voice exactly):
+${ACCOUNT_PERSONA}
 
 COMPLIANCE RULES (mandatory):
 $COMPLIANCE_RULES
@@ -428,11 +461,12 @@ else
     --arg title "$NEWS_TITLE" \
     --arg source "$NEWS_SOURCE" \
     --arg url "$NEWS_URL" \
+    --arg account "$ACCOUNT" \
     --argjson len "$TWEET_LEN" \
     '{
       "tweet": $tweet,
       "platform": "x",
-      "account": "v0idai",
+      "account": $account,
       "pillar": "ecosystem-intelligence",
       "content_type": "single",
       "status": $status,

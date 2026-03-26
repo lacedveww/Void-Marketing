@@ -96,6 +96,8 @@ Add to your `~/.openclaw/openclaw.json`:
 
 ## 4. Cron Job Definitions
 
+> **NOTE:** Until @v0idai access is granted (expected after end-of-month presentation), the pipeline posts Account 1 content to @flowerncoins (Vew's personal X account) via OpenTweet. Content is generated with @v0idai's voice and persona. Once @v0idai access is received, update the POSTING_ACCOUNT in .env and remove this note.
+
 Run these commands to create each scheduled job. All times are America/New_York.
 
 The pipeline uses 5 jobs organized around the Three-Pillar Generation Framework (see `engine/frameworks/three-pillar-generation.md`). Two jobs are silent data collectors; three produce messages. The Morning Summary is the start of a reply-gated sequential chain that absorbs Draft Review, Scheduling, and Health Check as downstream steps triggered by Vew's responses.
@@ -170,9 +172,10 @@ FOR EACH CONTENT SLOT IN EACH ACCOUNT, follow this flow:
 
 SUBSTEP A - GENERATE 8 VARIANTS:
 Run the generation script with --variants 8 (or --variants 4 for articles).
-For tweets: bash companies/voidai/automations/scripts/generate-daily-tweet.sh --variants 8 <metrics-file>
-For news tweets: bash companies/voidai/automations/scripts/generate-news-tweet.sh --variants 8 <news-file>
-For threads: bash companies/voidai/automations/scripts/generate-weekly-thread.sh --variants 8 <metrics-file>
+For tweets: bash companies/voidai/automations/scripts/generate-daily-tweet.sh --variants 8 --account <account-id> <metrics-file>
+For news tweets: bash companies/voidai/automations/scripts/generate-news-tweet.sh --variants 8 --account <account-id> <news-file>
+For threads: bash companies/voidai/automations/scripts/generate-weekly-thread.sh --variants 8 --account <account-id> <metrics-file>
+Where <account-id> is: v0idai, daily-info, bittensor, or defi. This loads the correct persona from accounts.md.
 Receive the variants JSON with metadata (hook_type, tone, format for each variant).
 
 SUBSTEP B - SCORE ALL VARIANTS (run internally, do NOT show scores to Vew):
@@ -220,29 +223,33 @@ SUBSTEP F - HANDLE VEW'S RESPONSE:
 NOW APPLY THIS FLOW TO EACH ACCOUNT:
 
 Account 1: @v0idai (Main)
-9. Read companies/voidai/accounts.md Account 1 persona. For each content slot (1-2 tweet slots):
-   Run substeps A-F above. Focus: builder updates, lending development, vision threads, major milestones.
-10. For approved @v0idai drafts: proceed to scheduling via post-to-x.sh respecting cadence rules (MAX_POSTS_PER_DAY=6, MIN_POST_GAP_MINUTES=180).
+9. For each content slot (1-2 tweet slots), run substeps A-F with --account v0idai:
+   bash generate-daily-tweet.sh --variants 8 --account v0idai <metrics-file>
+   Focus: builder updates, lending development, vision threads, major milestones.
+10. For approved @v0idai drafts: proceed to scheduling via post-to-x.sh respecting cadence rules (MAX_POSTS_PER_DAY=6, MIN_POST_GAP_MINUTES=180). NOTE: Currently posting to @flowerncoins until @v0idai access granted.
 11. Show full @v0idai schedule for today. Then say: 'Moving to Daily/Info account drafts. Ready?'
 12. Wait for Vew's response.
 
 Account 2: VoidAI Daily/Informational
-13. Read companies/voidai/accounts.md Account 2 persona. For each content slot (3-5 tweet slots):
-    Run substeps A-F. Focus: product updates, bridge stats, lending progress, ecosystem news.
+13. For each content slot (3-5 tweet slots), run substeps A-F with --account daily-info:
+    bash generate-daily-tweet.sh --variants 8 --account daily-info <metrics-file>
+    Focus: product updates, bridge stats, lending progress, ecosystem news.
 14. For approved drafts: move to queue/posted/daily-info/ with metadata.
 15. Then say: 'Moving to Bittensor Ecosystem account drafts. Ready?'
 16. Wait for Vew's response.
 
 Account 3: Bittensor Ecosystem Analyst
-17. Read companies/voidai/accounts.md Account 3 persona. For each content slot (2-3 tweet slots):
-    Run substeps A-F. Focus: Bittensor ecosystem, subnet analysis, TAO trends. VoidAI max 1 post.
+17. For each content slot (2-3 tweet slots), run substeps A-F with --account bittensor:
+    bash generate-daily-tweet.sh --variants 8 --account bittensor <metrics-file>
+    Focus: Bittensor ecosystem, subnet analysis, TAO trends. VoidAI max 1 post.
 18. For approved drafts: move to queue/posted/bittensor/ with manually_posted metadata.
 19. Then say: 'Moving to DeFi/Cross-Chain account drafts. Ready?'
 20. Wait for Vew's response.
 
 Account 4: DeFi / Cross-Chain Alpha
-21. Read companies/voidai/accounts.md Account 4 persona. For each content slot (2-3 tweet slots):
-    Run substeps A-F. Focus: DeFi analysis, lending markets, yield strategies. VoidAI/Bittensor max 1 post.
+21. For each content slot (2-3 tweet slots), run substeps A-F with --account defi:
+    bash generate-daily-tweet.sh --variants 8 --account defi <metrics-file>
+    Focus: DeFi analysis, lending markets, yield strategies. VoidAI/Bittensor max 1 post.
 22. For approved drafts: move to queue/posted/defi/ with manually_posted metadata.
 
 After all 4 accounts:

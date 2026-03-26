@@ -22,6 +22,8 @@ All satellite accounts MUST comply with these requirements:
 
 ## Account 1: @v0idai (Main)
 
+> **TEMPORARY (until end-of-month):** Account 1 content is posted to @flowerncoins (Vew's personal X account) until @v0idai access is granted. Content is still generated with the @v0idai persona and voice rules. Only the posting destination changes.
+
 - **Handle**: @v0idai
 - **Role**: Official VoidAI account. All announcements originate here. Builder-style updates including lending development progress.
 - **Content mix**: All 5 content pillars at standard weights (30% Lending & DeFi Banking, 20% Bridge & Infrastructure, 25% Ecosystem Intelligence, 20% Alpha & Education, 5% Community & Culture)

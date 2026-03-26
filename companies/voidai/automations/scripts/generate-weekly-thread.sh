@@ -45,15 +45,18 @@ log() {
 }
 
 usage() {
-  echo "Usage: $0 [--variants N] <weekly-metrics-json-file>" >&2
+  echo "Usage: $0 [--variants N] [--account NAME] <weekly-metrics-json-file>" >&2
+  echo "  --account: v0idai (default), daily-info, bittensor, defi" >&2
   exit 1
 }
 
 # Parse optional flags before positional args
 VARIANTS=1
+ACCOUNT="v0idai"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --variants) VARIANTS="$2"; shift 2 ;;
+    --account) ACCOUNT="$2"; shift 2 ;;
     *) break ;;
   esac
 done
@@ -76,6 +79,29 @@ fi
 
 METRICS_DATA=$(cat "$METRICS_FILE")
 log "Loaded weekly metrics from $METRICS_FILE"
+
+# Load account persona from accounts.md
+ACCOUNTS_FILE="$COMPANY_DIR/accounts.md"
+if [[ -f "$ACCOUNTS_FILE" ]]; then
+  case "$ACCOUNT" in
+    v0idai)      ACCOUNT_SECTION="Account 1" ; ACCOUNT_NAME="@v0idai (Main)" ;;
+    daily-info)  ACCOUNT_SECTION="Account 2" ; ACCOUNT_NAME="VoidAI Daily/Informational" ;;
+    bittensor)   ACCOUNT_SECTION="Account 3" ; ACCOUNT_NAME="Bittensor Ecosystem Analyst" ;;
+    defi)        ACCOUNT_SECTION="Account 4" ; ACCOUNT_NAME="DeFi / Cross-Chain Alpha" ;;
+    *)           ACCOUNT_SECTION="Account 1" ; ACCOUNT_NAME="@v0idai (Main)" ;;
+  esac
+  # Extract from "## Account N:" to next "## Account" or "---" separator
+  ACCOUNT_PERSONA=$(sed -n "/^## ${ACCOUNT_SECTION}:/,/^## Account [0-9]/p" "$ACCOUNTS_FILE" | sed '$d')
+  if [[ -z "$ACCOUNT_PERSONA" ]]; then
+    # Fallback: try extracting to end of file (for last account)
+    ACCOUNT_PERSONA=$(sed -n "/^## ${ACCOUNT_SECTION}:/,\$p" "$ACCOUNTS_FILE")
+  fi
+  log "Loaded persona for $ACCOUNT_NAME"
+else
+  ACCOUNT_PERSONA=""
+  ACCOUNT_NAME="@v0idai (Main)"
+  log "WARNING: accounts.md not found, using default persona"
+fi
 
 # Load performance summary (feedback loop)
 PERFORMANCE_SUMMARY_FILE="$PROJECT_ROOT/companies/voidai/automations/data/performance-summary.json"
@@ -138,7 +164,7 @@ if [[ "$DRY_RUN" == "true" ]]; then
     for i in $(seq 1 "$VARIANTS"); do
       IDX=$(( (i - 1) % 8 ))
       [[ $i -gt 1 ]] && MOCK_VARIANTS+=","
-      MOCK_VARIANTS+="{\"id\":\"v${i}\",\"content\":[{\"position\":1,\"tweet\":\"[DRY_RUN] Variant ${i} hook tweet\",\"is_hook\":true},{\"position\":2,\"tweet\":\"[DRY_RUN] Variant ${i} data tweet\",\"is_hook\":false},{\"position\":3,\"tweet\":\"[DRY_RUN] Variant ${i} insight tweet\",\"is_hook\":false},{\"position\":4,\"tweet\":\"[DRY_RUN] Variant ${i} CTA tweet\",\"is_hook\":false}],\"hook_type\":\"${STRUCTURE_TYPES[$IDX]}\",\"tone\":\"${TONES[$IDX]}\",\"format\":\"thread\",\"content_type\":\"thread\",\"account\":\"v0idai\",\"pillar\":\"ecosystem-intelligence\",\"topic\":\"weekly recap\",\"word_count\":20}"
+      MOCK_VARIANTS+="{\"id\":\"v${i}\",\"content\":[{\"position\":1,\"tweet\":\"[DRY_RUN] Variant ${i} hook tweet\",\"is_hook\":true},{\"position\":2,\"tweet\":\"[DRY_RUN] Variant ${i} data tweet\",\"is_hook\":false},{\"position\":3,\"tweet\":\"[DRY_RUN] Variant ${i} insight tweet\",\"is_hook\":false},{\"position\":4,\"tweet\":\"[DRY_RUN] Variant ${i} CTA tweet\",\"is_hook\":false}],\"hook_type\":\"${STRUCTURE_TYPES[$IDX]}\",\"tone\":\"${TONES[$IDX]}\",\"format\":\"thread\",\"content_type\":\"thread\",\"account\":\"${ACCOUNT}\",\"pillar\":\"ecosystem-intelligence\",\"topic\":\"weekly recap\",\"word_count\":20}"
     done
     MOCK_VARIANTS+="]"
     jq -n \
@@ -152,6 +178,7 @@ if [[ "$DRY_RUN" == "true" ]]; then
   else
     jq -n \
       --arg ts "$TIMESTAMP" \
+      --arg account "$ACCOUNT" \
       '{
         "thread": [
           {"position": 1, "tweet": "[DRY_RUN] Hook tweet placeholder", "is_hook": true},
@@ -161,7 +188,7 @@ if [[ "$DRY_RUN" == "true" ]]; then
           {"position": 5, "tweet": "[DRY_RUN] CTA tweet placeholder", "is_hook": false}
         ],
         "platform": "x",
-        "account": "v0idai",
+        "account": $account,
         "pillar": "ecosystem-intelligence",
         "content_type": "thread",
         "status": "dry_run",
@@ -174,11 +201,11 @@ fi
 # Build the prompt
 if [[ "$VARIANTS" -gt 1 ]]; then
   # --- Multi-variant thread prompt ---
-  PROMPT="You are generating weekly recap THREAD variants for the @v0idai X account (VoidAI main account).
+  PROMPT="You are generating weekly recap THREAD variants for the ${ACCOUNT_NAME} X account.
 VoidAI is Bittensor DeFi Infrastructure (bridge + staking + lending). The lending platform is the current primary focus.
 VoidAI operates 4 X accounts (1 main + 3 satellites: Daily/Informational, Bittensor Ecosystem, DeFi/Cross-Chain).
 
-Generate exactly $VARIANTS thread variants based on the weekly metrics data below for the @v0idai account.
+Generate exactly $VARIANTS thread variants based on the weekly metrics data below for the ${ACCOUNT_NAME} account.
 
 MANDATORY DIVERSITY — each variant must use a DIFFERENT structure type:
 - Variants 1-2: educational structure (teach the reader something, break down a concept with data)
@@ -204,6 +231,9 @@ Every variant must:
 
 VOICE RULES:
 $VOICE_RULES
+
+ACCOUNT PERSONA (match this voice exactly):
+${ACCOUNT_PERSONA}
 
 COMPLIANCE RULES (mandatory):
 $COMPLIANCE_RULES
@@ -250,7 +280,7 @@ Return ONLY valid JSON, no markdown fences, no explanation.
       \"tone\": \"analytical\",
       \"format\": \"thread\",
       \"content_type\": \"thread\",
-      \"account\": \"v0idai\",
+      \"account\": \"${ACCOUNT}\",
       \"pillar\": \"ecosystem-intelligence\",
       \"topic\": \"<topic from weekly data>\",
       \"word_count\": <total word count across all tweets>
@@ -263,8 +293,7 @@ Generate all $VARIANTS thread variants now."
 
 else
   # --- Single-variant prompt (original) ---
-  PROMPT=$(cat <<'PROMPT_END'
-You are generating a weekly recap THREAD for the @v0idai X account (VoidAI main account).
+  PROMPT="You are generating a weekly recap THREAD for the ${ACCOUNT_NAME} X account.
 VoidAI is Bittensor DeFi Infrastructure (bridge + staking + lending). The lending platform is the current primary focus.
 VoidAI operates 4 X accounts (1 main + 3 satellites: Daily/Informational, Bittensor Ecosystem, DeFi/Cross-Chain).
 
@@ -273,16 +302,14 @@ TASK: Generate a thread of 5 to 7 tweets based on the weekly metrics data below.
 THREAD STRUCTURE (mandatory):
 1. Hook tweet: grabs attention, sets up the thread. Use a compelling data point or insight as the hook.
 2. Data tweets (2-4 tweets): each covers one key metric or trend from the week. Specific numbers required.
-3. Insight tweet: connect the data to a "so what" for the reader. What does this mean for TAO holders, subnet builders, or DeFi users?
+3. Insight tweet: connect the data to a \"so what\" for the reader. What does this mean for TAO holders, subnet builders, or DeFi users?
 4. CTA tweet: close with a clear call to action (bridge, stake, learn more, follow for updates).
-
-PROMPT_END
-)
-
-  PROMPT="$PROMPT
 
 VOICE RULES:
 $VOICE_RULES
+
+ACCOUNT PERSONA (match this voice exactly):
+${ACCOUNT_PERSONA}
 
 COMPLIANCE RULES (mandatory):
 $COMPLIANCE_RULES
@@ -457,11 +484,12 @@ else
     --argjson thread "$THREAD_JSON" \
     --arg status "$STATUS" \
     --arg ts "$TIMESTAMP" \
+    --arg account "$ACCOUNT" \
     --argjson count "$TWEET_COUNT" \
     '{
       "thread": $thread,
       "platform": "x",
-      "account": "v0idai",
+      "account": $account,
       "pillar": "ecosystem-intelligence",
       "content_type": "thread",
       "tweet_count": $count,

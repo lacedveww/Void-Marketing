@@ -45,15 +45,18 @@ log() {
 }
 
 usage() {
-  echo "Usage: $0 [--variants N] <metrics-json-file>" >&2
+  echo "Usage: $0 [--variants N] [--account NAME] <metrics-json-file>" >&2
+  echo "  --account: v0idai (default), daily-info, bittensor, defi" >&2
   exit 1
 }
 
 # Parse optional flags before positional args
 VARIANTS=1
+ACCOUNT="v0idai"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --variants) VARIANTS="$2"; shift 2 ;;
+    --account) ACCOUNT="$2"; shift 2 ;;
     *) break ;;
   esac
 done
@@ -78,6 +81,29 @@ fi
 
 METRICS_DATA=$(cat "$METRICS_FILE")
 log "Loaded metrics from $METRICS_FILE"
+
+# Load account persona from accounts.md
+ACCOUNTS_FILE="$COMPANY_DIR/accounts.md"
+if [[ -f "$ACCOUNTS_FILE" ]]; then
+  case "$ACCOUNT" in
+    v0idai)      ACCOUNT_SECTION="Account 1" ; ACCOUNT_NAME="@v0idai (Main)" ;;
+    daily-info)  ACCOUNT_SECTION="Account 2" ; ACCOUNT_NAME="VoidAI Daily/Informational" ;;
+    bittensor)   ACCOUNT_SECTION="Account 3" ; ACCOUNT_NAME="Bittensor Ecosystem Analyst" ;;
+    defi)        ACCOUNT_SECTION="Account 4" ; ACCOUNT_NAME="DeFi / Cross-Chain Alpha" ;;
+    *)           ACCOUNT_SECTION="Account 1" ; ACCOUNT_NAME="@v0idai (Main)" ;;
+  esac
+  # Extract from "## Account N:" to next "## Account" or "---" separator
+  ACCOUNT_PERSONA=$(sed -n "/^## ${ACCOUNT_SECTION}:/,/^## Account [0-9]/p" "$ACCOUNTS_FILE" | sed '$d')
+  if [[ -z "$ACCOUNT_PERSONA" ]]; then
+    # Fallback: try extracting to end of file (for last account)
+    ACCOUNT_PERSONA=$(sed -n "/^## ${ACCOUNT_SECTION}:/,\$p" "$ACCOUNTS_FILE")
+  fi
+  log "Loaded persona for $ACCOUNT_NAME"
+else
+  ACCOUNT_PERSONA=""
+  ACCOUNT_NAME="@v0idai (Main)"
+  log "WARNING: accounts.md not found, using default persona"
+fi
 
 # Load performance summary (feedback loop: learn from past engagement data)
 PERFORMANCE_SUMMARY_FILE="$PROJECT_ROOT/companies/voidai/automations/data/performance-summary.json"
@@ -163,7 +189,7 @@ if [[ "$DRY_RUN" == "true" ]]; then
     for i in $(seq 1 "$VARIANTS"); do
       IDX=$(( (i - 1) % 8 ))
       [[ $i -gt 1 ]] && MOCK_VARIANTS+=","
-      MOCK_VARIANTS+="{\"id\":\"v${i}\",\"content\":\"[DRY_RUN] Mock variant ${i} tweet text\",\"hook_type\":\"${HOOK_TYPES[$IDX]}\",\"tone\":\"${TONES[$IDX]}\",\"format\":\"single-stat-opener\",\"content_type\":\"tweet\",\"account\":\"v0idai\",\"pillar\":\"bridge-build\",\"topic\":\"daily metrics\",\"word_count\":7}"
+      MOCK_VARIANTS+="{\"id\":\"v${i}\",\"content\":\"[DRY_RUN] Mock variant ${i} tweet text\",\"hook_type\":\"${HOOK_TYPES[$IDX]}\",\"tone\":\"${TONES[$IDX]}\",\"format\":\"single-stat-opener\",\"content_type\":\"tweet\",\"account\":\"${ACCOUNT}\",\"pillar\":\"bridge-build\",\"topic\":\"daily metrics\",\"word_count\":7}"
     done
     MOCK_VARIANTS+="]"
     jq -n \
@@ -178,10 +204,11 @@ if [[ "$DRY_RUN" == "true" ]]; then
     jq -n \
       --arg ts "$TIMESTAMP" \
       --arg metrics "$METRICS_DATA" \
+      --arg account "$ACCOUNT" \
       '{
         "tweet": "[DRY_RUN] Would generate tweet from metrics data",
         "platform": "x",
-        "account": "v0idai",
+        "account": $account,
         "pillar": "bridge-build",
         "status": "dry_run",
         "created_at": $ts,
@@ -194,11 +221,11 @@ fi
 # Build the prompt for claude -p
 if [[ "$VARIANTS" -gt 1 ]]; then
   # --- Multi-variant prompt ---
-  PROMPT="You are generating tweets for the @v0idai X account (VoidAI main account).
+  PROMPT="You are generating tweets for the ${ACCOUNT_NAME} X account.
 VoidAI is Bittensor DeFi Infrastructure (bridge + staking + lending). The lending platform is the current primary focus.
 VoidAI operates 4 X accounts (1 main + 3 satellites: Daily/Informational, Bittensor Ecosystem, DeFi/Cross-Chain).
 
-Generate exactly $VARIANTS tweet variants about the topic below for the @v0idai account.
+Generate exactly $VARIANTS tweet variants about the topic below for the ${ACCOUNT_NAME} account.
 
 MANDATORY DIVERSITY — each variant must use a DIFFERENT hook type:
 - Variants 1-2: data-lead hooks (open with a specific number or metric)
@@ -218,6 +245,9 @@ Every variant must:
 
 VOICE RULES:
 $VOICE_RULES
+
+ACCOUNT PERSONA (match this voice exactly):
+${ACCOUNT_PERSONA}
 
 COMPLIANCE RULES (mandatory, override everything else):
 $COMPLIANCE_RULES
@@ -252,7 +282,7 @@ Return ONLY valid JSON, nothing else. No markdown code fences. No explanation.
       \"tone\": \"analytical\",
       \"format\": \"single-stat-opener\",
       \"content_type\": \"tweet\",
-      \"account\": \"v0idai\",
+      \"account\": \"${ACCOUNT}\",
       \"pillar\": \"bridge-build\",
       \"topic\": \"<topic from input data>\",
       \"word_count\": <number>
@@ -265,20 +295,17 @@ Generate all $VARIANTS variants now."
 
 else
   # --- Single-variant prompt (original) ---
-  PROMPT=$(cat <<'PROMPT_HEADER'
-You are generating a single tweet for the @v0idai X account (VoidAI main account).
+  PROMPT="You are generating a single tweet for the ${ACCOUNT_NAME} X account.
 VoidAI is Bittensor DeFi Infrastructure (bridge + staking + lending). The lending platform is the current primary focus.
 VoidAI operates 4 X accounts (1 main + 3 satellites: Daily/Informational, Bittensor Ecosystem, DeFi/Cross-Chain).
 
 TASK: Generate exactly ONE tweet (max 280 characters) based on the daily metrics data below.
 
 VOICE RULES:
-PROMPT_HEADER
-)
-
-  PROMPT="$PROMPT
-
 $VOICE_RULES
+
+ACCOUNT PERSONA (match this voice exactly):
+${ACCOUNT_PERSONA}
 
 COMPLIANCE RULES (mandatory, override everything else):
 $COMPLIANCE_RULES
@@ -485,11 +512,12 @@ else
     --arg tweet "$TWEET_TEXT" \
     --arg status "$STATUS" \
     --arg ts "$TIMESTAMP" \
+    --arg account "$ACCOUNT" \
     --argjson len "$TWEET_LEN" \
     '{
       "tweet": $tweet,
       "platform": "x",
-      "account": "v0idai",
+      "account": $account,
       "pillar": "bridge-build",
       "content_type": "single",
       "status": $status,
