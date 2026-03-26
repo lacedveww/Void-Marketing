@@ -360,7 +360,14 @@ CLAUDE_OUTPUT=$(cd "$PROJECT_ROOT" && echo "$PROMPT" | "$CLAUDE_BIN" -p 2>/dev/n
 if [[ "$VARIANTS" -gt 1 ]]; then
   # --- Multi-variant JSON extraction ---
   CLEAN_OUTPUT=$(echo "$CLAUDE_OUTPUT" | sed 's/^```json//; s/^```//; s/```$//' | tr '\n' ' ')
-  CLEAN_OUTPUT=$(echo "$CLEAN_OUTPUT" | sed 's/.*\({.*}\).*/\1/')
+  CLEAN_OUTPUT=$(python3 -c "
+import sys
+text = sys.stdin.read()
+start = text.find('{')
+end = text.rfind('}')
+if start >= 0 and end > start:
+    print(text[start:end+1])
+" <<< "$CLEAN_OUTPUT" 2>/dev/null || echo "$CLEAN_OUTPUT" | sed 's/^[^{]*//' | sed 's/[^}]*$//')
 
   if [[ -z "$CLEAN_OUTPUT" ]]; then
     log "ERROR: Could not extract valid JSON from claude output"
