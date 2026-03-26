@@ -102,7 +102,12 @@ The pipeline uses 5 jobs organized around the Three-Pillar Generation Framework 
 
 ### Job 1: Intelligence Sweep (SILENT)
 
-Runs twice daily. Scans monitored X accounts (Tier 1 content accounts from `monitoring/content-accounts.md`, Tier 2 marketing accounts from `monitoring/marketing-accounts.md`) and collects ecosystem news, competitor signals, and engagement opportunities. Produces raw data files consumed by the Morning Summary.
+Runs twice daily. Executes `build-sweep.sh` which orchestrates three concrete collection scripts:
+1. `collect-x-accounts.sh` — fetches recent tweets from 100+ monitored accounts via Twitter Syndication API (no API key needed)
+2. `collect-news.sh` — RSS feeds from CoinDesk, The Block, CoinTelegraph, DL News filtered for Bittensor keywords
+3. `collect-metrics.sh` — Taostats API for TAO price, SN106 subnet data, network stats
+
+The sweep produces a single `data/sweep-YYYY-MM-DD-HHMM.json` file consumed by the Morning Summary.
 
 ```bash
 openclaw cron add \
@@ -110,27 +115,21 @@ openclaw cron add \
   --cron "0 8,20 * * *" \
   --tz "America/New_York" \
   --session isolated \
-  --message "Run the VoidAI Intelligence Sweep. SILENT data collection - do NOT send any messages to channels.
+  --message "Run the VoidAI Intelligence Sweep. This is a SILENT data collection job. Do NOT send any messages.
 
-1. Read the monitoring account lists from:
-   - companies/voidai/monitoring/content-accounts.md (Tier 1: Bittensor core, builders/analysts)
-   - companies/voidai/monitoring/marketing-accounts.md (Tier 2: marketing/design, AI marketing tools)
-2. For each monitored account, collect new posts, threads, and engagement signals since the last sweep.
-3. Run: bash companies/voidai/automations/scripts/collect-news.sh
-4. Run: bash companies/voidai/automations/scripts/collect-metrics.sh
-5. Write consolidated output to companies/voidai/automations/data/sweep-\$(date +%Y-%m-%d)-\$(date +%H%M).json with structure:
-   {
-     \"collected_at\": \"ISO timestamp\",
-     \"sweep_type\": \"morning|evening\",
-     \"accounts_checked\": [...],
-     \"new_posts\": [...],
-     \"engagement_opportunities\": [...],
-     \"competitor_mentions\": [...],
-     \"trending_topics\": [...],
-     \"ecosystem_news\": [...],
-     \"metrics_snapshot\": {...}
-   }
-6. Do NOT announce results. This is silent collection only."
+Run this single command:
+  bash companies/voidai/automations/scripts/build-sweep.sh --hours 12
+
+This executes three collection scripts and merges their outputs into one sweep JSON:
+1. collect-x-accounts.sh -- fetches recent tweets from monitored accounts (monitoring/content-accounts.md + monitoring/marketing-accounts.md) via Twitter Syndication API
+2. collect-news.sh -- RSS feeds filtered for Bittensor/TAO/subnet keywords
+3. collect-metrics.sh -- Taostats API for TAO price, SN106 data, network stats
+
+Output file: companies/voidai/automations/data/sweep-YYYY-MM-DD-HHMM.json
+The file has top-level keys: x_accounts, ecosystem_news, metrics_snapshot, metadata
+
+If the script fails, report the error in the session log but do NOT send any messages.
+Do NOT attempt to manually collect X account data. The script handles all API calls."
 ```
 
 ### Job 2: Morning Summary (Reply-Gated Chain Start)
@@ -148,11 +147,11 @@ openclaw cron add \
   --message "Generate the VoidAI Morning Summary brief and run the reply-gated chain. Execute these steps:
 
 STEP 1 - MORNING SUMMARY:
-1. Read TODAY's morning sweep file: companies/voidai/automations/data/sweep-$(date +%Y-%m-%d)-0800.json (or the most recent file matching sweep-*-morning.json from today)
-2. Read LAST NIGHT's evening sweep file: find the most recent file matching sweep-*-evening.json (this will be yesterday's 8PM sweep)
+1. Find today's morning sweep file: ls -t companies/voidai/automations/data/sweep-\$(date +%Y-%m-%d)-0*.json 2>/dev/null | head -1. The file is named sweep-YYYY-MM-DD-HHMM.json and contains x_accounts (tweets from monitored accounts via Apify), ecosystem_news (RSS), and metrics_snapshot (Taostats). If no sweep file exists yet, note this in the summary and use whatever data files are available.
+2. Find last night's evening sweep: ls -t companies/voidai/automations/data/sweep-*-2*.json 2>/dev/null | head -1 (files with hour >= 20 are evening sweeps).
 3. Read yesterday's engagement data from companies/voidai/automations/data/performance-summary.json (Pillar C feedback for Message 6)
-4. Combine data from BOTH sweeps (evening + morning) to get full overnight coverage. The morning summary must reflect everything that happened since yesterday's morning summary.
-5. Read the latest daily-metrics JSON for current market context
+4. Combine data from BOTH sweeps (evening + morning) to get full overnight coverage. The x_accounts.posts array in each sweep contains tweets with engagement metrics, VoidAI/competitor mention flags, and priority ratings. Use these to identify top stories and engagement opportunities.
+5. Read the latest daily-metrics JSON for current market context (or use metrics_snapshot from the sweep file)
 6. Generate a structured brief with these sections:
    A. MARKET SNAPSHOT: TAO price, SN106 emissions, bridge volume (1 line each)
    B. TOP STORIES (max 5): Priority-ranked news/posts from sweep, with suggested content angle and target account

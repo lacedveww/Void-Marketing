@@ -1,17 +1,17 @@
 {
-  "collected_at": "2026-03-25T20:42:42Z",
+  "collected_at": "2026-03-26T02:53:24Z",
   "date": "2026-03-25",
-  "dry_run": true,
+  "dry_run": false,
   "tao": {
-    "price_usd": 348.97,
-    "price_change_1h_pct": -1.96,
-    "price_change_24h_pct": 3.39,
-    "price_change_7d_pct": 30.73,
-    "price_change_30d_pct": 107.32,
-    "market_cap_usd": 3758237847,
-    "fully_diluted_market_cap_usd": 7328315642,
-    "volume_24h_usd": 1211537033,
-    "circulating_supply": 10769595
+    "price_usd": 355.905740846926,
+    "price_change_1h_pct": -0.3638435,
+    "price_change_24h_pct": 6.11897522,
+    "price_change_7d_pct": 33.41029727,
+    "price_change_30d_pct": 109.29428199,
+    "market_cap_usd": 3833307854.75002,
+    "fully_diluted_market_cap_usd": 7474020557.79,
+    "volume_24h_usd": 1164174921.67492,
+    "circulating_supply": 10770570.4483107
   },
   "sn106": {
     "subnet_id": 106,
@@ -27,16 +27,19 @@
     "fee_rate": "0.00050354772259098192",
     "registration_cost_rao": "133585556570",
     "neuron_registration_cost_rao": "500000",
-    "net_flow_1_day_rao": "-188226065369",
-    "net_flow_7_days_rao": "-532469113960",
-    "net_flow_30_days_rao": "-1230442212340",
+    "net_flow_1_day_rao": "-198819345000",
+    "net_flow_7_days_rao": "-627310213204",
+    "net_flow_30_days_rao": "-1282839195205",
     "recycled_lifetime_rao": "43257550282",
     "recycled_24h_rao": "0",
-    "alpha_price_tao_estimate": 0.00050354772259098192
+    "ema_tao_flow": "0",
+    "tao_flow": "0",
+    "alpha_price_tao_estimate": "0.00050354772259098192",
+    "alpha_price_usd_estimate": "0.179216"
   },
   "network": {
-    "total_staked_rao": "7353067603457808",
-    "total_issued_rao": "10770389433224995",
+    "total_staked_rao": "7298739163130276",
+    "total_issued_rao": "10770624448306038",
     "total_subnets": 129
   },
   "bridge": {
