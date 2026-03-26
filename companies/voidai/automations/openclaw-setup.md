@@ -419,6 +419,9 @@ export APIFY_API_TOKEN="<from .env>"           # API token from https://console.
 export MAX_APIFY_DAILY_COST="1.00"             # Daily spend cap in USD (default: 1.00)
 export MAX_APIFY_MONTHLY_COST="27.00"          # Monthly spend cap in USD (default: 27.00)
 export APIFY_COST_PER_RUN="0.50"               # Cost cap per actor run in USD (default: 0.50)
+
+# Posting account (switch to v0idai after access granted)
+export POSTING_ACCOUNT="flowerncoins"    # Currently Vew's personal @flowerncoins. Change to "v0idai" after presentation.
 ```
 
 **Apify plan**: Starter Monthly ($29/month prepaid, Bronze discount). Actor: apidojo/tweet-scraper ($0.0004/tweet).
