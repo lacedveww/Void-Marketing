@@ -136,10 +136,13 @@ Pillar C requires live posting data to function. During DRY_RUN and early soft-l
 - **PAUSES** -- waits for Vew's response before continuing to Step 3
 
 ### Step 3: Content Drafting (reply-gated, on Vew's response)
-- Reads morning summary + performance feedback (Pillar C data)
-- Generates 3-5 draft posts across Pillars A and B
+- Drafts are generated **per-account in sequence**, not as one batch
+- Each account's persona is loaded from `accounts.md` before generating its content (account-specific persona loading)
+- Account order: @v0idai (1-2 posts) -> Daily/Info (3-5 posts) -> Bittensor Ecosystem (2-3 posts) -> DeFi/Cross-Chain (2-3 posts)
+- Each account is a mini-review cycle: generate -> present -> approve/edit/reject -> next account
 - Each draft includes: text, target account, pillar tag, suggested post time, hook type
-- Drafts queued in `queue/drafts/` with metadata
+- @v0idai drafts scheduled via OpenTweet; satellite accounts saved to `queue/posted/{account}/` as manually_posted
+- Different voice, hook, angle per account even on the same topic (Sub-Agent Specialization Pattern)
 
 ### Step 4: Human Approval (reply-gated, on draft delivery)
 - Drafts presented for Vew's review in Telegram
@@ -177,3 +180,4 @@ Pillar C requires live posting data to function. During DRY_RUN and early soft-l
 | 2026-03-25 | Initial framework document created. Three-pillar generation system with daily targets, 7-step process, and pre-launch notes for Pillar C. |
 | 2026-03-25 | Updated to reply-gated workflow: Step 2 at 8:30AM (was 9AM), Steps 3-4 are reply-gated (were timed at 10:30AM), Step 7 at Fri 10:30AM (was Fri 12PM). Pillar C weekly calibration reference updated. |
 | 2026-03-25 | Lending pivot: added lending keywords to Pillar A+B coverage and routing. Updated account routing from 6 to 4 accounts. Removed Meme/Culture and AI x Crypto routing. Added Daily/Informational routing. |
+| 2026-03-25 | Updated Step 3 (Content Drafting) to per-account sequential generation with account-specific persona loading. Replaces single-batch drafting with 4-account mini-review cycles. |

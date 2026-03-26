@@ -163,30 +163,53 @@ STEP 1 - MORNING SUMMARY:
 7. Deliver the brief to Telegram (5-6 messages).
 8. PAUSE - wait for Vew's response before continuing.
 
-STEP 2 - DRAFT REVIEW (on Vew's response):
-9. Generate 3-5 draft posts across Pillars A and B:
-   - Pillar A (X Intelligence): 2-3 posts from sweep data (news, QTs, narrative threads)
-   - Pillar B (SEO/News): 1-2 posts from news feeds and research pipeline
-   - Each draft includes: text, target account, pillar tag, suggested post time, hook type
-10. Run: bash companies/voidai/automations/scripts/generate-daily-tweet.sh with today's metrics
-11. Present all drafts for Vew's review with approve/edit/reject options
-12. Wait for Vew's approval.
+STEP 2 - MULTI-ACCOUNT DRAFT REVIEW (on Vew's response):
+Generate and present content for each account SEQUENTIALLY. Each account is its own mini-review cycle. Do not move to the next account until the current one is fully approved.
 
-STEP 3 - SCHEDULING (on Vew's approval):
-13. Ask Vew for preferred posting times.
-14. Wait for Vew's response with times.
+Account 1: @v0idai (Main)
+9. Read companies/voidai/accounts.md Account 1 persona. Generate 1-2 draft posts focused on builder updates, lending development, vision threads, major milestones.
+10. Present drafts to Vew via Telegram. Label: '[@v0idai] Draft 1 of 2:' with Telegraph preview.
+11. Wait for Vew to approve/edit/reject each draft.
+12. For approved @v0idai drafts: proceed to scheduling - ask Vew what time to schedule each, then schedule via post-to-x.sh respecting cadence rules (MAX_POSTS_PER_DAY=6, MIN_POST_GAP_MINUTES=180).
+13. Show full @v0idai schedule for today. Then say: 'Moving to Daily/Info account drafts. Ready?'
+14. Wait for Vew's response.
 
-STEP 4 - CONTENT SCHEDULER (on Vew's time preferences):
-15. For approved drafts:
-    - Move to queue/approved/
-    - If DRY_RUN is not 'true', schedule via post-to-x.sh respecting cadence rules (MAX_POSTS_PER_DAY=6, MIN_POST_GAP_MINUTES=180)
-16. Show full day schedule to Vew for confirmation.
-17. Wait for Vew's confirmation.
+Account 2: VoidAI Daily/Informational
+15. Read companies/voidai/accounts.md Account 2 persona. Generate 3-5 draft posts focused on product updates, bridge stats, lending progress, ecosystem news.
+16. Present drafts to Vew via Telegram. Label: '[Daily/Info] Draft 1 of 5:' with Telegraph preview.
+17. Wait for Vew to approve/edit/reject each draft.
+18. For approved Daily/Info drafts: move to queue/posted/daily-info/ with metadata {account: 'daily-info', status: 'manually_posted', approved_at: ISO timestamp, content: tweet text, pillar: A or B, hook_type: type}.
+19. Then say: 'Moving to Bittensor Ecosystem account drafts. Ready?'
+20. Wait for Vew's response.
 
-STEP 5 - HEALTH CHECK (on Vew's confirmation):
-18. Run system health check (API connectivity, cron status, queue audit, posting status).
-19. Log rejected drafts with reason for voice calibration learning.
-20. Report: drafts generated, approved, rejected, scheduled, system status." \
+Account 3: Bittensor Ecosystem Analyst
+21. Read companies/voidai/accounts.md Account 3 persona. Generate 2-3 draft posts focused on Bittensor ecosystem, subnet analysis, TAO trends, DeFi/lending ecosystem. VoidAI mentioned max 1 post, only within broader ecosystem context.
+22. Present drafts to Vew via Telegram. Label: '[Bittensor Ecosystem] Draft 1 of 3:' with Telegraph preview.
+23. Wait for Vew to approve/edit/reject each draft.
+24. For approved drafts: move to queue/posted/bittensor/ with manually_posted metadata.
+25. Then say: 'Moving to DeFi/Cross-Chain account drafts. Ready?'
+26. Wait for Vew's response.
+
+Account 4: DeFi / Cross-Chain Alpha
+27. Read companies/voidai/accounts.md Account 4 persona. Generate 2-3 draft posts focused on DeFi analysis, lending markets, yield strategies, cross-chain flows. VoidAI/Bittensor mentioned max 1 post, only within broader DeFi context.
+28. Present drafts to Vew via Telegram. Label: '[DeFi Alpha] Draft 1 of 3:' with Telegraph preview.
+29. Wait for Vew to approve/edit/reject each draft.
+30. For approved drafts: move to queue/posted/defi/ with manually_posted metadata.
+
+After all 4 accounts:
+31. Show summary: 'Today's content: @v0idai: [X] scheduled via OpenTweet. Daily/Info: [X] approved (manual post). Bittensor: [X] approved (manual post). DeFi: [X] approved (manual post). Total: [X] posts across 4 accounts.'
+
+KEY RULES:
+- Load the CORRECT account persona from accounts.md before generating each account's content. Do NOT blend voices.
+- Each account's content should be DIFFERENT even on the same topic. Different hook, angle, format per Sub-Agent Specialization Pattern.
+- Satellite accounts: read sweep data and generate content appropriate to each niche.
+- Respect inter-account coordination: if @v0idai covers a topic, satellites use a different angle or skip it.
+- Bittensor and DeFi accounts: enforce 1-2x/week VoidAI mention cap.
+
+STEP 3 - HEALTH CHECK (after all accounts reviewed):
+32. Run system health check (API connectivity, cron status, queue audit, posting status).
+33. Log rejected drafts with reason for voice calibration learning.
+34. Report: drafts generated per account, approved, rejected, scheduled, manually posted, system status." \
   --announce \
   --channel telegram \
   --to "channel:YOUR_CHANNEL_ID"
@@ -365,7 +388,7 @@ export DISCORD_WEBHOOK_URL="<from .env>"
 | Schedule | Job | What it does | Messages? |
 |----------|-----|-------------|-----------|
 | 8:00 AM + 8:00 PM ET | Intelligence Sweep | SILENT data collection: X accounts, subnets, marketing intel, news, SEO, competitors | No (silent) |
-| 8:30 AM ET | Morning Summary → Draft Review → Scheduling → Health Check | Reply-gated chain: delivers summary, waits for response, then runs draft review, scheduling prompt, content scheduler, and health check as sequential steps | Yes (Telegram) |
+| 8:30 AM ET | Morning Summary → Multi-Account Draft Review → Health Check | Reply-gated chain: delivers summary, waits for response, then generates content for 4 accounts sequentially (@v0idai scheduled via OpenTweet, satellites saved as manually_posted), then health check | Yes (Telegram) |
 | 10:00 AM ET | Health Check (fallback) | Runs automatically if the morning chain hasn't completed by 10AM. Also runs daily including Fridays. | Yes (Telegram) |
 | 10:00 PM ET | Engagement Collector | SILENT: collects post engagement data, updates performance files | No (silent) |
 | 10:30 AM Fridays | Weekly Recap + Calibration | Generates recap thread, voice calibration, updates voice-learnings.md | Yes (Telegram) |
