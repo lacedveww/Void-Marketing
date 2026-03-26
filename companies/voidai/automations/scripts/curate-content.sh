@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # curate-content.sh
 #
-# Generates 8 content variants via Gemini API and saves them to a file.
-# OpenClaw (Gemini) then reads the file, scores them, picks top 4, and
-# presents only those 4 to Vew. This keeps the 8 variants hidden from chat.
+# Generates content variants via Gemini API and saves them to a file.
+# Tweets: 8 variants (top 4 presented). Threads: 6 variants (top 3 presented).
+# OpenClaw (Gemini) reads the file, scores them, picks the top options,
+# and presents only those to Vew. Variants are hidden from chat.
 #
 # Usage:
 #   ./curate-content.sh --account v0idai --type tweet --topic "lending update"
@@ -61,13 +62,33 @@ if [[ -n "$SWEEP_FILE" && -f "$SWEEP_FILE" ]]; then
   SWEEP_CONTEXT=$(jq -c '{tao_price: .metrics_snapshot.tao.price_usd, tao_24h: .metrics_snapshot.tao.price_change_24h_pct, sn106_validators: .metrics_snapshot.sn106.validators, subnets: .metrics_snapshot.network.total_subnets, top_posts: [.x_accounts.posts | sort_by(-.engagement.likes) | .[0:3] | .[] | {account, text: .tweet_text[0:100], likes: .engagement.likes}]}' "$SWEEP_FILE" 2>/dev/null || echo "")
 fi
 
-# Build prompt
+# Load preference learning context
+PREFERENCE_CONTEXT=""
+PREF_LOG_DIR="$DATA_DIR/preference-log"
+LATEST_PREF_LOG=$(ls -t "$PREF_LOG_DIR"/preference-log-*.json 2>/dev/null | head -1)
+if [[ -n "$LATEST_PREF_LOG" && -f "$LATEST_PREF_LOG" ]]; then
+  PREF_SELECTED=$(jq -r '[.entries[]? | select(.user_selection.skipped != true and .user_selection.selected_variant_id != null) | "- \(.user_selection.selected_variant_id): score \(.user_selection.selected_composite_score // "?")"] | .[0:5] | join("\n")' "$LATEST_PREF_LOG" 2>/dev/null || echo "")
+  if [[ -n "$PREF_SELECTED" ]]; then
+    PREFERENCE_CONTEXT="PREFERENCE LEARNING: Recent curator selections: ${PREF_SELECTED}. Generate variants aligned with these preferences."
+  fi
+fi
+
+# Performance context
+PERF_CONTEXT=""
+PERF_FILE="$DATA_DIR/performance-summary.json"
+if [[ -f "$PERF_FILE" ]]; then
+  PERF_CONTEXT=$(jq -r '"POST ANALYTICS: Avg engagement " + (.avg_engagement_rate_pct // "?" | tostring) + "%. Patterns: " + ([.patterns[]? | .[0:80]] | .[0:3] | join("; "))' "$PERF_FILE" 2>/dev/null || echo "")
+fi
+
+# Determine variant count by content type
 if [[ "$CONTENT_TYPE" == "thread" ]]; then
-  TYPE_INST="Generate exactly 8 THREAD variants. Each thread: 5-7 tweets, each max 280 chars. Vary structure across: educational explainer, builder narrative, data story, ecosystem lens (2 variants each)."
-  FORMAT='Each variant: {"id":"v1","hook_type":"data-lead","tone":"analytical","thread":[{"pos":1,"text":"..."},{"pos":2,"text":"..."}]}'
+  VARIANT_COUNT=6
+  TYPE_INST="Generate exactly ${VARIANT_COUNT} THREAD variants. Each thread: 5-7 tweets, each max 280 chars."
+  FORMAT='Each variant: {"id":"v1","thread":[{"pos":1,"text":"..."},{"pos":2,"text":"..."}]}'
 else
-  TYPE_INST="Generate exactly 8 TWEET variants. Max 280 characters each. Count carefully. If over 280, rewrite shorter."
-  FORMAT='Each variant: {"id":"v1","content":"tweet text here","hook_type":"data-lead","tone":"analytical","word_count":42}'
+  VARIANT_COUNT=8
+  TYPE_INST="Generate exactly ${VARIANT_COUNT} TWEET variants. Max 280 characters each. Count carefully. If over 280, rewrite shorter."
+  FORMAT='Each variant: {"id":"v1","content":"tweet text here","word_count":42}'
 fi
 
 PROMPT="Generate content for the ${ACCOUNT} X account.
@@ -78,22 +99,19 @@ TOPIC: ${TOPIC:-Today's Bittensor/VoidAI developments based on the data below}
 
 ${TYPE_INST}
 
-HOOK DIVERSITY (mandatory):
-- v1,v2: data-lead hooks (open with specific number/metric)
-- v3,v4: builder/conversational hooks (personal builder perspective)
-- v5,v6: curiosity-gap hooks (question or teaser)
-- v7,v8: alpha-leak/contrarian hooks (non-obvious insight)
-Within each pair: one analytical tone, one conversational tone.
+CONTENT STRATEGY: Base each variant on the monitoring data, trending topics, post analytics, and preference learning below. Each variant should take a DIFFERENT angle on the data. Vary hook style and narrative organically based on what the data suggests. Do NOT use predefined categories.
 
 RULES: No hashtags. No em dashes. No double hyphens. No banned phrases: game-changer, paradigm shift, cutting-edge, seamless integration, robust ecosystem, revolutionizing, paving the way, it is worth noting, ever-evolving landscape, at its core, in conclusion, as we navigate. Every tweet needs specific data.
 
 ${SWEEP_CONTEXT:+TODAY'S DATA: ${SWEEP_CONTEXT}}
+${PERF_CONTEXT:+${PERF_CONTEXT}}
+${PREFERENCE_CONTEXT:+${PREFERENCE_CONTEXT}}
 
-Output a JSON array of 8 objects. No markdown fences. No explanation. Just the array.
+Output a JSON array of ${VARIANT_COUNT} objects. No markdown fences. No explanation. Just the array.
 ${FORMAT}"
 
 # Call Gemini API
-log "Generating 8 ${CONTENT_TYPE} variants for @${ACCOUNT}..."
+log "Generating ${VARIANT_COUNT} ${CONTENT_TYPE} variants for @${ACCOUNT}..."
 
 BODY_FILE=$(mktemp)
 RESPONSE_FILE=$(mktemp)

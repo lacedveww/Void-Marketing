@@ -5,8 +5,8 @@ Used by OpenClaw (Gemini) to evaluate Claude-generated content variants before p
 ## When This Runs
 
 After each content generation step in the morning reply-gated chain.
-Claude generates 8 variants (tweets/threads) or 4 variants (articles).
-Gemini scores all variants. Top 4 (or top 2 for articles) are presented to Vew.
+Claude generates: 8 variants (tweets), 6 variants (threads), or 4 variants (articles).
+Gemini scores all variants. Top 4 (tweets), top 3 (threads), or top 2 (articles) are presented to Vew.
 
 ## Scoring Dimensions (1-10 each)
 
@@ -50,7 +50,7 @@ Does the content pass all rules?
 Reference: voice.md DO NOT section, compliance.md, banned AI phrases list.
 
 ### 5. Uniqueness
-How different is this variant from the other 7?
+How different is this variant from the others in this batch?
 - 10: Completely unique angle, hook, and structure. No overlap with others.
 - 7-9: Distinct from most but shares minor elements with one other variant.
 - 4-6: Overlaps significantly with another variant in hook or angle.
@@ -76,12 +76,11 @@ If compliance = 0, composite = 0 regardless of other scores.
 ## Selection Rules
 
 1. Rank all variants by composite score (highest first)
-2. Select top 4 (or top 2 for articles)
-3. DIVERSITY CHECK: The top 4 must include at least 3 different hook types
-   - If top 4 has fewer than 3 hook types: drop the lowest-scored variant sharing a hook type with a higher-scored variant, replace with the highest-scored variant of a missing hook type
+2. Select: top 4 (tweets), top 3 (threads), or top 2 (articles)
+3. DIVERSITY CHECK: selected options should cover different angles/topics. If two options are too similar (same angle, similar phrasing), drop the lower-scored one and pull in the next highest-scored variant with a different angle
 4. Compliance-failed variants (score 0) are NEVER presented
-5. If fewer than 4 pass compliance, present however many passed and flag the issue
-6. RANDOMIZE the presentation order (A/B/C/D does not correspond to score rank)
+5. If fewer options pass compliance than needed, present however many passed and flag the issue
+6. RANDOMIZE the presentation order (letter labels do not correspond to score rank)
 
 ## What Gets Logged
 

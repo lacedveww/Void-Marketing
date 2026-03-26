@@ -158,13 +158,10 @@ if [[ "$DRY_RUN" == "true" ]]; then
   TIMESTAMP=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
   if [[ "$VARIANTS" -gt 1 ]]; then
     # Generate mock thread variant data for multi-variant dry run
-    STRUCTURE_TYPES=("educational" "educational" "builder-narrative" "builder-narrative" "data-story" "data-story" "ecosystem-lens" "ecosystem-lens")
-    TONES=("analytical" "conversational" "analytical" "conversational" "analytical" "conversational" "analytical" "conversational")
     MOCK_VARIANTS="["
     for i in $(seq 1 "$VARIANTS"); do
-      IDX=$(( (i - 1) % 8 ))
       [[ $i -gt 1 ]] && MOCK_VARIANTS+=","
-      MOCK_VARIANTS+="{\"id\":\"v${i}\",\"content\":[{\"position\":1,\"tweet\":\"[DRY_RUN] Variant ${i} hook tweet\",\"is_hook\":true},{\"position\":2,\"tweet\":\"[DRY_RUN] Variant ${i} data tweet\",\"is_hook\":false},{\"position\":3,\"tweet\":\"[DRY_RUN] Variant ${i} insight tweet\",\"is_hook\":false},{\"position\":4,\"tweet\":\"[DRY_RUN] Variant ${i} CTA tweet\",\"is_hook\":false}],\"hook_type\":\"${STRUCTURE_TYPES[$IDX]}\",\"tone\":\"${TONES[$IDX]}\",\"format\":\"thread\",\"content_type\":\"thread\",\"account\":\"${ACCOUNT}\",\"pillar\":\"ecosystem-intelligence\",\"topic\":\"weekly recap\",\"word_count\":20}"
+      MOCK_VARIANTS+="{\"id\":\"v${i}\",\"content\":[{\"position\":1,\"tweet\":\"[DRY_RUN] Variant ${i} hook tweet\",\"is_hook\":true},{\"position\":2,\"tweet\":\"[DRY_RUN] Variant ${i} data tweet\",\"is_hook\":false},{\"position\":3,\"tweet\":\"[DRY_RUN] Variant ${i} insight tweet\",\"is_hook\":false},{\"position\":4,\"tweet\":\"[DRY_RUN] Variant ${i} CTA tweet\",\"is_hook\":false}],\"format\":\"thread\",\"content_type\":\"thread\",\"account\":\"${ACCOUNT}\",\"topic\":\"weekly recap\",\"word_count\":20}"
     done
     MOCK_VARIANTS+="]"
     jq -n \
@@ -201,20 +198,38 @@ fi
 # Build the prompt
 if [[ "$VARIANTS" -gt 1 ]]; then
   # --- Multi-variant thread prompt ---
+  # Load preference learning context
+  PREFERENCE_CONTEXT=""
+  PREF_LOG_DIR="$PROJECT_ROOT/companies/voidai/automations/data/preference-log"
+  LATEST_PREF_LOG=$(ls -t "$PREF_LOG_DIR"/preference-log-*.json 2>/dev/null | head -1)
+  if [[ -n "$LATEST_PREF_LOG" && -f "$LATEST_PREF_LOG" ]]; then
+    # Extract patterns from recent selections vs declines
+    SELECTED=$(jq -r '[.entries[]? | select(.user_selection.skipped != true) | .user_selection | select(.selected_variant_id != null) | "- Selected \(.selected_variant_id): score \(.selected_composite_score // "?")"] | .[0:5] | join("\n")' "$LATEST_PREF_LOG" 2>/dev/null || echo "")
+    DECLINED=$(jq -r '[.entries[]? | .gemini_scoring.all_variants[]? | select(.presented_to_user == true) | select(.id != (input_line_number | tostring)) | .content_preview] | .[0:5] | join("\n")' "$LATEST_PREF_LOG" 2>/dev/null || echo "")
+    if [[ -n "$SELECTED" ]]; then
+      PREFERENCE_CONTEXT="
+PREFERENCE LEARNING (from past selection data, use to guide variant generation):
+Recent selections:
+${SELECTED}
+Learn from these patterns: generate more variants similar to what was selected, avoid patterns from what was declined.
+"
+    fi
+    log "Loaded preference learning data from $LATEST_PREF_LOG"
+  fi
+
   PROMPT="You are generating weekly recap THREAD variants for the ${ACCOUNT_NAME} X account.
 VoidAI is Bittensor DeFi Infrastructure (bridge + staking + lending). The lending platform is the current primary focus.
 VoidAI operates 3 X accounts (1 main + 2 satellites: Daily/Informational, Bittensor Ecosystem).
 
 Generate exactly $VARIANTS thread variants based on the weekly metrics data below for the ${ACCOUNT_NAME} account.
 
-MANDATORY DIVERSITY — each variant must use a DIFFERENT structure type:
-- Variants 1-2: educational structure (teach the reader something, break down a concept with data)
-- Variants 3-4: builder narrative structure (tell the story from a builder's perspective, what was built/shipped/learned)
-- Variants 5-6: data story structure (lead with the numbers, let metrics tell the narrative)
-- Variants 7-8: ecosystem lens structure (zoom out to Bittensor ecosystem context, connect VoidAI's week to broader trends)
+CONTENT STRATEGY — base each variant on:
+1. The monitoring/sweep data provided (what's trending, what's newsworthy)
+2. SEO-relevant topics in the Bittensor/DeFi space right now
+3. Performance feedback from previous posts (what got engagement)
+4. Preference learning from past selections (what the curator chose vs declined)
 
-Within each pair, vary the TONE:
-- One analytical, one conversational (for each structure type pair)
+Each variant should take a DIFFERENT angle on the data. Vary the hook style, narrative structure, and emphasis organically based on what the data suggests. Do NOT use predefined categories. Instead, let the data drive the diversity.
 
 Each thread variant must contain 5 to 7 tweets with this structure:
 1. Hook tweet: grabs attention, sets up the thread. Use a compelling data point or insight.
@@ -262,6 +277,8 @@ FORMATTING RULES:
 
 $PERFORMANCE_CONTEXT
 
+${PREFERENCE_CONTEXT}
+
 WEEKLY METRICS DATA:
 $METRICS_DATA
 
@@ -276,13 +293,10 @@ Return ONLY valid JSON, no markdown fences, no explanation.
         {\"position\": 2, \"tweet\": \"<data tweet>\", \"is_hook\": false},
         ...
       ],
-      \"hook_type\": \"educational\",
-      \"tone\": \"analytical\",
       \"format\": \"thread\",
       \"content_type\": \"thread\",
       \"account\": \"${ACCOUNT}\",
-      \"pillar\": \"ecosystem-intelligence\",
-      \"topic\": \"<topic from weekly data>\",
+      \"topic\": \"<specific topic/angle from the data>\",
       \"word_count\": <total word count across all tweets>
     },
     ...

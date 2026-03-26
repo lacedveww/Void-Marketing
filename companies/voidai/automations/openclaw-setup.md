@@ -170,13 +170,14 @@ Each account is its own mini-review cycle. Do not move to the next account until
 
 FOR EACH CONTENT SLOT IN EACH ACCOUNT, follow this flow:
 
-SUBSTEP A - GENERATE 8 VARIANTS:
-Run the generation script with --variants 8 (or --variants 4 for articles).
+SUBSTEP A - GENERATE VARIANTS:
+Run the generation script. Variant counts: tweets = 8, threads = 6, articles = 4.
 For tweets: bash companies/voidai/automations/scripts/generate-daily-tweet.sh --variants 8 --account <account-id> <metrics-file>
 For news tweets: bash companies/voidai/automations/scripts/generate-news-tweet.sh --variants 8 --account <account-id> <news-file>
-For threads: bash companies/voidai/automations/scripts/generate-weekly-thread.sh --variants 8 --account <account-id> <metrics-file>
+For threads: bash companies/voidai/automations/scripts/generate-weekly-thread.sh --variants 6 --account <account-id> <metrics-file>
 Where <account-id> is: v0idai, daily-info, or bittensor. This loads the correct persona from accounts.md.
-Receive the variants JSON with metadata (hook_type, tone, format for each variant).
+Content is generated based on monitoring data, trending topics/SEO, previous post analytics, and preference learning from past selections.
+Receive the variants JSON with metadata.
 
 SUBSTEP B - SCORE ALL VARIANTS (run internally, do NOT show scores to Vew):
 Read scoring criteria from engine/frameworks/gemini-scoring-criteria.md.
@@ -185,47 +186,55 @@ Score EACH variant on 6 dimensions (1-10 each):
   2. RELEVANCE: How well does this connect to today's sweep intelligence data?
   3. HOOK QUALITY: How strong is the opening hook? Will it stop a scroll?
   4. COMPLIANCE: Does it pass all voice rules and banned phrase checks? Any banned phrase = score 0.
-  5. UNIQUENESS: How different is this from the other 7 variants?
+  5. UNIQUENESS: How different is this from the other variants in this batch?
   6. DATA DENSITY: Does it include specific, concrete information?
 Compute COMPOSITE SCORE = average of all 6. If compliance = 0, composite = 0.
 
-SUBSTEP C - SELECT TOP 4:
+SUBSTEP C - SELECT TOP OPTIONS:
   1. Rank all variants by composite score (highest first)
-  2. Select top 4 (top 2 for articles)
-  3. DIVERSITY CHECK: top 4 must include at least 3 different hook types.
-     If not, drop the lowest-scored variant sharing a hook type with a higher-scored one,
-     replace with the highest-scored variant of a missing hook type.
+  2. Select: top 4 for tweets, top 3 for threads, top 2 for articles
+  3. DIVERSITY CHECK: selected options should cover different angles/topics. If two options are too similar, drop the lower-scored one and pull in the next highest-scored variant with a different angle.
   4. Compliance-failed variants (score 0) are NEVER presented.
-  5. RANDOMIZE the presentation order (A/B/C/D does NOT correspond to score rank).
+  5. RANDOMIZE the presentation order (letter labels do NOT correspond to score rank).
 
-SUBSTEP D - LOG ALL 8 VARIANTS:
-Write ALL 8 variants with full scores to automations/data/preference-log/preference-log-$(date +%Y-%m-%d).json.
+SUBSTEP D - LOG ALL VARIANTS:
+Write ALL variants (8 for tweets, 6 for threads, 4 for articles) with full scores to automations/data/preference-log/preference-log-$(date +%Y-%m-%d).json.
 Use the log format documented in engine/frameworks/preference-learning.md.
 Include: all scores, composite scores, presented_to_user flag, presented_as letter, filtered_reason for non-presented variants.
 
-SUBSTEP E - PRESENT TOP 4 TO VEW:
-Show the top 4 as A/B/C/D with hook type labels. Do NOT show scores or rankings.
-Format:
+SUBSTEP E - PRESENT OPTIONS TO VEW:
+Do NOT show scores, rankings, or category labels.
+
+For TWEETS (4 options):
   [@account] Tweet N — Pick one:
-  A [Hook-type]: 'tweet text preview...'
-  B [Hook-type]: 'tweet text preview...'
-  C [Hook-type]: 'tweet text preview...'
-  D [Hook-type]: 'tweet text preview...'
-  Reply with a letter (A/B/C/D), 'regenerate' for new options, or 'skip'.
+  A: 'tweet text preview...'
+  B: 'tweet text preview...'
+  C: 'tweet text preview...'
+  D: 'tweet text preview...'
+  Reply with a letter (A/B/C/D), 'regenerate', or 'skip'.
+
+For THREADS (3 options with Telegraph preview):
+  Before presenting, publish each thread option to Telegraph using:
+  bash companies/voidai/automations/scripts/publish-telegraph.sh <variants-file> <variant-id>
+  Then present compactly:
+  [@account] Thread — Pick one:
+  A: 'hook tweet preview...' -> telegra.ph/link-a
+  B: 'hook tweet preview...' -> telegra.ph/link-b
+  C: 'hook tweet preview...' -> telegra.ph/link-c
+  Reply with a letter (A/B/C), 'regenerate', or 'skip'.
 
 SUBSTEP F - HANDLE VEW'S RESPONSE:
-  - Letter (A/B/C/D): Log selection with variant ID, score rank, whether it was the top-scored variant, score gap between top and selected.
+  - Letter selection: Log selection with variant ID, score rank, whether it was the top-scored variant, score gap between top and selected.
   - Letter with edit: Log as above plus edited: true, save the edited version.
-  - 'regenerate': Generate 8 NEW variants, score and filter again, present fresh top 4. Log original 8 with regenerated: true.
+  - 'regenerate': Generate NEW variants (8 for tweets, 6 for threads), score and filter again, present fresh options. Log originals with regenerated: true.
   - 'skip': Log all variants as skipped.
-  - Telegraph preview: Generate preview on Telegraph, then return to selection.
 
 NOW APPLY THIS FLOW TO EACH ACCOUNT:
 
 Account 1: @v0idai (Main)
-9. For each content slot (1-2 tweet slots), run substeps A-F with --account v0idai:
-   bash generate-daily-tweet.sh --variants 8 --account v0idai <metrics-file>
-   Focus: builder updates, lending development, vision threads, major milestones.
+9. For each content slot (1-2 tweet slots + thread slots), run substeps A-F with --account v0idai:
+   Tweets: bash generate-daily-tweet.sh --variants 8 --account v0idai <metrics-file>
+   Threads: bash generate-weekly-thread.sh --variants 6 --account v0idai <metrics-file>
 10. For approved @v0idai drafts: proceed to scheduling via post-to-x.sh respecting cadence rules (MAX_POSTS_PER_DAY=6, MIN_POST_GAP_MINUTES=180). NOTE: Currently posting to @flowerncoins until @v0idai access granted.
 11. Show full @v0idai schedule for today. Then say: 'Moving to Daily/Info account drafts. Ready?'
 12. Wait for Vew's response.
@@ -233,7 +242,6 @@ Account 1: @v0idai (Main)
 Account 2: VoidAI Daily/Informational
 13. For each content slot (3-5 tweet slots), run substeps A-F with --account daily-info:
     bash generate-daily-tweet.sh --variants 8 --account daily-info <metrics-file>
-    Focus: product updates, bridge stats, lending progress, ecosystem news.
 14. For approved drafts: move to queue/posted/daily-info/ with metadata.
 15. Then say: 'Moving to Bittensor Ecosystem account drafts. Ready?'
 16. Wait for Vew's response.
@@ -241,7 +249,6 @@ Account 2: VoidAI Daily/Informational
 Account 3: Bittensor Ecosystem Analyst
 17. For each content slot (2-3 tweet slots), run substeps A-F with --account bittensor:
     bash generate-daily-tweet.sh --variants 8 --account bittensor <metrics-file>
-    Focus: Bittensor ecosystem, subnet analysis, TAO trends. VoidAI max 1 post.
 18. For approved drafts: move to queue/posted/bittensor/ with manually_posted metadata.
 
 After all 3 accounts:
@@ -249,10 +256,13 @@ After all 3 accounts:
 
 KEY RULES:
 - Load the CORRECT account persona from accounts.md before generating each account's content. Do NOT blend voices.
-- Each account's content should be DIFFERENT even on the same topic. Different hook, angle, format per Sub-Agent Specialization Pattern.
+- Each account's content should be DIFFERENT even on the same topic. Different angle per Sub-Agent Specialization Pattern.
+- Content generation is DATA-DRIVEN: use monitoring data, trending topics/SEO, previous post analytics, and preference learning from past selections. No predefined categories.
 - Satellite accounts: read sweep data and generate content appropriate to each niche.
 - Respect inter-account coordination: if @v0idai covers a topic, satellites use a different angle or skip it.
 - Bittensor account: enforce 1-2x/week VoidAI mention cap.
+- Variant counts: tweets = 8 generated / top 4 presented. Threads = 6 generated / top 3 presented. Articles = 4 generated / top 2 presented.
+- For thread options, ALWAYS publish to Telegraph and include the link. This keeps the review compact.
 - ALWAYS log ALL variants (presented and filtered) with full scores to the preference log. This data trains the system.
 
 STEP 3 - HEALTH CHECK (after all accounts reviewed):

@@ -183,13 +183,10 @@ if [[ "$DRY_RUN" == "true" ]]; then
   TIMESTAMP=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
   if [[ "$VARIANTS" -gt 1 ]]; then
     # Generate mock variant data for multi-variant dry run
-    HOOK_TYPES=("data-lead" "data-lead" "builder-conversational" "builder-conversational" "curiosity-gap" "curiosity-gap" "alpha-leak-contrarian" "alpha-leak-contrarian")
-    TONES=("analytical" "conversational" "analytical" "conversational" "analytical" "conversational" "analytical" "conversational")
     MOCK_VARIANTS="["
     for i in $(seq 1 "$VARIANTS"); do
-      IDX=$(( (i - 1) % 8 ))
       [[ $i -gt 1 ]] && MOCK_VARIANTS+=","
-      MOCK_VARIANTS+="{\"id\":\"v${i}\",\"content\":\"[DRY_RUN] Mock variant ${i} tweet text\",\"hook_type\":\"${HOOK_TYPES[$IDX]}\",\"tone\":\"${TONES[$IDX]}\",\"format\":\"single-stat-opener\",\"content_type\":\"tweet\",\"account\":\"${ACCOUNT}\",\"pillar\":\"bridge-build\",\"topic\":\"daily metrics\",\"word_count\":7}"
+      MOCK_VARIANTS+="{\"id\":\"v${i}\",\"content\":\"[DRY_RUN] Mock variant ${i} tweet text\",\"content_type\":\"tweet\",\"account\":\"${ACCOUNT}\",\"topic\":\"daily metrics\",\"word_count\":7}"
     done
     MOCK_VARIANTS+="]"
     jq -n \
@@ -220,21 +217,37 @@ fi
 
 # Build the prompt for claude -p
 if [[ "$VARIANTS" -gt 1 ]]; then
+  # Load preference learning context
+  PREFERENCE_CONTEXT=""
+  PREF_LOG_DIR="$PROJECT_ROOT/companies/voidai/automations/data/preference-log"
+  LATEST_PREF_LOG=$(ls -t "$PREF_LOG_DIR"/preference-log-*.json 2>/dev/null | head -1)
+  if [[ -n "$LATEST_PREF_LOG" && -f "$LATEST_PREF_LOG" ]]; then
+    SELECTED_PATTERNS=$(jq -r '[.entries[]? | select(.user_selection.skipped != true and .user_selection.selected_variant_id != null) | "- \(.user_selection.selected_variant_id): score \(.user_selection.selected_composite_score // "?")"] | .[0:5] | join("\n")' "$LATEST_PREF_LOG" 2>/dev/null || echo "")
+    if [[ -n "$SELECTED_PATTERNS" ]]; then
+      PREFERENCE_CONTEXT="
+PREFERENCE LEARNING (from past curator selections, use to guide variant style):
+Recent selections:
+${SELECTED_PATTERNS}
+Generate more variants aligned with these preferences. Avoid patterns from declined options.
+"
+    fi
+    log "Loaded preference learning data"
+  fi
+
   # --- Multi-variant prompt ---
   PROMPT="You are generating tweets for the ${ACCOUNT_NAME} X account.
 VoidAI is Bittensor DeFi Infrastructure (bridge + staking + lending). The lending platform is the current primary focus.
 VoidAI operates 3 X accounts (1 main + 2 satellites: Daily/Informational, Bittensor Ecosystem).
 
-Generate exactly $VARIANTS tweet variants about the topic below for the ${ACCOUNT_NAME} account.
+Generate exactly $VARIANTS tweet variants for the ${ACCOUNT_NAME} account.
 
-MANDATORY DIVERSITY — each variant must use a DIFFERENT hook type:
-- Variants 1-2: data-lead hooks (open with a specific number or metric)
-- Variants 3-4: builder/conversational hooks (open with a builder perspective or personal tone)
-- Variants 5-6: curiosity-gap hooks (open with a question or teaser)
-- Variants 7-8: alpha-leak/contrarian hooks (open with a non-obvious insight or hot take)
+CONTENT STRATEGY — base each variant on:
+1. The monitoring/sweep data provided (what's trending, what's newsworthy)
+2. SEO-relevant topics in the Bittensor/DeFi space right now
+3. Performance feedback from previous posts (what got engagement)
+4. Preference learning from past selections (what the curator chose vs declined)
 
-Within each pair, vary the TONE:
-- One analytical, one conversational (for each hook type pair)
+Each variant should take a DIFFERENT angle on the data. Vary the hook style and tone organically based on what the data suggests. Do NOT use predefined categories. Let the data drive the diversity.
 
 Every variant must:
 - Follow the voice rules provided
@@ -268,6 +281,8 @@ FORMATTING RULES:
 
 $PERFORMANCE_CONTEXT
 
+${PREFERENCE_CONTEXT}
+
 DAILY METRICS DATA:
 $METRICS_DATA
 
@@ -278,13 +293,9 @@ Return ONLY valid JSON, nothing else. No markdown code fences. No explanation.
     {
       \"id\": \"v1\",
       \"content\": \"<the full tweet text, max 280 chars>\",
-      \"hook_type\": \"data-lead\",
-      \"tone\": \"analytical\",
-      \"format\": \"single-stat-opener\",
       \"content_type\": \"tweet\",
       \"account\": \"${ACCOUNT}\",
-      \"pillar\": \"bridge-build\",
-      \"topic\": \"<topic from input data>\",
+      \"topic\": \"<specific topic/angle from the data>\",
       \"word_count\": <number>
     },
     ...

@@ -164,13 +164,10 @@ if [[ "$DRY_RUN" == "true" ]]; then
   TIMESTAMP=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
   if [[ "$VARIANTS" -gt 1 ]]; then
     # Generate mock variant data for multi-variant dry run
-    HOOK_TYPES=("data-lead" "data-lead" "builder-conversational" "builder-conversational" "curiosity-gap" "curiosity-gap" "alpha-leak-contrarian" "alpha-leak-contrarian")
-    TONES=("analytical" "conversational" "analytical" "conversational" "analytical" "conversational" "analytical" "conversational")
     MOCK_VARIANTS="["
     for i in $(seq 1 "$VARIANTS"); do
-      IDX=$(( (i - 1) % 8 ))
       [[ $i -gt 1 ]] && MOCK_VARIANTS+=","
-      MOCK_VARIANTS+="{\"id\":\"v${i}\",\"content\":\"[DRY_RUN] Mock news variant ${i} tweet text\",\"hook_type\":\"${HOOK_TYPES[$IDX]}\",\"tone\":\"${TONES[$IDX]}\",\"format\":\"news-commentary\",\"content_type\":\"tweet\",\"account\":\"${ACCOUNT}\",\"pillar\":\"ecosystem-intelligence\",\"topic\":\"$(echo "$NEWS_TITLE" | sed 's/"/\\"/g')\",\"word_count\":8}"
+      MOCK_VARIANTS+="{\"id\":\"v${i}\",\"content\":\"[DRY_RUN] Mock news variant ${i} tweet text\",\"content_type\":\"tweet\",\"account\":\"${ACCOUNT}\",\"topic\":\"$(echo "$NEWS_TITLE" | sed 's/"/\\"/g')\",\"word_count\":8}"
     done
     MOCK_VARIANTS+="]"
     jq -n \
@@ -219,16 +216,18 @@ if [[ "$VARIANTS" -gt 1 ]]; then
 VoidAI is Bittensor DeFi Infrastructure (bridge + staking + lending). The lending platform is the current primary focus.
 VoidAI operates 3 X accounts (1 main + 2 satellites: Daily/Informational, Bittensor Ecosystem).
 
-Generate exactly $VARIANTS tweet variants about the topic below for the ${ACCOUNT_NAME} account.
+Generate exactly $VARIANTS tweet variants about the news item below for the ${ACCOUNT_NAME} account.
 
-MANDATORY DIVERSITY — each variant must use a DIFFERENT hook type:
-- Variants 1-2: data-lead hooks (open with a specific number or metric)
-- Variants 3-4: builder/conversational hooks (open with a builder perspective or personal tone)
-- Variants 5-6: curiosity-gap hooks (open with a question or teaser)
-- Variants 7-8: alpha-leak/contrarian hooks (open with a non-obvious insight or hot take)
+CONTENT STRATEGY — base each variant on:
+1. The news item and its relevance to the Bittensor/DeFi ecosystem
+2. SEO-relevant angles that would perform well right now
+3. Performance feedback from previous posts (what got engagement)
+4. Preference learning from past selections (what the curator chose vs declined)
 
-Within each pair, vary the TONE:
-- One analytical, one conversational (for each hook type pair)
+Each variant should take a DIFFERENT angle on the news. Vary hook style and tone organically. Do NOT use predefined categories.
+
+Do NOT just summarize the headline. Add value: connect it to VoidAI's ecosystem,
+explain why it matters for TAO holders or subnet builders, or share a unique take.
 
 Every variant must:
 - Follow the voice rules provided
@@ -236,9 +235,6 @@ Every variant must:
 - Connect to today's intelligence data
 - Answer \"so what\" for the reader
 - Contain no banned AI phrases
-
-Do NOT just summarize the headline. Add value: connect it to VoidAI's ecosystem,
-explain why it matters for TAO holders or subnet builders, or share a unique take.
 
 VOICE RULES:
 $VOICE_RULES
@@ -281,13 +277,9 @@ Return ONLY valid JSON, no markdown fences, no explanation:
     {
       \"id\": \"v1\",
       \"content\": \"<the full tweet text, max 280 chars>\",
-      \"hook_type\": \"data-lead\",
-      \"tone\": \"analytical\",
-      \"format\": \"news-commentary\",
       \"content_type\": \"tweet\",
       \"account\": \"${ACCOUNT}\",
-      \"pillar\": \"ecosystem-intelligence\",
-      \"topic\": \"<topic from news item>\",
+      \"topic\": \"<specific angle from the news item>\",
       \"word_count\": <number>
     },
     ...

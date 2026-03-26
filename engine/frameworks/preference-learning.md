@@ -16,12 +16,12 @@ Two-stage content curation with three simultaneous learning loops that improve c
 ## Architecture: Three-Layer Curation Pipeline
 
 ```
-LAYER 1 — Claude Code CLI generates 8 variants per content slot
-  | all 8 variants output as JSON with metadata
-LAYER 2 — OpenClaw (Gemini) scores all 8 on multiple dimensions (1-10 each)
-  | selects top 4 by composite score, maintains hook diversity
-  | logs ALL 8 variants with full scores
-LAYER 3 — Vew picks 1 of the top 4 via Telegram
+LAYER 1 — Claude Code CLI generates variants per content slot (8 tweets, 6 threads, 4 articles)
+  | all variants output as JSON with metadata
+LAYER 2 — OpenClaw (Gemini) scores all variants on multiple dimensions (1-10 each)
+  | selects top options by composite score, ensures angle diversity
+  | logs ALL variants with full scores
+LAYER 3 — Vew picks 1 from the top options via Telegram
   | selection + all scores logged to preference system
   | three feedback signals: Gemini quality scores, Vew's preference, audience engagement
 ```
@@ -40,21 +40,21 @@ LAYER 3 — Vew picks 1 of the top 4 via Telegram
 
 | Content Type | Claude Generates | Gemini Scores | Vew Sees | Vew Picks |
 |---|---|---|---|---|
-| Tweet | 8 | all 8 | top 4 | 1 |
-| Thread | 8 | all 8 | top 4 | 1 |
-| Article/Blog | 4 | all 4 | top 2 | 1 |
+| Tweet | 8 | all 8 | top 4 (A/B/C/D) | 1 |
+| Thread | 6 | all 6 | top 3 (A/B/C) + Telegraph links | 1 |
+| Article/Blog | 4 | all 4 | top 2 (A/B) | 1 |
 
 ---
 
-## Hook Diversity Requirements
+## Content Generation Strategy
 
-When generating 8 variants, enforce this hook distribution:
-- Variants 1-2: data-lead hooks (open with a specific number or metric)
-- Variants 3-4: builder/conversational hooks (open with a builder perspective)
-- Variants 5-6: curiosity-gap hooks (open with a question or teaser)
-- Variants 7-8: alpha-leak/contrarian hooks (open with a non-obvious insight)
+Variants are generated based on (in priority order):
+1. **Monitoring data** — today's sweep (X accounts, RSS news, Taostats metrics)
+2. **Trending topics / SEO** — what's hot in Bittensor/DeFi right now
+3. **Post analytics** — engagement data from previous posts (performance-summary.json)
+4. **Preference learning** — patterns from past curator selections vs declines (preference-log/)
 
-Within each pair, vary the tone: one analytical, one conversational.
+Each variant should take a different angle on the data. Diversity emerges organically from the data, not from predefined categories. No hook type labels or structure type assignments.
 
 ---
 
@@ -84,7 +84,7 @@ Each content slot generates one log entry containing ALL data:
       "generation": {
         "total_generated": 8,
         "model": "claude-code-cli",
-        "prompt_included": ["sweep_data", "metrics", "voice_rules", "performance_feedback"]
+        "prompt_included": ["sweep_data", "metrics", "voice_rules", "performance_feedback", "preference_learning"]
       },
       "gemini_scoring": {
         "model": "gemini-2.5-flash",
@@ -92,9 +92,7 @@ Each content slot generates one log entry containing ALL data:
           {
             "id": "v1",
             "content_preview": "First 100 chars...",
-            "hook_type": "data-lead",
-            "tone": "analytical",
-            "format": "single-stat-opener",
+            "topic": "specific angle/topic",
             "scores": {
               "voice_match": 8,
               "relevance": 9,
@@ -112,8 +110,7 @@ Each content slot generates one log entry containing ALL data:
       "user_selection": {
         "selected_option": "B",
         "selected_variant_id": "v5",
-        "selected_hook_type": "builder",
-        "selected_tone": "conversational",
+        "selected_topic": "lending TVL update",
         "selected_composite_score": 8.2,
         "was_top_scored": false,
         "top_scored_variant_id": "v1",
@@ -127,7 +124,7 @@ Each content slot generates one log entry containing ALL data:
         "gemini_top_pick_matched_user": false,
         "user_preferred_lower_score": true,
         "score_gap": 0.3,
-        "pattern_note": "User picked builder hook over higher-scored data-lead"
+        "pattern_note": "User picked variant with different angle over higher-scored option"
       }
     }
   ]
@@ -138,22 +135,33 @@ Each content slot generates one log entry containing ALL data:
 
 ## Telegram Presentation Format
 
-Present top 4 as A/B/C/D with hook type labels. Order is RANDOMIZED (not by score):
+No scores, no category labels. Order is RANDOMIZED (not by score).
 
+**Tweets (4 options):**
 ```
 [@v0idai] Tweet 1 — Pick one:
 
-A [Data-lead]: "65% LTV on wTAO. VoidAI lending testnet is live..."
-B [Builder]: "Testnet milestone: lending accepts wTAO collateral..."
-C [Curiosity]: "What changes when you can borrow against your TAO..."
-D [Alpha]: "Most people don't realize what 65% LTV on wTAO enables..."
+A: "65% LTV on wTAO. VoidAI lending testnet is live..."
+B: "Testnet milestone: lending accepts wTAO collateral..."
+C: "What changes when you can borrow against your TAO..."
+D: "Most people don't realize what 65% LTV on wTAO enables..."
 
-Reply with a letter (A/B/C/D), "regenerate" for new options, or "skip".
+Reply with a letter (A/B/C/D), "regenerate", or "skip".
 ```
 
-Do NOT show scores to Vew.
+**Threads (3 options with Telegraph preview):**
+Each thread option is published to Telegraph first via `publish-telegraph.sh`. Present compactly:
+```
+[@v0idai] Thread — Pick one:
 
-On "regenerate": Claude generates 8 NEW variants, Gemini scores and filters again, presents fresh top 4. Original 8 logged with `regenerated: true`.
+A: "Hook tweet preview..." -> telegra.ph/link-a
+B: "Hook tweet preview..." -> telegra.ph/link-b
+C: "Hook tweet preview..." -> telegra.ph/link-c
+
+Reply with a letter (A/B/C), "regenerate", or "skip".
+```
+
+On "regenerate": Claude generates NEW variants (8 tweets, 6 threads), Gemini scores and filters again, presents fresh options. Originals logged with `regenerated: true`.
 
 ---
 
