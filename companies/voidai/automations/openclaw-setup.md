@@ -202,26 +202,34 @@ Write ALL variants (8 for tweets, 6 for threads, 4 for articles) with full score
 Use the log format documented in engine/frameworks/preference-learning.md.
 Include: all scores, composite scores, presented_to_user flag, presented_as letter, filtered_reason for non-presented variants.
 
-SUBSTEP E - PRESENT OPTIONS TO VEW:
+SUBSTEP E - PRESENT OPTIONS TO VEW VIA TELEGRAPH:
 Do NOT show scores, rankings, or category labels.
+ALL content types are published to Telegraph for clean review. Present options ONE BY ONE.
 
-For TWEETS (4 options):
+For EACH selected option, publish to Telegraph:
+  bash companies/voidai/automations/scripts/publish-telegraph.sh <variants-file> <variant-id>
+The script handles tweets, threads, and articles automatically.
+
+TWEETS (4 options):
   [@account] Tweet N — Pick one:
-  A: 'tweet text preview...'
-  B: 'tweet text preview...'
-  C: 'tweet text preview...'
-  D: 'tweet text preview...'
+  A: telegra.ph/link-a
+  B: telegra.ph/link-b
+  C: telegra.ph/link-c
+  D: telegra.ph/link-d
   Reply with a letter (A/B/C/D), 'regenerate', or 'skip'.
 
-For THREADS (3 options with Telegraph preview):
-  Before presenting, publish each thread option to Telegraph using:
-  bash companies/voidai/automations/scripts/publish-telegraph.sh <variants-file> <variant-id>
-  Then present compactly:
+THREADS (3 options):
   [@account] Thread — Pick one:
-  A: 'hook tweet preview...' -> telegra.ph/link-a
-  B: 'hook tweet preview...' -> telegra.ph/link-b
-  C: 'hook tweet preview...' -> telegra.ph/link-c
+  A: telegra.ph/link-a
+  B: telegra.ph/link-b
+  C: telegra.ph/link-c
   Reply with a letter (A/B/C), 'regenerate', or 'skip'.
+
+ARTICLES (2 options):
+  [@account] Article — Pick one:
+  A: telegra.ph/link-a
+  B: telegra.ph/link-b
+  Reply with a letter (A/B), 'regenerate', or 'skip'.
 
 SUBSTEP F - HANDLE VEW'S RESPONSE:
   - Letter selection: Log selection with variant ID, score rank, whether it was the top-scored variant, score gap between top and selected.
@@ -262,7 +270,7 @@ KEY RULES:
 - Respect inter-account coordination: if @v0idai covers a topic, satellites use a different angle or skip it.
 - Bittensor account: enforce 1-2x/week VoidAI mention cap.
 - Variant counts: tweets = 8 generated / top 4 presented. Threads = 6 generated / top 3 presented. Articles = 4 generated / top 2 presented.
-- For thread options, ALWAYS publish to Telegraph and include the link. This keeps the review compact.
+- For ALL content options (tweets, threads, articles), ALWAYS publish to Telegraph and include the link. This keeps the review clean and compact.
 - ALWAYS log ALL variants (presented and filtered) with full scores to the preference log. This data trains the system.
 
 STEP 3 - HEALTH CHECK (after all accounts reviewed):

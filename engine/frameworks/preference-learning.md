@@ -136,32 +136,42 @@ Each content slot generates one log entry containing ALL data:
 ## Telegram Presentation Format
 
 No scores, no category labels. Order is RANDOMIZED (not by score).
+ALL content types are published to Telegraph for clean review via `publish-telegraph.sh`.
 
 **Tweets (4 options):**
 ```
 [@v0idai] Tweet 1 — Pick one:
 
-A: "65% LTV on wTAO. VoidAI lending testnet is live..."
-B: "Testnet milestone: lending accepts wTAO collateral..."
-C: "What changes when you can borrow against your TAO..."
-D: "Most people don't realize what 65% LTV on wTAO enables..."
+A: telegra.ph/link-a
+B: telegra.ph/link-b
+C: telegra.ph/link-c
+D: telegra.ph/link-d
 
 Reply with a letter (A/B/C/D), "regenerate", or "skip".
 ```
 
-**Threads (3 options with Telegraph preview):**
-Each thread option is published to Telegraph first via `publish-telegraph.sh`. Present compactly:
+**Threads (3 options):**
 ```
 [@v0idai] Thread — Pick one:
 
-A: "Hook tweet preview..." -> telegra.ph/link-a
-B: "Hook tweet preview..." -> telegra.ph/link-b
-C: "Hook tweet preview..." -> telegra.ph/link-c
+A: telegra.ph/link-a
+B: telegra.ph/link-b
+C: telegra.ph/link-c
 
 Reply with a letter (A/B/C), "regenerate", or "skip".
 ```
 
-On "regenerate": Claude generates NEW variants (8 tweets, 6 threads), Gemini scores and filters again, presents fresh options. Originals logged with `regenerated: true`.
+**Articles (2 options):**
+```
+[@v0idai] Article — Pick one:
+
+A: telegra.ph/link-a
+B: telegra.ph/link-b
+
+Reply with a letter (A/B), "regenerate", or "skip".
+```
+
+On "regenerate": Claude generates NEW variants (8 tweets, 6 threads, 4 articles), Gemini scores and filters again, presents fresh options. Originals logged with `regenerated: true`.
 
 ---
 
