@@ -148,9 +148,11 @@ openclaw cron add \
   --message "Generate the VoidAI Morning Summary brief and run the reply-gated chain. Execute these steps:
 
 STEP 1 - MORNING SUMMARY:
-1. Read the latest sweep JSON from companies/voidai/automations/data/ (most recent sweep-*.json)
-2. Read the latest performance-summary.json (Pillar C feedback data)
-3. Read the latest daily-metrics JSON for current market context
+1. Read TODAY's morning sweep file: companies/voidai/automations/data/sweep-$(date +%Y-%m-%d)-0800.json (or the most recent file matching sweep-*-morning.json from today)
+2. Read LAST NIGHT's evening sweep file: find the most recent file matching sweep-*-evening.json (this will be yesterday's 8PM sweep)
+3. Read yesterday's engagement data from companies/voidai/automations/data/performance-summary.json (Pillar C feedback for Message 6)
+4. Combine data from BOTH sweeps (evening + morning) to get full overnight coverage. The morning summary must reflect everything that happened since yesterday's morning summary.
+5. Read the latest daily-metrics JSON for current market context
 4. Generate a structured brief with these sections:
    A. MARKET SNAPSHOT: TAO price, SN106 emissions, bridge volume (1 line each)
    B. TOP STORIES (max 5): Priority-ranked news/posts from sweep, with suggested content angle and target account
