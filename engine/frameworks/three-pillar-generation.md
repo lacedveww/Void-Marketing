@@ -135,20 +135,32 @@ Pillar C requires live posting data to function. During DRY_RUN and early soft-l
 - Includes: priority flags, suggested account routing, draft hooks
 - **PAUSES** -- waits for Vew's response before continuing to Step 3
 
-### Step 3: Content Drafting (reply-gated, on Vew's response)
+### Step 3: Content Generation with Two-Stage Curation (reply-gated, on Vew's response)
+- Claude generates **8 variants per tweet/thread slot** (4 for articles) with enforced hook diversity
+- Each variant uses a different hook type (data-lead, builder, curiosity-gap, alpha-leak) with tone variation (analytical vs conversational)
+- Variants output as JSON with metadata: `hook_type`, `tone`, `format`, `content_type`, `account`, `pillar`, `topic`, `word_count`
 - Drafts are generated **per-account in sequence**, not as one batch
-- Each account's persona is loaded from `accounts.md` before generating its content (account-specific persona loading)
-- Account order: @v0idai (1-2 posts) -> Daily/Info (3-5 posts) -> Bittensor Ecosystem (2-3 posts) -> DeFi/Cross-Chain (2-3 posts)
-- Each account is a mini-review cycle: generate -> present -> approve/edit/reject -> next account
-- Each draft includes: text, target account, pillar tag, suggested post time, hook type
-- @v0idai drafts scheduled via OpenTweet; satellite accounts saved to `queue/posted/{account}/` as manually_posted
+- Each account's persona is loaded from `accounts.md` before generating its content
+- Account order: @v0idai (1-2 slots) -> Daily/Info (3-5 slots) -> Bittensor Ecosystem (2-3 slots) -> DeFi/Cross-Chain (2-3 slots)
 - Different voice, hook, angle per account even on the same topic (Sub-Agent Specialization Pattern)
+- See `engine/frameworks/preference-learning.md` for the full curation pipeline
 
-### Step 4: Human Approval (reply-gated, on draft delivery)
-- Drafts presented for Vew's review in Telegram
-- Options: approve, edit, reject, reschedule
-- Approved drafts move to `queue/approved/`
-- Rejected drafts logged with reason for voice calibration learning
+### Step 3b: Gemini Scoring Layer (internal, per content slot)
+- OpenClaw (Gemini) scores **all 8 variants** on 6 dimensions (1-10 each): voice match, relevance, hook quality, compliance, uniqueness, data density
+- Composite score = average of all 6 dimensions; compliance failure = 0 overall
+- Selects **top 4** by composite score, enforcing at least 3 different hook types in the selection
+- Randomizes presentation order (A/B/C/D does not correspond to score rank)
+- Logs **ALL 8 variants** with full scores to `data/preference-log/preference-log-YYYY-MM-DD.json`
+- See `engine/frameworks/gemini-scoring-criteria.md` for the full scoring rubric
+
+### Step 4: Human Selection (reply-gated, curated options)
+- Top 4 variants presented to Vew via Telegram as A/B/C/D with hook type labels
+- Scores are NOT shown to Vew
+- Options: letter (A/B/C/D), letter with edit, regenerate (fresh 8 variants), skip, preview
+- On regenerate: 8 new variants generated, scored, filtered, fresh top 4 presented; originals logged with `regenerated: true`
+- Selection logged with: variant ID, score rank, whether top-scored was picked, score gap
+- Three learning signals captured: Gemini quality scores, Vew's preference, audience engagement (later)
+- @v0idai drafts scheduled via OpenTweet; satellite accounts saved to `queue/posted/{account}/` as manually_posted
 
 ### Step 5: Scheduled Posting
 - Approved content posted at optimal times based on cadence rules
@@ -181,3 +193,4 @@ Pillar C requires live posting data to function. During DRY_RUN and early soft-l
 | 2026-03-25 | Updated to reply-gated workflow: Step 2 at 8:30AM (was 9AM), Steps 3-4 are reply-gated (were timed at 10:30AM), Step 7 at Fri 10:30AM (was Fri 12PM). Pillar C weekly calibration reference updated. |
 | 2026-03-25 | Lending pivot: added lending keywords to Pillar A+B coverage and routing. Updated account routing from 6 to 4 accounts. Removed Meme/Culture and AI x Crypto routing. Added Daily/Informational routing. |
 | 2026-03-25 | Updated Step 3 (Content Drafting) to per-account sequential generation with account-specific persona loading. Replaces single-batch drafting with 4-account mini-review cycles. |
+| 2026-03-25 | Two-stage curation: Step 3 generates 8 variants with hook diversity, Step 3b adds Gemini 6-dimension scoring layer, Step 4 presents curated top 4 to Vew. Preference logging for all variants. |

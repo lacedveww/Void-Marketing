@@ -6,6 +6,7 @@
 #
 # Usage:
 #   ./generate-weekly-thread.sh /path/to/weekly-metrics.json
+#   ./generate-weekly-thread.sh --variants 8 /path/to/weekly-metrics.json
 #   DRY_RUN=true ./generate-weekly-thread.sh /path/to/weekly-metrics.json
 #
 # Input:  JSON file with aggregated weekly metrics (7-day TAO price trend,
@@ -44,9 +45,18 @@ log() {
 }
 
 usage() {
-  echo "Usage: $0 <weekly-metrics-json-file>" >&2
+  echo "Usage: $0 [--variants N] <weekly-metrics-json-file>" >&2
   exit 1
 }
+
+# Parse optional flags before positional args
+VARIANTS=1
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --variants) VARIANTS="$2"; shift 2 ;;
+    *) break ;;
+  esac
+done
 
 if [[ $# -lt 1 ]]; then
   usage
@@ -120,28 +130,140 @@ PILLARS=$(cat "$PILLARS_FILE")
 if [[ "$DRY_RUN" == "true" ]]; then
   log "DRY_RUN is true. Outputting placeholder."
   TIMESTAMP=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
-  jq -n \
-    --arg ts "$TIMESTAMP" \
-    '{
-      "thread": [
-        {"position": 1, "tweet": "[DRY_RUN] Hook tweet placeholder", "is_hook": true},
-        {"position": 2, "tweet": "[DRY_RUN] Data tweet placeholder", "is_hook": false},
-        {"position": 3, "tweet": "[DRY_RUN] Data tweet placeholder", "is_hook": false},
-        {"position": 4, "tweet": "[DRY_RUN] Insight tweet placeholder", "is_hook": false},
-        {"position": 5, "tweet": "[DRY_RUN] CTA tweet placeholder", "is_hook": false}
-      ],
-      "platform": "x",
-      "account": "v0idai",
-      "pillar": "ecosystem-intelligence",
-      "content_type": "thread",
-      "status": "dry_run",
-      "created_at": $ts
-    }'
+  if [[ "$VARIANTS" -gt 1 ]]; then
+    # Generate mock thread variant data for multi-variant dry run
+    STRUCTURE_TYPES=("educational" "educational" "builder-narrative" "builder-narrative" "data-story" "data-story" "ecosystem-lens" "ecosystem-lens")
+    TONES=("analytical" "conversational" "analytical" "conversational" "analytical" "conversational" "analytical" "conversational")
+    MOCK_VARIANTS="["
+    for i in $(seq 1 "$VARIANTS"); do
+      IDX=$(( (i - 1) % 8 ))
+      [[ $i -gt 1 ]] && MOCK_VARIANTS+=","
+      MOCK_VARIANTS+="{\"id\":\"v${i}\",\"content\":[{\"position\":1,\"tweet\":\"[DRY_RUN] Variant ${i} hook tweet\",\"is_hook\":true},{\"position\":2,\"tweet\":\"[DRY_RUN] Variant ${i} data tweet\",\"is_hook\":false},{\"position\":3,\"tweet\":\"[DRY_RUN] Variant ${i} insight tweet\",\"is_hook\":false},{\"position\":4,\"tweet\":\"[DRY_RUN] Variant ${i} CTA tweet\",\"is_hook\":false}],\"hook_type\":\"${STRUCTURE_TYPES[$IDX]}\",\"tone\":\"${TONES[$IDX]}\",\"format\":\"thread\",\"content_type\":\"thread\",\"account\":\"v0idai\",\"pillar\":\"ecosystem-intelligence\",\"topic\":\"weekly recap\",\"word_count\":20}"
+    done
+    MOCK_VARIANTS+="]"
+    jq -n \
+      --argjson variants "$MOCK_VARIANTS" \
+      --arg ts "$TIMESTAMP" \
+      '{
+        "variants": $variants,
+        "status": "dry_run",
+        "created_at": $ts
+      }'
+  else
+    jq -n \
+      --arg ts "$TIMESTAMP" \
+      '{
+        "thread": [
+          {"position": 1, "tweet": "[DRY_RUN] Hook tweet placeholder", "is_hook": true},
+          {"position": 2, "tweet": "[DRY_RUN] Data tweet placeholder", "is_hook": false},
+          {"position": 3, "tweet": "[DRY_RUN] Data tweet placeholder", "is_hook": false},
+          {"position": 4, "tweet": "[DRY_RUN] Insight tweet placeholder", "is_hook": false},
+          {"position": 5, "tweet": "[DRY_RUN] CTA tweet placeholder", "is_hook": false}
+        ],
+        "platform": "x",
+        "account": "v0idai",
+        "pillar": "ecosystem-intelligence",
+        "content_type": "thread",
+        "status": "dry_run",
+        "created_at": $ts
+      }'
+  fi
   exit 0
 fi
 
 # Build the prompt
-PROMPT=$(cat <<'PROMPT_END'
+if [[ "$VARIANTS" -gt 1 ]]; then
+  # --- Multi-variant thread prompt ---
+  PROMPT="You are generating weekly recap THREAD variants for the @v0idai X account (VoidAI main account).
+VoidAI is Bittensor DeFi Infrastructure (bridge + staking + lending). The lending platform is the current primary focus.
+VoidAI operates 4 X accounts (1 main + 3 satellites: Daily/Informational, Bittensor Ecosystem, DeFi/Cross-Chain).
+
+Generate exactly $VARIANTS thread variants based on the weekly metrics data below for the @v0idai account.
+
+MANDATORY DIVERSITY — each variant must use a DIFFERENT structure type:
+- Variants 1-2: educational structure (teach the reader something, break down a concept with data)
+- Variants 3-4: builder narrative structure (tell the story from a builder's perspective, what was built/shipped/learned)
+- Variants 5-6: data story structure (lead with the numbers, let metrics tell the narrative)
+- Variants 7-8: ecosystem lens structure (zoom out to Bittensor ecosystem context, connect VoidAI's week to broader trends)
+
+Within each pair, vary the TONE:
+- One analytical, one conversational (for each structure type pair)
+
+Each thread variant must contain 5 to 7 tweets with this structure:
+1. Hook tweet: grabs attention, sets up the thread. Use a compelling data point or insight.
+2. Data tweets (2-4 tweets): each covers one key metric or trend. Specific numbers required.
+3. Insight tweet: connect the data to a \"so what\" for the reader.
+4. CTA tweet: close with a clear call to action.
+
+Every variant must:
+- Follow the voice rules provided
+- Match the account persona
+- Connect to this week's data
+- Answer \"so what\" for the reader
+- Contain no banned AI phrases
+
+VOICE RULES:
+$VOICE_RULES
+
+COMPLIANCE RULES (mandatory):
+$COMPLIANCE_RULES
+
+CONTENT PILLARS (for reference):
+$PILLARS
+
+BANNED PHRASES (any of these in any tweet = auto-fail):
+- \"It's worth noting\", \"In the ever-evolving landscape of\", \"At its core\"
+- \"This is a game-changer\", \"This underscores the importance of\", \"Without further ado\"
+- \"In today's rapidly changing\", \"Revolutionizing the way\", \"Paving the way for\"
+- \"Paradigm shift\", \"Synergy/synergies\", \"Holistic approach\", \"Cutting-edge\"
+- \"Seamless integration\", \"Robust ecosystem\", \"It is important to note that\"
+- \"In conclusion\", \"As we navigate\"
+- \"Additionally,\" / \"Furthermore,\" / \"Moreover,\" at sentence start
+
+FORMATTING RULES:
+- NEVER use em dashes or double hyphens anywhere. Use commas, periods, colons, or line breaks.
+- Each tweet max 280 characters.
+- Every tweet must contribute specific data or actionable insight. No filler.
+- Sound like a builder talking to other builders.
+- Use Bittensor-native terminology: subnet, SN106, dTAO, emissions, metagraph.
+- Use DeFi terminology where relevant: TVL, bridge volume, liquidity.
+- Use lending terminology where relevant: collateral, LTV, borrow rate, supply rate, utilization rate.
+- The hook tweet should NOT start with \"This week\" or \"Weekly update\". Open with the most compelling data point.
+
+$PERFORMANCE_CONTEXT
+
+WEEKLY METRICS DATA:
+$METRICS_DATA
+
+OUTPUT FORMAT:
+Return ONLY valid JSON, no markdown fences, no explanation.
+{
+  \"variants\": [
+    {
+      \"id\": \"v1\",
+      \"content\": [
+        {\"position\": 1, \"tweet\": \"<hook tweet text>\", \"is_hook\": true},
+        {\"position\": 2, \"tweet\": \"<data tweet>\", \"is_hook\": false},
+        ...
+      ],
+      \"hook_type\": \"educational\",
+      \"tone\": \"analytical\",
+      \"format\": \"thread\",
+      \"content_type\": \"thread\",
+      \"account\": \"v0idai\",
+      \"pillar\": \"ecosystem-intelligence\",
+      \"topic\": \"<topic from weekly data>\",
+      \"word_count\": <total word count across all tweets>
+    },
+    ...
+  ]
+}
+
+Generate all $VARIANTS thread variants now."
+
+else
+  # --- Single-variant prompt (original) ---
+  PROMPT=$(cat <<'PROMPT_END'
 You are generating a weekly recap THREAD for the @v0idai X account (VoidAI main account).
 VoidAI is Bittensor DeFi Infrastructure (bridge + staking + lending). The lending platform is the current primary focus.
 VoidAI operates 4 X accounts (1 main + 3 satellites: Daily/Informational, Bittensor Ecosystem, DeFi/Cross-Chain).
@@ -157,7 +279,7 @@ THREAD STRUCTURE (mandatory):
 PROMPT_END
 )
 
-PROMPT="$PROMPT
+  PROMPT="$PROMPT
 
 VOICE RULES:
 $VOICE_RULES
@@ -201,80 +323,151 @@ Return ONLY valid JSON, no markdown fences, no explanation. Array of tweet objec
 ]
 
 Generate the thread now."
+fi
 
-log "Calling claude -p to generate weekly thread..."
+log "Calling claude -p to generate weekly thread (variants=$VARIANTS)..."
 
 CLAUDE_OUTPUT=$(cd "$PROJECT_ROOT" && echo "$PROMPT" | "$CLAUDE_BIN" -p 2>/dev/null) || {
   log "ERROR: claude -p failed"
   exit 1
 }
 
-# Extract JSON array from output
-CLEAN_OUTPUT=$(echo "$CLAUDE_OUTPUT" | sed 's/^```json//; s/^```//; s/```$//' | tr '\n' ' ')
+if [[ "$VARIANTS" -gt 1 ]]; then
+  # --- Multi-variant JSON extraction ---
+  CLEAN_OUTPUT=$(echo "$CLAUDE_OUTPUT" | sed 's/^```json//; s/^```//; s/```$//' | tr '\n' ' ')
+  CLEAN_OUTPUT=$(echo "$CLEAN_OUTPUT" | sed 's/.*\({.*}\).*/\1/')
 
-# Try to extract the JSON array
-THREAD_JSON=$(echo "$CLEAN_OUTPUT" | grep -oE '\[.*\]' | head -1) || true
-
-if [[ -z "$THREAD_JSON" ]]; then
-  log "ERROR: Could not extract JSON array from claude output"
-  log "Raw output: $CLAUDE_OUTPUT"
-  exit 1
-fi
-
-if ! echo "$THREAD_JSON" | jq empty 2>/dev/null; then
-  log "ERROR: Extracted output is not valid JSON"
-  log "Extracted: $THREAD_JSON"
-  exit 1
-fi
-
-# Validate thread structure
-TWEET_COUNT=$(echo "$THREAD_JSON" | jq 'length')
-
-if [[ "$TWEET_COUNT" -lt 5 || "$TWEET_COUNT" -gt 7 ]]; then
-  log "WARNING: Thread has $TWEET_COUNT tweets (expected 5-7)"
-fi
-
-# Validate each tweet length and check for banned content
-VALIDATION_ISSUES=0
-for i in $(seq 0 $((TWEET_COUNT - 1))); do
-  TWEET=$(echo "$THREAD_JSON" | jq -r ".[$i].tweet")
-  TWEET_LEN=${#TWEET}
-
-  if [[ $TWEET_LEN -gt 280 ]]; then
-    log "WARNING: Tweet $((i + 1)) is $TWEET_LEN chars (over 280)"
-    VALIDATION_ISSUES=$((VALIDATION_ISSUES + 1))
+  if [[ -z "$CLEAN_OUTPUT" ]]; then
+    log "ERROR: Could not extract valid JSON from claude output"
+    log "Raw output: $CLAUDE_OUTPUT"
+    exit 1
   fi
 
-  # Check for em dashes and double hyphens
-  if echo "$TWEET" | grep -q '\-\-'; then
-    log "WARNING: Tweet $((i + 1)) contains double hyphens"
-    VALIDATION_ISSUES=$((VALIDATION_ISSUES + 1))
+  if ! echo "$CLEAN_OUTPUT" | jq empty 2>/dev/null; then
+    log "ERROR: Extracted output is not valid JSON"
+    log "Extracted: $CLEAN_OUTPUT"
+    exit 1
   fi
-done
 
-STATUS="pending_review"
-if [[ $VALIDATION_ISSUES -gt 0 ]]; then
-  STATUS="flagged_validation"
-  log "Thread flagged with $VALIDATION_ISSUES validation issues"
+  VARIANT_COUNT=$(echo "$CLEAN_OUTPUT" | jq '.variants | length')
+  if [[ "$VARIANT_COUNT" -lt 1 ]]; then
+    log "ERROR: No variants array in output"
+    exit 1
+  fi
+
+  log "Extracted $VARIANT_COUNT thread variants from claude output"
+
+  # Validate each variant's thread tweets
+  FLAGGED=0
+  for v in $(seq 0 $((VARIANT_COUNT - 1))); do
+    V_ID=$(echo "$CLEAN_OUTPUT" | jq -r ".variants[$v].id // \"v$((v+1))\"")
+    THREAD_LEN=$(echo "$CLEAN_OUTPUT" | jq ".variants[$v].content | length")
+
+    if [[ "$THREAD_LEN" -lt 5 || "$THREAD_LEN" -gt 7 ]]; then
+      log "WARNING: Variant $V_ID has $THREAD_LEN tweets (expected 5-7)"
+      FLAGGED=$((FLAGGED + 1))
+    fi
+
+    for t in $(seq 0 $((THREAD_LEN - 1))); do
+      TWEET=$(echo "$CLEAN_OUTPUT" | jq -r ".variants[$v].content[$t].tweet // empty")
+      TWEET_LEN=${#TWEET}
+
+      if [[ $TWEET_LEN -gt 280 ]]; then
+        log "WARNING: Variant $V_ID tweet $((t+1)) is $TWEET_LEN chars (over 280)"
+        FLAGGED=$((FLAGGED + 1))
+      fi
+
+      if echo "$TWEET" | grep -q '\-\-'; then
+        log "WARNING: Variant $V_ID tweet $((t+1)) contains double hyphens"
+        FLAGGED=$((FLAGGED + 1))
+      fi
+    done
+  done
+
+  STATUS="pending_review"
+  if [[ $FLAGGED -gt 0 ]]; then
+    STATUS="flagged_validation"
+    log "Thread variants flagged with $FLAGGED issues"
+  fi
+
+  TIMESTAMP=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+
+  echo "$CLEAN_OUTPUT" | jq \
+    --arg status "$STATUS" \
+    --arg ts "$TIMESTAMP" \
+    '. + { "status": $status, "created_at": $ts }'
+
+  log "Multi-variant thread generation complete ($VARIANT_COUNT variants, status: $STATUS)"
+
+else
+  # --- Single-variant extraction (original) ---
+  # Extract JSON array from output
+  CLEAN_OUTPUT=$(echo "$CLAUDE_OUTPUT" | sed 's/^```json//; s/^```//; s/```$//' | tr '\n' ' ')
+
+  # Try to extract the JSON array
+  THREAD_JSON=$(echo "$CLEAN_OUTPUT" | grep -oE '\[.*\]' | head -1) || true
+
+  if [[ -z "$THREAD_JSON" ]]; then
+    log "ERROR: Could not extract JSON array from claude output"
+    log "Raw output: $CLAUDE_OUTPUT"
+    exit 1
+  fi
+
+  if ! echo "$THREAD_JSON" | jq empty 2>/dev/null; then
+    log "ERROR: Extracted output is not valid JSON"
+    log "Extracted: $THREAD_JSON"
+    exit 1
+  fi
+
+  # Validate thread structure
+  TWEET_COUNT=$(echo "$THREAD_JSON" | jq 'length')
+
+  if [[ "$TWEET_COUNT" -lt 5 || "$TWEET_COUNT" -gt 7 ]]; then
+    log "WARNING: Thread has $TWEET_COUNT tweets (expected 5-7)"
+  fi
+
+  # Validate each tweet length and check for banned content
+  VALIDATION_ISSUES=0
+  for i in $(seq 0 $((TWEET_COUNT - 1))); do
+    TWEET=$(echo "$THREAD_JSON" | jq -r ".[$i].tweet")
+    TWEET_LEN=${#TWEET}
+
+    if [[ $TWEET_LEN -gt 280 ]]; then
+      log "WARNING: Tweet $((i + 1)) is $TWEET_LEN chars (over 280)"
+      VALIDATION_ISSUES=$((VALIDATION_ISSUES + 1))
+    fi
+
+    # Check for em dashes and double hyphens
+    if echo "$TWEET" | grep -q '\-\-'; then
+      log "WARNING: Tweet $((i + 1)) contains double hyphens"
+      VALIDATION_ISSUES=$((VALIDATION_ISSUES + 1))
+    fi
+  done
+
+  STATUS="pending_review"
+  if [[ $VALIDATION_ISSUES -gt 0 ]]; then
+    STATUS="flagged_validation"
+    log "Thread flagged with $VALIDATION_ISSUES validation issues"
+  fi
+
+  TIMESTAMP=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+
+  # Output structured JSON
+  jq -n \
+    --argjson thread "$THREAD_JSON" \
+    --arg status "$STATUS" \
+    --arg ts "$TIMESTAMP" \
+    --argjson count "$TWEET_COUNT" \
+    '{
+      "thread": $thread,
+      "platform": "x",
+      "account": "v0idai",
+      "pillar": "ecosystem-intelligence",
+      "content_type": "thread",
+      "tweet_count": $count,
+      "status": $status,
+      "created_at": $ts
+    }'
+
+  log "Thread generated successfully ($TWEET_COUNT tweets, status: $STATUS)"
 fi
-
-TIMESTAMP=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
-
-# Output structured JSON
-jq -n \
-  --argjson thread "$THREAD_JSON" \
-  --arg status "$STATUS" \
-  --arg ts "$TIMESTAMP" \
-  --argjson count "$TWEET_COUNT" \
-  '{
-    "thread": $thread,
-    "platform": "x",
-    "account": "v0idai",
-    "pillar": "ecosystem-intelligence",
-    "content_type": "thread",
-    "tweet_count": $count,
-    "status": $status,
-    "created_at": $ts
-  }'
-
-log "Thread generated successfully ($TWEET_COUNT tweets, status: $STATUS)"

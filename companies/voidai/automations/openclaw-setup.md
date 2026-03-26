@@ -162,41 +162,91 @@ STEP 1 - MORNING SUMMARY:
 7. Deliver the brief to Telegram (5-6 messages).
 8. PAUSE - wait for Vew's response before continuing.
 
-STEP 2 - MULTI-ACCOUNT DRAFT REVIEW (on Vew's response):
-Generate and present content for each account SEQUENTIALLY. Each account is its own mini-review cycle. Do not move to the next account until the current one is fully approved.
+STEP 2 - MULTI-ACCOUNT DRAFT REVIEW WITH TWO-STAGE CURATION (on Vew's response):
+Generate and present content for each account SEQUENTIALLY using the three-layer curation pipeline.
+Each account is its own mini-review cycle. Do not move to the next account until the current one is fully approved.
+
+FOR EACH CONTENT SLOT IN EACH ACCOUNT, follow this flow:
+
+SUBSTEP A - GENERATE 8 VARIANTS:
+Run the generation script with --variants 8 (or --variants 4 for articles).
+For tweets: bash companies/voidai/automations/scripts/generate-daily-tweet.sh --variants 8 <metrics-file>
+For news tweets: bash companies/voidai/automations/scripts/generate-news-tweet.sh --variants 8 <news-file>
+For threads: bash companies/voidai/automations/scripts/generate-weekly-thread.sh --variants 8 <metrics-file>
+Receive the variants JSON with metadata (hook_type, tone, format for each variant).
+
+SUBSTEP B - SCORE ALL VARIANTS (run internally, do NOT show scores to Vew):
+Read scoring criteria from engine/frameworks/gemini-scoring-criteria.md.
+Score EACH variant on 6 dimensions (1-10 each):
+  1. VOICE MATCH: How well does this match the account persona from accounts.md?
+  2. RELEVANCE: How well does this connect to today's sweep intelligence data?
+  3. HOOK QUALITY: How strong is the opening hook? Will it stop a scroll?
+  4. COMPLIANCE: Does it pass all voice rules and banned phrase checks? Any banned phrase = score 0.
+  5. UNIQUENESS: How different is this from the other 7 variants?
+  6. DATA DENSITY: Does it include specific, concrete information?
+Compute COMPOSITE SCORE = average of all 6. If compliance = 0, composite = 0.
+
+SUBSTEP C - SELECT TOP 4:
+  1. Rank all variants by composite score (highest first)
+  2. Select top 4 (top 2 for articles)
+  3. DIVERSITY CHECK: top 4 must include at least 3 different hook types.
+     If not, drop the lowest-scored variant sharing a hook type with a higher-scored one,
+     replace with the highest-scored variant of a missing hook type.
+  4. Compliance-failed variants (score 0) are NEVER presented.
+  5. RANDOMIZE the presentation order (A/B/C/D does NOT correspond to score rank).
+
+SUBSTEP D - LOG ALL 8 VARIANTS:
+Write ALL 8 variants with full scores to automations/data/preference-log/preference-log-$(date +%Y-%m-%d).json.
+Use the log format documented in engine/frameworks/preference-learning.md.
+Include: all scores, composite scores, presented_to_user flag, presented_as letter, filtered_reason for non-presented variants.
+
+SUBSTEP E - PRESENT TOP 4 TO VEW:
+Show the top 4 as A/B/C/D with hook type labels. Do NOT show scores or rankings.
+Format:
+  [@account] Tweet N — Pick one:
+  A [Hook-type]: 'tweet text preview...'
+  B [Hook-type]: 'tweet text preview...'
+  C [Hook-type]: 'tweet text preview...'
+  D [Hook-type]: 'tweet text preview...'
+  Reply with a letter (A/B/C/D), 'regenerate' for new options, or 'skip'.
+
+SUBSTEP F - HANDLE VEW'S RESPONSE:
+  - Letter (A/B/C/D): Log selection with variant ID, score rank, whether it was the top-scored variant, score gap between top and selected.
+  - Letter with edit: Log as above plus edited: true, save the edited version.
+  - 'regenerate': Generate 8 NEW variants, score and filter again, present fresh top 4. Log original 8 with regenerated: true.
+  - 'skip': Log all variants as skipped.
+  - Telegraph preview: Generate preview on Telegraph, then return to selection.
+
+NOW APPLY THIS FLOW TO EACH ACCOUNT:
 
 Account 1: @v0idai (Main)
-9. Read companies/voidai/accounts.md Account 1 persona. Generate 1-2 draft posts focused on builder updates, lending development, vision threads, major milestones.
-10. Present drafts to Vew via Telegram. Label: '[@v0idai] Draft 1 of 2:' with Telegraph preview.
-11. Wait for Vew to approve/edit/reject each draft.
-12. For approved @v0idai drafts: proceed to scheduling - ask Vew what time to schedule each, then schedule via post-to-x.sh respecting cadence rules (MAX_POSTS_PER_DAY=6, MIN_POST_GAP_MINUTES=180).
-13. Show full @v0idai schedule for today. Then say: 'Moving to Daily/Info account drafts. Ready?'
-14. Wait for Vew's response.
+9. Read companies/voidai/accounts.md Account 1 persona. For each content slot (1-2 tweet slots):
+   Run substeps A-F above. Focus: builder updates, lending development, vision threads, major milestones.
+10. For approved @v0idai drafts: proceed to scheduling via post-to-x.sh respecting cadence rules (MAX_POSTS_PER_DAY=6, MIN_POST_GAP_MINUTES=180).
+11. Show full @v0idai schedule for today. Then say: 'Moving to Daily/Info account drafts. Ready?'
+12. Wait for Vew's response.
 
 Account 2: VoidAI Daily/Informational
-15. Read companies/voidai/accounts.md Account 2 persona. Generate 3-5 draft posts focused on product updates, bridge stats, lending progress, ecosystem news.
-16. Present drafts to Vew via Telegram. Label: '[Daily/Info] Draft 1 of 5:' with Telegraph preview.
-17. Wait for Vew to approve/edit/reject each draft.
-18. For approved Daily/Info drafts: move to queue/posted/daily-info/ with metadata {account: 'daily-info', status: 'manually_posted', approved_at: ISO timestamp, content: tweet text, pillar: A or B, hook_type: type}.
-19. Then say: 'Moving to Bittensor Ecosystem account drafts. Ready?'
-20. Wait for Vew's response.
+13. Read companies/voidai/accounts.md Account 2 persona. For each content slot (3-5 tweet slots):
+    Run substeps A-F. Focus: product updates, bridge stats, lending progress, ecosystem news.
+14. For approved drafts: move to queue/posted/daily-info/ with metadata.
+15. Then say: 'Moving to Bittensor Ecosystem account drafts. Ready?'
+16. Wait for Vew's response.
 
 Account 3: Bittensor Ecosystem Analyst
-21. Read companies/voidai/accounts.md Account 3 persona. Generate 2-3 draft posts focused on Bittensor ecosystem, subnet analysis, TAO trends, DeFi/lending ecosystem. VoidAI mentioned max 1 post, only within broader ecosystem context.
-22. Present drafts to Vew via Telegram. Label: '[Bittensor Ecosystem] Draft 1 of 3:' with Telegraph preview.
-23. Wait for Vew to approve/edit/reject each draft.
-24. For approved drafts: move to queue/posted/bittensor/ with manually_posted metadata.
-25. Then say: 'Moving to DeFi/Cross-Chain account drafts. Ready?'
-26. Wait for Vew's response.
+17. Read companies/voidai/accounts.md Account 3 persona. For each content slot (2-3 tweet slots):
+    Run substeps A-F. Focus: Bittensor ecosystem, subnet analysis, TAO trends. VoidAI max 1 post.
+18. For approved drafts: move to queue/posted/bittensor/ with manually_posted metadata.
+19. Then say: 'Moving to DeFi/Cross-Chain account drafts. Ready?'
+20. Wait for Vew's response.
 
 Account 4: DeFi / Cross-Chain Alpha
-27. Read companies/voidai/accounts.md Account 4 persona. Generate 2-3 draft posts focused on DeFi analysis, lending markets, yield strategies, cross-chain flows. VoidAI/Bittensor mentioned max 1 post, only within broader DeFi context.
-28. Present drafts to Vew via Telegram. Label: '[DeFi Alpha] Draft 1 of 3:' with Telegraph preview.
-29. Wait for Vew to approve/edit/reject each draft.
-30. For approved drafts: move to queue/posted/defi/ with manually_posted metadata.
+21. Read companies/voidai/accounts.md Account 4 persona. For each content slot (2-3 tweet slots):
+    Run substeps A-F. Focus: DeFi analysis, lending markets, yield strategies. VoidAI/Bittensor max 1 post.
+22. For approved drafts: move to queue/posted/defi/ with manually_posted metadata.
 
 After all 4 accounts:
-31. Show summary: 'Today's content: @v0idai: [X] scheduled via OpenTweet. Daily/Info: [X] approved (manual post). Bittensor: [X] approved (manual post). DeFi: [X] approved (manual post). Total: [X] posts across 4 accounts.'
+23. Show summary: 'Today's content: @v0idai: [X] scheduled via OpenTweet. Daily/Info: [X] approved (manual post). Bittensor: [X] approved (manual post). DeFi: [X] approved (manual post). Total: [X] posts across 4 accounts. Variants generated: [N]. Preference data logged.'
 
 KEY RULES:
 - Load the CORRECT account persona from accounts.md before generating each account's content. Do NOT blend voices.
@@ -204,6 +254,7 @@ KEY RULES:
 - Satellite accounts: read sweep data and generate content appropriate to each niche.
 - Respect inter-account coordination: if @v0idai covers a topic, satellites use a different angle or skip it.
 - Bittensor and DeFi accounts: enforce 1-2x/week VoidAI mention cap.
+- ALWAYS log ALL variants (presented and filtered) with full scores to the preference log. This data trains the system.
 
 STEP 3 - HEALTH CHECK (after all accounts reviewed):
 32. Run system health check (API connectivity, cron status, queue audit, posting status).
