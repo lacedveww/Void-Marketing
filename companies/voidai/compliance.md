@@ -65,7 +65,6 @@ The substitution table above applies STRICTLY when describing VoidAI's own produ
 |---------|----------|
 | Account 2 (Fanpage) | Rarely needs financial terminology. Stick to substitution table. |
 | Account 3 (Bittensor Ecosystem) | May reference ecosystem "emissions" and "rewards" naturally. Use substitution table for VoidAI-specific content. |
-| Account 4 (DeFi / Cross-Chain) | May use standard DeFi terminology (yield, APY, farming) for ecosystem commentary and third-party analysis. MUST use substitution table when discussing VoidAI products specifically. |
 | Account 5 (AI x Crypto) | Primarily educational/analytical. Standard industry terms allowed for general AI x crypto commentary. Use substitution table for VoidAI-specific content. |
 | Account 6 (Meme / Culture) | Rarely needs financial terminology. Stick to substitution table. Humor does not exempt from compliance. |
 

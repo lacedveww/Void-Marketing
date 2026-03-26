@@ -9,7 +9,7 @@
 | Community-Educator | 25% | Accessible explainers for newcomers. "Here's how to bridge TAO to Solana in 3 steps." Lending education: "What is LTV?", "How collateral works in DeFi lending." |
 | Culture / Memes | 5% | Minimal. Occasional polls or community celebrations. No dedicated meme account. |
 
-Note: The main @v0idai account naturally runs at ~55% Builder-Credibility and ~0% Culture/Memes. The 5% Culture weight applies to OVERALL content output across all 4 accounts, not the main account specifically.
+Note: The main @v0idai account naturally runs at ~55% Builder-Credibility and ~0% Culture/Memes. The 5% Culture weight applies to OVERALL content output across all 3 accounts, not the main account specifically.
 
 ## Voice Rules: DO
 
@@ -249,4 +249,4 @@ When generating ANY content, Claude MUST read these files in order:
 |------|--------|-------------|
 | 2026-03-13 | Initial voice config extracted from CLAUDE.md | Vew |
 | 2026-03-22 | Added: RT guidelines (tip 3), price/chart ban (tips 14-15), narrative building guidance (tip 11), teasing guidelines (tips 12, 17), announcement framing (tip 13), deadline communication policy (tip 16) per X Playbook | Vew |
-| 2026-03-25 | Lending pivot: updated voice registers with lending references, reduced Culture/Memes to 5%, added lending terminology (collateral, LTV, liquidation threshold, borrow/supply rates, utilization rate), updated 6-account refs to 4, updated narrative and announcement framing with lending examples. | Vew |
+| 2026-03-25 | Lending pivot: updated voice registers with lending references, reduced Culture/Memes to 5%, added lending terminology (collateral, LTV, liquidation threshold, borrow/supply rates, utilization rate), updated 6-account refs to 3, updated narrative and announcement framing with lending examples. | Vew |

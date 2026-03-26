@@ -27,11 +27,11 @@ All VoidAI content generation flows through three pillars, each with a distinct 
 - Content angles surfaced by monitored builders/analysts
 - Lending ecosystem developments (Sturdy SN10, BitQuant SN15, Aave, Compound, Morpho)
 
-### Account Routing (4 accounts)
+### Account Routing (3 accounts)
 - Protocol news, builder updates, lending development, ecosystem commentary: @v0idai (main)
 - Daily stats, routine updates, metrics recaps: Daily/Informational account
 - Technical deep-dives on subnets, decentralized training, DeFi/lending ecosystem: Bittensor Ecosystem account
-- DeFi/cross-chain angles, lending market analysis: DeFi / Cross-Chain account
+- DeFi/cross-chain angles, lending market analysis: @v0idai (main) for major pieces, Daily/Informational for routine updates
 
 ### Priority Rules
 1. Breaking news gets same-day coverage (within 4 hours of sweep detection)
@@ -55,8 +55,8 @@ All VoidAI content generation flows through three pillars, each with a distinct 
 - Product launches and partnership announcements from adjacent ecosystems
 - SEO-aligned content that builds topical authority
 
-### Account Routing (4 accounts)
-- DeFi/bridging/lending industry context: DeFi / Cross-Chain account
+### Account Routing (3 accounts)
+- DeFi/bridging/lending industry context: @v0idai (main)
 - General AI/tech trends reframed for audience: @v0idai (main)
 - Technical research explainers: Bittensor Ecosystem account
 - Factual news recaps: Daily/Informational account
@@ -141,7 +141,7 @@ Pillar C requires live posting data to function. During DRY_RUN and early soft-l
 - Variants output as JSON with metadata: `hook_type`, `tone`, `format`, `content_type`, `account`, `pillar`, `topic`, `word_count`
 - Drafts are generated **per-account in sequence**, not as one batch
 - Each account's persona is loaded from `accounts.md` before generating its content
-- Account order: @v0idai (1-2 slots) -> Daily/Info (3-5 slots) -> Bittensor Ecosystem (2-3 slots) -> DeFi/Cross-Chain (2-3 slots)
+- Account order: @v0idai (1-2 slots) -> Daily/Info (3-5 slots) -> Bittensor Ecosystem (2-3 slots)
 - Different voice, hook, angle per account even on the same topic (Sub-Agent Specialization Pattern)
 - See `engine/frameworks/preference-learning.md` for the full curation pipeline
 

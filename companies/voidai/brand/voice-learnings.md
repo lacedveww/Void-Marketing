@@ -28,7 +28,7 @@ This file is the self-improving feedback loop for VoidAI's brand voice. After ev
 ```
 ### [DATE], [ACCOUNT], [CONTENT TYPE]
 **Platform**: [X / Blog / Discord / LinkedIn]
-**Account**: [Main @v0idai / Fanpage / Bittensor Ecosystem / DeFi / Cross-Chain / AI x Crypto / Meme / Culture]
+**Account**: [Main @v0idai / Fanpage / Bittensor Ecosystem]
 **Post summary**: [1-line description]
 **Engagement**: Likes: X | RTs: X | Replies: X | Views: X | Engagement rate: X%
 **Engagement baseline comparison**: [Above/Below/At baseline for this account]
@@ -54,7 +54,6 @@ This file is the self-improving feedback loop for VoidAI's brand voice. After ev
 | Main @v0idai | X | X% | +/-X% |
 | Fanpage | X | X% | +/-X% |
 | Bittensor Ecosystem | X | X% | +/-X% |
-| DeFi / Cross-Chain | X | X% | +/-X% |
 
 **Pattern observations**:
 - [What content type performed best this week]

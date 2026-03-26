@@ -203,7 +203,7 @@ if [[ "$VARIANTS" -gt 1 ]]; then
   # --- Multi-variant thread prompt ---
   PROMPT="You are generating weekly recap THREAD variants for the ${ACCOUNT_NAME} X account.
 VoidAI is Bittensor DeFi Infrastructure (bridge + staking + lending). The lending platform is the current primary focus.
-VoidAI operates 4 X accounts (1 main + 3 satellites: Daily/Informational, Bittensor Ecosystem, DeFi/Cross-Chain).
+VoidAI operates 3 X accounts (1 main + 2 satellites: Daily/Informational, Bittensor Ecosystem).
 
 Generate exactly $VARIANTS thread variants based on the weekly metrics data below for the ${ACCOUNT_NAME} account.
 
@@ -295,7 +295,7 @@ else
   # --- Single-variant prompt (original) ---
   PROMPT="You are generating a weekly recap THREAD for the ${ACCOUNT_NAME} X account.
 VoidAI is Bittensor DeFi Infrastructure (bridge + staking + lending). The lending platform is the current primary focus.
-VoidAI operates 4 X accounts (1 main + 3 satellites: Daily/Informational, Bittensor Ecosystem, DeFi/Cross-Chain).
+VoidAI operates 3 X accounts (1 main + 2 satellites: Daily/Informational, Bittensor Ecosystem).
 
 TASK: Generate a thread of 5 to 7 tweets based on the weekly metrics data below.
 

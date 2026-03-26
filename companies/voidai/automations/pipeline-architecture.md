@@ -477,7 +477,6 @@ queue/drafts      |           |
 |---------|-------------|---------------|-------------------|-----------|-------------------|-----------------|
 | Fanpage | @void_maxi / @sn106_stan | OpenTweet / X API | Yes (Phase 2-3); auto for low-risk in Phase 4 | 1-2 | 13:00-15:00, 21:00-23:00 | Phase 1b (private/locked) |
 | Bittensor Ecosystem | @tao_signal / @subnet_watch | OpenTweet / X API | Yes (Phase 2-3); auto for data posts Phase 4 | 1-2 | 14:00-17:00 | Phase 1b (private/locked) |
-| DeFi / Cross-Chain | @defi_routes / @chain_flows | OpenTweet / X API | Yes until Phase 4 | 1-2 | 14:00-16:00, 20:00-22:00 | Phase 4 |
 | AI x Crypto | @neural_markets / @ai_onchain | OpenTweet / X API | Yes until Phase 4 | 1 | 15:00-17:00 | Phase 4 |
 | Meme / Culture | @tao_memes / @subnet_humor | OpenTweet / X API | Yes until Phase 4 | 1-2 | 13:00-15:00, 20:00-22:00 | Phase 4 |
 
@@ -497,7 +496,6 @@ When the same news publishes across multiple accounts:
 | 1 | @v0idai (Main) | First | Official announcement |
 | 2 | Fanpage | +2 hours minimum | Hype/fan reaction |
 | 3 | Bittensor Ecosystem | +3 hours minimum | Ecosystem impact analysis |
-| 4 | DeFi / Cross-Chain | +4 hours minimum | Infrastructure/alpha angle |
 | 5 | AI x Crypto | +5 hours minimum | AI narrative angle (if relevant) |
 | 6 | Meme / Culture | +6 hours minimum (or next day) | Meme/joke angle |
 
@@ -1230,7 +1228,7 @@ SET OBJECTIVES          PLAN                  MODIFY               TEST
 **Use cases for VoidAI:**
 - Find papers on cross-chain bridge architectures, security models, and formal verification for Alpha & Education content
 - Track new Bittensor/decentralized training research for Ecosystem Intelligence content
-- Find DeFi protocol analysis papers for the DeFi / Cross-Chain account
+- Find DeFi protocol analysis papers for the Bittensor Ecosystem account
 - Monitor AI/ML research that connects to Bittensor's compute marketplace thesis for AI x Crypto account
 
 **Integration point:** Add to MCP server config alongside Canva, Apify, GitHub, Taostats, Slack. Use in content generation when producing technical deep-dives, tutorial threads, or ecosystem analysis that benefits from academic sourcing.

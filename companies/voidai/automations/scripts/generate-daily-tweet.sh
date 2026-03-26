@@ -223,7 +223,7 @@ if [[ "$VARIANTS" -gt 1 ]]; then
   # --- Multi-variant prompt ---
   PROMPT="You are generating tweets for the ${ACCOUNT_NAME} X account.
 VoidAI is Bittensor DeFi Infrastructure (bridge + staking + lending). The lending platform is the current primary focus.
-VoidAI operates 4 X accounts (1 main + 3 satellites: Daily/Informational, Bittensor Ecosystem, DeFi/Cross-Chain).
+VoidAI operates 3 X accounts (1 main + 2 satellites: Daily/Informational, Bittensor Ecosystem).
 
 Generate exactly $VARIANTS tweet variants about the topic below for the ${ACCOUNT_NAME} account.
 
@@ -297,7 +297,7 @@ else
   # --- Single-variant prompt (original) ---
   PROMPT="You are generating a single tweet for the ${ACCOUNT_NAME} X account.
 VoidAI is Bittensor DeFi Infrastructure (bridge + staking + lending). The lending platform is the current primary focus.
-VoidAI operates 4 X accounts (1 main + 3 satellites: Daily/Informational, Bittensor Ecosystem, DeFi/Cross-Chain).
+VoidAI operates 3 X accounts (1 main + 2 satellites: Daily/Informational, Bittensor Ecosystem).
 
 TASK: Generate exactly ONE tweet (max 280 characters) based on the daily metrics data below.
 

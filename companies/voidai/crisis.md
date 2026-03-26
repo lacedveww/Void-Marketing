@@ -204,7 +204,6 @@ Follow these steps in order. Do not skip steps. Do not rush.
 **Step 8. Resume satellite accounts per the schedule below** (see Per-Account Crisis Behavior above):
   1. Daily/Informational (first, factual updates)
   2. Bittensor Ecosystem
-  3. DeFi / Cross-Chain (last)
 
 ---
 
@@ -229,7 +228,6 @@ Follow these steps in order. Do not skip steps. Do not rush.
 | Main @v0idai | ONLY account that posts official updates. Factual, transparent, no spin. |
 | Daily/Informational | May share ONLY official @v0idai updates via quote-tweet. No independent posts. |
 | Bittensor Ecosystem | May share ONLY official @v0idai updates via quote-tweet. No independent commentary. |
-| DeFi / Cross-Chain | May share ONLY official @v0idai updates via quote-tweet. No independent commentary. |
 
 ## What NEVER To Do During a Crisis
 

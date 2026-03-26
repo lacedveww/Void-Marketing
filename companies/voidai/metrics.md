@@ -268,7 +268,6 @@ Beyond engagement, track whether content drives action:
 | Main @v0idai | >1.29% | Existing performance data |
 | Fanpage | >1.5% | Gen Z community average |
 | Bittensor Ecosystem | >2.0% | Bittensor community average |
-| DeFi / Cross-Chain | >1.5% | DeFi community average |
 
 Performance alerts trigger when:
 - Any post achieves >3x average engagement rate (flag as breakout performer)

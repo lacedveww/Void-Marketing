@@ -69,9 +69,9 @@ VoidAI's content must speak to specific audiences, not a generic "crypto audienc
 | Persona | Primary Account | Secondary Accounts |
 |---------|----------------|-------------------|
 | Validators & Miners | @v0idai (main) | Bittensor Ecosystem satellite, Daily/Info |
-| TAO Holders & Delegators | @v0idai (main) | Daily/Info, Bittensor Ecosystem, DeFi satellite |
-| DeFi Power Users | DeFi / Cross-Chain satellite | @v0idai (main), Daily/Info |
-| Degens & Speculators | Bittensor Ecosystem satellite | Daily/Info, DeFi satellite |
+| TAO Holders & Delegators | @v0idai (main) | Daily/Info, Bittensor Ecosystem |
+| DeFi Power Users | @v0idai (main) | Daily/Info, Bittensor Ecosystem |
+| Degens & Speculators | Bittensor Ecosystem satellite | Daily/Info |
 | Builders & Developers | @v0idai (main) | Daily/Info |
 
 ## Pillar Descriptions
@@ -121,7 +121,6 @@ Minimal touch. Community celebrations and engagement. With no dedicated meme acc
 | Main (@v0idai) | 30% | 20% | 25% | 20% | 5% |
 | Daily/Informational | 35% | 30% | 20% | 10% | 5% |
 | Bittensor Ecosystem | 15% | 10% | 50% | 20% | 5% |
-| DeFi / Cross-Chain | 30% | 15% | 25% | 25% | 5% |
 
 ## Content Experimentation by Pillar
 
@@ -159,4 +158,4 @@ Always reference these numbers when available (pull latest data from `companies/
 | 2026-03-13 | Initial pillars config extracted from CLAUDE.md | Vew |
 | 2026-03-22 | Added 5 audience personas (validators/miners, TAO holders/delegators, DeFi users, degens, builders) with pillar mapping and account routing per X Playbook tip 7 | Vew |
 | 2026-03-22 | Added high-priority content topics to Ecosystem Intelligence (Covenant-72B, on-device AI), added Content Experimentation by Pillar section with per-pillar A/B test priorities | Claude Code |
-| 2026-03-25 | Lending pivot: reweighted pillars (Lending 30%, Bridge 20%, Ecosystem 25%, Alpha 20%, Culture 5%). Added Lending & DeFi Banking pillar. Updated pillar-to-account mapping for 4 accounts. Added lending anchor metrics. | Vew |
+| 2026-03-25 | Lending pivot: reweighted pillars (Lending 30%, Bridge 20%, Ecosystem 25%, Alpha 20%, Culture 5%). Added Lending & DeFi Banking pillar. Updated pillar-to-account mapping for 3 accounts. Added lending anchor metrics. | Vew |

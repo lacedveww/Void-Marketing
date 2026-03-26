@@ -217,7 +217,7 @@ if [[ "$VARIANTS" -gt 1 ]]; then
   PROMPT="You are generating tweets for the ${ACCOUNT_NAME} X account about a news item.
 
 VoidAI is Bittensor DeFi Infrastructure (bridge + staking + lending). The lending platform is the current primary focus.
-VoidAI operates 4 X accounts (1 main + 3 satellites: Daily/Informational, Bittensor Ecosystem, DeFi/Cross-Chain).
+VoidAI operates 3 X accounts (1 main + 2 satellites: Daily/Informational, Bittensor Ecosystem).
 
 Generate exactly $VARIANTS tweet variants about the topic below for the ${ACCOUNT_NAME} account.
 
@@ -301,7 +301,7 @@ else
   PROMPT="You are generating a single tweet for the ${ACCOUNT_NAME} X account about a news item.
 
 VoidAI is Bittensor DeFi Infrastructure (bridge + staking + lending). The lending platform is the current primary focus.
-VoidAI operates 4 X accounts (1 main + 3 satellites: Daily/Informational, Bittensor Ecosystem, DeFi/Cross-Chain).
+VoidAI operates 3 X accounts (1 main + 2 satellites: Daily/Informational, Bittensor Ecosystem).
 
 TASK: Generate ONE tweet (max 280 characters) that adds genuine commentary or insight
 about this news from VoidAI's perspective as Bittensor DeFi infrastructure builders.

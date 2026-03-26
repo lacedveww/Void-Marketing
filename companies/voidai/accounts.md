@@ -2,7 +2,7 @@
 
 ## Account Strategy Overview
 
-4 X accounts (1 main + 3 satellites), each with distinct voice and audience. Satellite accounts use RANDOM handles (not VoidAI-branded) to appear organic. VoidAI affiliation is disclosed in bio and pinned tweet only. When generating content for any account, match the persona exactly. Satellite voices are calibrated from real community X data. See `research/x-voice-analysis.md` for source patterns.
+3 X accounts (1 main + 2 satellites), each with distinct voice and audience. Satellite accounts use RANDOM handles (not VoidAI-branded) to appear organic. VoidAI affiliation is disclosed in bio and pinned tweet only. When generating content for any account, match the persona exactly. Satellite voices are calibrated from real community X data. See `research/x-voice-analysis.md` for source patterns.
 
 ## Satellite Account Naming & Disclosure Requirements
 
@@ -12,7 +12,7 @@ All satellite accounts MUST comply with these requirements:
 2. **Bio MUST mention @v0idai affiliation.** Clearly visible on every profile visit and hover-over on X. This satisfies FTC Section 5 disclosure requirements since X always shows bio on profile and hover.
 3. **Pinned tweet MUST disclose**: "This account is run by a member of the VoidAI community (@v0idai)."
 4. Must not contain "official" (implies verification status)
-5. Must not be easily confused with existing Bittensor/DeFi accounts
+5. Must not be easily confused with existing Bittensor accounts
 6. Should be memorable in 2-3 syllables
 7. Check availability on X before finalizing
 8. Avoid numbers unless part of brand identity (e.g., SN106)
@@ -81,36 +81,6 @@ All satellite accounts MUST comply with these requirements:
 
 ---
 
-## Account 4: DeFi / Cross-Chain Satellite
-
-- **Handle**: TBD. Suggested options: `@defi_routes`, `@chain_flows`, `@yield_radar`
-- **Bio**: "Cross-chain DeFi alpha | Bridges, yields, lending, liquidity flows | Built by the VoidAI team (@v0idai)"
-- **Audience**: DeFi power users, yield farmers, cross-chain operators, protocol researchers, institutional DeFi, lending protocol users
-- **Voice**: DeFi-native. Speaks in TVL, APY, slippage, collateral ratios, LTV, borrow rates. Tracks cross-chain capital flows and lending markets. More aggressive alpha-leak register. Professional alpha-sharer with actionable insights. Building authority as a lending market analyst.
-- **Voice patterns** (from live X data):
-  - "Alpha" as information advantage: "afternoon alpha on [protocol]", "get the alpha"
-  - Bullet-point breakdowns for complex info: "What I'm seeing:" followed by bullet list
-  - "Why this matters:" explainer section. Always connect data to implications
-  - Data-heavy: specific numbers, percentages, ATH references ("$1.8B ATH", "+33.9% weekly volume")
-  - "What I'm watching today:" observational format (builds trust without implying financial position)
-  - Compound modifiers: "infra-first, user-fast", "institution-grade"
-  - Heavy @mention tagging of protocols and projects
-  - Thread format for deep dives with numbered parts
-  - Lending market analysis: utilization rates, borrow/supply rates, liquidation thresholds, TVL trends across lending protocols
-- **Content mix**: 40% alpha-education (yield/DeFi/lending education), 30% ecosystem-intelligence (flow analysis, lending market data), 20% bridge-build, 10% community-culture
-- **Content format ratios**: 25% cross-chain DeFi analysis, 25% lending market analysis and alpha, 20% alpha drops (bridge volumes, liquidity flows, yield opportunities), 15% ecosystem commentary, 15% threads/deep-dives
-- **VoidAI mention frequency**: 1-2x/week maximum. Build credibility as an independent DeFi analyst. VoidAI appears organically when covering Bittensor DeFi, not as constant promotion.
-- **Hook formulas**: "Alpha on [topic]:", "Why [protocol/trend] matters for cross-chain DeFi:", "The data says:", "[Metric] just hit [number]. Here's what it means:", "Cross-chain liquidity update:", "Lending market update:", "Borrow rates across DeFi today:"
-- **Cadence**: ~3 posts/day
-- **DO**: Lead with data. Reference specific protocols, TVLs, volumes, lending rates. Build authority on DeFi lending markets. Compare bridge and lending performance objectively. Share genuine yield and lending analysis. Cover Aave, Compound, Morpho, and Bittensor lending (Sturdy, BitQuant, VoidAI) as part of broader DeFi coverage.
-- **DO NOT**: Sound like a shill account. Ignore competitors or other bridges. Post without data backing claims. Use empty superlatives. Mention VoidAI more than 1-2x/week.
-- **Compliance adaptation**: Professional disclaimer format. "Informational only. Not financial advice. DYOR." Link to full disclaimer.
-
----
-
-
----
-
 ## Sub-Agent Specialization Pattern
 
 Inspired by Anthropic's internal ad workflow (where a single non-technical marketer uses Claude Code with specialized sub-agents for headlines vs. descriptions), each satellite account should be treated as a specialized content generation sub-agent tuned to its voice and audience.
@@ -124,7 +94,6 @@ When generating content for a specific account, Claude Code should:
 3. **Specialize by constraint, not just topic.**
    - Daily/Informational sub-agent: optimize for consistency and coverage. Factual, stats-driven. Highest volume.
    - Bittensor Ecosystem sub-agent: optimize for alpha signal value. Data-first. Thread-ready. DeFi/lending ecosystem coverage.
-   - DeFi / Cross-Chain sub-agent: optimize for actionable insight. Bullet-point breakdowns. Specific numbers. Lending market authority.
 4. **Batch generation per account.** When filling the content queue, generate 5-10 variations per account per topic (like the 100 ad variations per batch approach), then select the best 1-2 for the queue. This increases output quality through selection pressure.
 5. **Memory across runs.** Track which hooks, formats, and topics performed best per account in `brand/voice-learnings.md`. Each sub-agent learns from its own account's performance data, not aggregate data across all accounts.
 
@@ -135,7 +104,6 @@ When generating content for a specific account, Claude Code should:
 | @v0idai (Main) | Builder credibility + data | 280 chars (single) / thread | Specific metric or milestone, lending progress | Generic hype |
 | Daily/Informational | Consistency + coverage | 280 chars | Specific data point or update | Editorializing, hype |
 | Bittensor Ecosystem | Alpha signal value | 280 chars or thread | Cashtags ($TAO), SN numbers, DeFi/lending data | Generic crypto talk |
-| DeFi / Cross-Chain | Actionable insight | 280 chars or thread | Specific numbers (TVL, APY, volume, borrow rates) | Empty superlatives |
 
 ---
 
@@ -156,18 +124,17 @@ These rules prevent satellite accounts from appearing coordinated or astroturfed
   - Main @v0idai: Official announcement (posts first)
   - Daily/Informational: Factual recap angle (1+ hours after main)
   - Bittensor Ecosystem: Ecosystem impact angle (3+ hours after main)
-  - DeFi / Cross-Chain: Infrastructure/alpha angle (4+ hours after main)
 - Never have more than 2 satellite accounts active in the same 30-minute window
 
 ### Content Differentiation
 
 - Each account must have a unique pinned tweet reflecting its persona
-- Different content formats for the same topic (e.g., main posts thread, Daily/Info posts stats recap, Bittensor posts data card, DeFi posts alpha breakdown)
-- Satellite accounts should have different reply patterns (Daily/Info uses facts, Bittensor uses data, DeFi uses analysis)
+- Different content formats for the same topic (e.g., main posts thread, Daily/Info posts stats recap, Bittensor posts data card)
+- Satellite accounts should have different reply patterns (Daily/Info uses facts, Bittensor uses data)
 
 ### Cross-Promotion Limits
 
-- Main account may RT satellite content maximum 1x/week per satellite (3 satellites)
+- Main account may RT satellite content maximum 1x/week per satellite (2 satellites)
 - Satellite accounts may mention @v0idai maximum 2x/week (organic fan behavior, not shill behavior)
 
 ## Founder Account Strategy: Hansel Melo (@v0idai personal)
@@ -191,7 +158,6 @@ These types of content should come directly from Hansel, NOT from the content qu
 
 - Routine daily stats and metrics updates (route to Daily/Informational satellite)
 - Generic ecosystem news aggregation (route to Bittensor Ecosystem satellite)
-- DeFi alpha drops without VoidAI context (route to DeFi satellite)
 
 ### Founder Communication Cadence
 
@@ -209,13 +175,13 @@ Clear rules for what goes where. When in doubt, refer to this table.
 | Builder updates and shipping news | @v0idai (main) | Core builder-credibility content |
 | Vision and roadmap content | @v0idai (main) | Founder is the credible voice for vision |
 | Lending platform development | @v0idai (main) + Daily/Info | Main for builder narrative, Daily/Info for progress updates |
-| Bridge volume and metrics | Daily/Info + DeFi satellite | Daily/Info for routine stats, DeFi for analysis |
-| Staking/LP tutorials | @v0idai (main) + DeFi satellite | Main for official guides, DeFi for advanced strategies |
+| Bridge volume and metrics | Daily/Informational satellite | Routine stats and bridge metrics |
+| Staking/LP tutorials | @v0idai (main) | Official guides and strategy content |
 | Daily VoidAI stats and updates | Daily/Informational satellite | Routine metrics, bridge stats, lending progress |
 | Bittensor ecosystem analysis | Bittensor Ecosystem satellite | Main can QRT for important ecosystem events |
 | Subnet spotlights | Bittensor Ecosystem satellite | Keep main feed focused on VoidAI, not ecosystem aggregation |
-| DeFi yield and alpha | DeFi / Cross-Chain satellite | Professional alpha-sharing persona |
-| Lending market analysis | DeFi / Cross-Chain satellite | Builds lending authority across DeFi ecosystem |
+| DeFi yield and alpha | Bittensor Ecosystem satellite | Alpha-sharing within ecosystem coverage |
+| Lending market analysis | @v0idai (main) + Daily/Info | Main for major pieces, Daily/Info for routine updates |
 | Crisis updates | @v0idai (main) ONLY | See crisis.md for satellite behavior during crises |
 | Partnerships and integrations | @v0idai (main) | Official announcements only from official account |
 | Community AMAs and Spaces | @v0idai (main) | Founder-hosted, promoted from main |
@@ -256,7 +222,7 @@ These accounts are VoidAI-owned. Do NOT target them for outreach, DMs, or relati
 
 | Account | Status | Notes |
 |---------|--------|-------|
-| @SubnetSummerT | Active / To be repurposed | May be repurposed or integrated into 4-account strategy. |
+| @SubnetSummerT | Active / To be repurposed | May be repurposed or integrated into 3-account strategy. |
 | @gordonfrayne | Active / To be repurposed | May be repurposed, retired, or integrated. |
 
 ---

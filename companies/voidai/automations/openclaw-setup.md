@@ -175,7 +175,7 @@ Run the generation script with --variants 8 (or --variants 4 for articles).
 For tweets: bash companies/voidai/automations/scripts/generate-daily-tweet.sh --variants 8 --account <account-id> <metrics-file>
 For news tweets: bash companies/voidai/automations/scripts/generate-news-tweet.sh --variants 8 --account <account-id> <news-file>
 For threads: bash companies/voidai/automations/scripts/generate-weekly-thread.sh --variants 8 --account <account-id> <metrics-file>
-Where <account-id> is: v0idai, daily-info, bittensor, or defi. This loads the correct persona from accounts.md.
+Where <account-id> is: v0idai, daily-info, or bittensor. This loads the correct persona from accounts.md.
 Receive the variants JSON with metadata (hook_type, tone, format for each variant).
 
 SUBSTEP B - SCORE ALL VARIANTS (run internally, do NOT show scores to Vew):
@@ -243,24 +243,16 @@ Account 3: Bittensor Ecosystem Analyst
     bash generate-daily-tweet.sh --variants 8 --account bittensor <metrics-file>
     Focus: Bittensor ecosystem, subnet analysis, TAO trends. VoidAI max 1 post.
 18. For approved drafts: move to queue/posted/bittensor/ with manually_posted metadata.
-19. Then say: 'Moving to DeFi/Cross-Chain account drafts. Ready?'
-20. Wait for Vew's response.
 
-Account 4: DeFi / Cross-Chain Alpha
-21. For each content slot (2-3 tweet slots), run substeps A-F with --account defi:
-    bash generate-daily-tweet.sh --variants 8 --account defi <metrics-file>
-    Focus: DeFi analysis, lending markets, yield strategies. VoidAI/Bittensor max 1 post.
-22. For approved drafts: move to queue/posted/defi/ with manually_posted metadata.
-
-After all 4 accounts:
-23. Show summary: 'Today's content: @v0idai: [X] scheduled via OpenTweet. Daily/Info: [X] approved (manual post). Bittensor: [X] approved (manual post). DeFi: [X] approved (manual post). Total: [X] posts across 4 accounts. Variants generated: [N]. Preference data logged.'
+After all 3 accounts:
+19. Show summary: 'Today's content: @v0idai: [X] scheduled via OpenTweet. Daily/Info: [X] approved (manual post). Bittensor: [X] approved (manual post). Total: [X] posts across 3 accounts. Variants generated: [N]. Preference data logged.'
 
 KEY RULES:
 - Load the CORRECT account persona from accounts.md before generating each account's content. Do NOT blend voices.
 - Each account's content should be DIFFERENT even on the same topic. Different hook, angle, format per Sub-Agent Specialization Pattern.
 - Satellite accounts: read sweep data and generate content appropriate to each niche.
 - Respect inter-account coordination: if @v0idai covers a topic, satellites use a different angle or skip it.
-- Bittensor and DeFi accounts: enforce 1-2x/week VoidAI mention cap.
+- Bittensor account: enforce 1-2x/week VoidAI mention cap.
 - ALWAYS log ALL variants (presented and filtered) with full scores to the preference log. This data trains the system.
 
 STEP 3 - HEALTH CHECK (after all accounts reviewed):
@@ -456,7 +448,7 @@ export POSTING_ACCOUNT="flowerncoins"    # Currently Vew's personal @flowerncoin
 | Schedule | Job | What it does | Messages? |
 |----------|-----|-------------|-----------|
 | 8:00 AM + 8:00 PM ET | Intelligence Sweep | SILENT data collection: X accounts, subnets, marketing intel, news, SEO, competitors | No (silent) |
-| 8:30 AM ET | Morning Summary → Multi-Account Draft Review → Health Check | Reply-gated chain: delivers summary, waits for response, then generates content for 4 accounts sequentially (@v0idai scheduled via OpenTweet, satellites saved as manually_posted), then health check | Yes (Telegram) |
+| 8:30 AM ET | Morning Summary → Multi-Account Draft Review → Health Check | Reply-gated chain: delivers summary, waits for response, then generates content for 3 accounts sequentially (@v0idai scheduled via OpenTweet, satellites saved as manually_posted), then health check | Yes (Telegram) |
 | 10:00 AM ET | Health Check (fallback) | Runs automatically if the morning chain hasn't completed by 10AM. Also runs daily including Fridays. | Yes (Telegram) |
 | 10:00 PM ET | Engagement Collector | SILENT: collects post engagement data, updates performance files | No (silent) |
 | 10:30 AM Fridays | Weekly Recap + Calibration | Generates recap thread, voice calibration, updates voice-learnings.md | Yes (Telegram) |
