@@ -1,0 +1,71 @@
+Generate the VoidAI Morning Summary brief and run the reply-gated chain.
+
+IMPORTANT: The project root is C:/Users/vew24/Apps/Void-Marketing-main. Use ABSOLUTE paths for ALL bash commands.
+
+Execute these steps:
+
+STEP 1 - MORNING SUMMARY:
+1. Run this bash command to get today's sweep summary:
+   bash C:/Users/vew24/Apps/Void-Marketing-main/companies/voidai/automations/scripts/summarize-sweep.sh
+   This outputs JSON with: market data (TAO price, 24h change, volume), top 10 posts by engagement, competitor mentions, VoidAI mentions, SN106 data (validators, fee rate), and news items. Use this data for the brief below.
+2. Generate the morning brief using the data from that command. Output the brief as your response text. OpenClaw handles Telegram delivery automatically. Do NOT try to send Telegram messages yourself or call any Telegram API. Simply write the brief as your reply:
+   A. MARKET SNAPSHOT: TAO price with 24h change %, SN106 validator count, SN106 fee rate (alpha price estimate). Use the ACTUAL numbers from the JSON.
+   B. TOP STORIES (max 5): Priority-ranked posts from the top_posts_by_engagement array, with suggested content angle and target account
+   C. ENGAGEMENT OPPORTUNITIES (max 3): High-engagement threads where a VoidAI reply/QT adds value, with draft hook
+   D. COMPETITOR ACTIVITY: Any posts from competitor_mentions array (or 'Nothing notable')
+   E. CONTENT SUGGESTIONS: 3-5 draft post ideas with pillar tag, target account, and hook
+   F. PERFORMANCE NOTE: Yesterday's engagement highlights (or 'Insufficient data' if pre-launch)
+3. After outputting the brief, PAUSE and wait for Vew's response.
+
+STEP 2 - MULTI-ACCOUNT DRAFT REVIEW WITH TWO-STAGE CURATION (on Vew's response):
+Generate and present content for each account SEQUENTIALLY using the three-layer curation pipeline.
+
+FOR EACH CONTENT SLOT IN EACH ACCOUNT, follow this flow:
+1. Run: bash C:/Users/vew24/Apps/Void-Marketing-main/companies/voidai/automations/scripts/generate-daily-tweet.sh --variants 8 --account <account-id> C:/Users/vew24/Apps/Void-Marketing-main/companies/voidai/automations/data/daily-metrics-$(date +%Y-%m-%d).json
+   The --account flag (v0idai, daily-info, or bittensor) automatically loads the correct persona from accounts.md inside the script. You do NOT need to read accounts.md yourself.
+2. SCORE all 8 variants internally on 6 dimensions (1-10 each):
+   - voice_match: matches account persona?
+   - relevance: tied to today's data?
+   - hook_quality: stops a scroll?
+   - compliance: any banned AI phrase = score 0
+   - uniqueness: different from other variants?
+   - data_density: specific numbers and metrics?
+   Composite score = average of all 6. If compliance=0, composite=0.
+3. SELECT top 4 by composite score, enforcing at least 3 different hook types. Randomize presentation order.
+4. LOG all 8 variants with full scores to C:/Users/vew24/Apps/Void-Marketing-main/companies/voidai/automations/data/preference-log/preference-log-$(date +%Y-%m-%d).json
+5. PRESENT top 4 to Vew as A/B/C/D with hook type labels. Do NOT show scores.
+   Format:
+   [@account] Tweet N - Pick one:
+   A [Hook-type]: "preview..."
+   B [Hook-type]: "preview..."
+   C [Hook-type]: "preview..."
+   D [Hook-type]: "preview..."
+   Reply with a letter (A/B/C/D), "regenerate" for new options, or "skip".
+6. Wait for response. On letter: log selection. On "regenerate": generate 8 new, score, present fresh 4. On "skip": log as skipped.
+
+Account 1: @v0idai (Main) - currently posting to @flowerncoins
+7. For 1-2 tweet slots, run the curation flow above with --account v0idai. Focus: builder updates, lending development.
+8. Show schedule, then: "Moving to Daily/Info. Ready?"
+9. Wait.
+
+Account 2: VoidAI Daily/Informational
+10. For 3-5 tweet slots, run the curation flow with --account daily-info. Focus: product updates, bridge stats, ecosystem news.
+11. Save approved drafts to C:/Users/vew24/Apps/Void-Marketing-main/companies/voidai/queue/posted/daily-info/ with metadata.
+12. "Moving to Bittensor Ecosystem. Ready?" Wait.
+
+Account 3: Bittensor Ecosystem Analyst
+13. For 2-3 tweet slots, run the curation flow with --account bittensor. Focus: subnet analysis, TAO trends. VoidAI max 1 post.
+14. Save approved drafts to C:/Users/vew24/Apps/Void-Marketing-main/companies/voidai/queue/posted/bittensor/.
+
+After all 3 accounts:
+15. Show summary with counts per account + total variants generated + preference data logged.
+
+KEY RULES:
+- The --account flag handles persona loading. Do NOT try to read accounts.md yourself.
+- Different hook, angle, format per account even on the same topic.
+- Always log ALL 8 variants with full scores to the preference log.
+- Do NOT show scores or ranking to Vew.
+- Randomize A/B/C/D order (do not present in score order).
+
+STEP 3 - HEALTH CHECK (after all accounts reviewed):
+16. Report: drafts generated per account, approved, rejected, scheduled, manually posted.
