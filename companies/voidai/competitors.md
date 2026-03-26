@@ -11,6 +11,35 @@
 - **Their strengths**: Coinbase ecosystem access, Base chain momentum
 - **Their weaknesses**: Single-chain focus, no lending product announced
 
+## Primary Lending Competitors
+
+### Sturdy Finance (SN10)
+
+- **Handle/URL**: @SturdyFinance
+- **What they do**: AI-optimized DeFi yield aggregator on Bittensor
+- **Their approach**: AI-driven yield optimization for subnet tokens
+- **Our differentiation**: Full DeFi stack (bridge + staking + lending vs. yield aggregation only), non-custodial architecture, Chainlink CCIP security, multi-chain bridge access
+- **Their strengths**: AI optimization narrative, early mover in Bittensor DeFi
+- **Their weaknesses**: No bridge product, narrower product scope
+
+### BitQuant (SN15)
+
+- **Handle/URL**: @BitQuantAI
+- **What they do**: AI-powered DeFi intelligence on Bittensor
+- **Their approach**: AI-driven financial analysis and DeFi intelligence
+- **Our differentiation**: Shipped products (bridge, staking), lending as next logical step in full DeFi stack, non-custodial
+- **Their strengths**: AI intelligence angle, data-driven approach
+- **Their weaknesses**: No bridge or staking product, no lending product announced
+
+### DeFi Benchmarks (non-Bittensor)
+
+| Competitor | Type | Relevance |
+|-----------|------|-----------|
+| Aave (@AaveAave) | Leading DeFi lending protocol | Gold standard for lending UX, collateral models, risk parameters. Benchmark for TVL, utilization rates, and governance |
+| Compound (@compoundfinance) | Pioneer DeFi lending protocol | Reference for supply/borrow rate models, cToken mechanics, governance |
+| Morpho (@MorphoLabs) | Lending protocol optimizer | Peer-to-peer matching layer on top of Aave/Compound. Study their rate optimization approach |
+| MakerDAO (@MakerDAO) | Decentralized stablecoin + lending | Reference for collateral models, liquidation mechanics, governance. DAI as lending benchmark |
+
 ## Category Competitors
 
 ### Bittensor-Specific Bridges
@@ -74,7 +103,7 @@
 ## Competitor Monitoring
 
 - **Frequency**: Daily automated monitoring via OpenClaw cron (Competitor Intel job)
-- **Accounts to monitor**: @gtaoventures, Tensorplex, TaoFi, Wormhole, LayerZero, Axelar
+- **Accounts to monitor**: @gtaoventures, @SturdyFinance (SN10), @BitQuantAI (SN15), @AaveAave, @compoundfinance, @MorphoLabs, @MakerDAO, Tensorplex, TaoFi, Wormhole, LayerZero, Axelar
 - **Signals to watch**: New features, partnerships, community sentiment, mindshare changes, pricing/fee changes, security incidents
 - **Weekly output**: Competitor digest included in weekly recap. Flags any response-framework scenarios for immediate attention.
 
@@ -119,7 +148,7 @@ Daily monitoring of key Bittensor ecosystem accounts for news, sentiment, and co
 
 **What VoidAI's pipeline does differently:**
 - VoidAI's pipeline is purpose-built for crypto/Bittensor with compliance awareness (Howey risk scoring, FTC satellite disclosure, etc.)
-- 6-account strategy with distinct personas is more sophisticated than generic social management
+- 4-account strategy with distinct personas is more sophisticated than generic social management
 - File-based queue with human review gate is more auditable and controllable
 - Data-driven content (bridge volume, emissions, on-chain metrics) is domain-specific intelligence Okara cannot replicate
 
@@ -140,3 +169,4 @@ Based on Altcoin Buzz "Top 10 Bittensor Subnets by Mindshare" (September 2025):
 | 2026-03-13 | Initial competitor config extracted from CLAUDE.md and roadmap | Vew |
 | 2026-03-22 | Expanded Okara AI CMO analysis, added Anthropic Claude Code ad workflow as reference, added deep competitive analysis of Okara vs VoidAI pipeline | Claude Code |
 | 2026-03-25 | Added monitoring/ directory reference for Intelligence Sweep account lists (content-accounts.md Tier 1, marketing-accounts.md Tier 2) | Claude Code |
+| 2026-03-25 | Lending pivot: elevated Sturdy (SN10) and BitQuant (SN15) to primary lending competitors. Added Aave, Compound, Morpho, MakerDAO as DeFi benchmarks. Updated monitoring list. Updated 6-account ref to 4. | Vew |

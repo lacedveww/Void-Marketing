@@ -143,6 +143,8 @@ fi
 # Build the prompt
 PROMPT=$(cat <<'PROMPT_END'
 You are generating a weekly recap THREAD for the @v0idai X account (VoidAI main account).
+VoidAI is Bittensor DeFi Infrastructure (bridge + staking + lending). The lending platform is the current primary focus.
+VoidAI operates 4 X accounts (1 main + 3 satellites: Daily/Informational, Bittensor Ecosystem, DeFi/Cross-Chain).
 
 TASK: Generate a thread of 5 to 7 tweets based on the weekly metrics data below.
 
@@ -182,6 +184,7 @@ FORMATTING RULES:
 - Sound like a builder talking to other builders.
 - Use Bittensor-native terminology: subnet, SN106, dTAO, emissions, metagraph.
 - Use DeFi terminology where relevant: TVL, bridge volume, liquidity.
+- Use lending terminology where relevant: collateral, LTV, borrow rate, supply rate, utilization rate.
 - The hook tweet should NOT start with \"This week\" or \"Weekly update\". Open with the most compelling data point.
 
 $PERFORMANCE_CONTEXT

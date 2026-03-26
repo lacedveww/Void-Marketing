@@ -49,6 +49,17 @@ Last updated: 2026-03-25
 
 ---
 
+## DeFi Lending Protocols (Benchmark Monitoring)
+
+| Handle | Name | Why Monitor | Priority |
+|--------|------|-------------|----------|
+| @AaveAave | Aave | Gold standard DeFi lending protocol. Governance, collateral models, risk parameters, marketing of lending products | High |
+| @compoundfinance | Compound Finance | Pioneer DeFi lending. Supply/borrow rate models, governance communication | High |
+| @MorphoLabs | Morpho Labs | Lending protocol optimizer. Rate optimization, P2P matching, innovative lending mechanics | High |
+| @MakerDAO | MakerDAO | Decentralized stablecoin + lending. Collateral models, liquidation mechanics, governance marketing | High |
+
+---
+
 ## Crypto Projects with Excellent X Marketing
 
 Projects studied not as competitors but as marketing case studies. What makes their X presence work, and what can VoidAI adapt?
@@ -169,3 +180,4 @@ When adding, include:
 | Date | Change |
 |------|--------|
 | 2026-03-25 | Initial creation with crypto marketing leaders, news/media, AI companies, community voices, 15 crypto projects, 7 tech companies, 9 individual marketers |
+| 2026-03-25 | Lending pivot: added DeFi Lending Protocols section with Aave, Compound, Morpho, MakerDAO as benchmark monitoring |

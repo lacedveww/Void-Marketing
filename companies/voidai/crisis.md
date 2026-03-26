@@ -4,12 +4,15 @@
 
 Activate this protocol immediately if ANY of the following occur:
 - Bridge exploit, vulnerability disclosure, or smart contract incident
-- Service disruption affecting user funds or bridge operations
+- Lending platform exploit, liquidation cascade, or smart contract vulnerability
+- Service disruption affecting user funds or bridge/lending operations
+- Lending platform delay beyond communicated timeline (company-defining crisis)
 - Subnet 106 deregistration or emissions disruption
 - Community backlash, astroturfing accusations, or coordinated attack
 - Regulatory action or legal threat
 - Competitor attack or disinformation campaign targeting VoidAI
 - Leaked internal documents or architecture details
+- Lending metrics trigger: TVL drops >30% in 24h, borrow utilization exceeds 95%, mass liquidation event (>10% of total collateral liquidated)
 
 ## Proactive Communication Triggers (Don't Wait for the Danger Zone)
 
@@ -199,11 +202,9 @@ Follow these steps in order. Do not skip steps. Do not rush.
 > **PUBLISHING RESUMED.** All 5 workflows reactivated and tested at [time UTC]. EMERGENCY_STOP=false, DRY_RUN=false. Normal operations restored.
 
 **Step 8. Resume satellite accounts per the schedule below** (see Per-Account Crisis Behavior above):
-  1. Bittensor Ecosystem (first)
-  2. DeFi / Cross-Chain
-  3. AI x Crypto
-  4. Fanpage Satellite
-  5. Meme / Culture (last)
+  1. Daily/Informational (first, factual updates)
+  2. Bittensor Ecosystem
+  3. DeFi / Cross-Chain (last)
 
 ---
 
@@ -226,11 +227,9 @@ Follow these steps in order. Do not skip steps. Do not rush.
 | Account | During Crisis |
 |---------|--------------|
 | Main @v0idai | ONLY account that posts official updates. Factual, transparent, no spin. |
-| Fanpage Satellite | SILENT. No memes, no engagement, no posts. Resume only after all-clear from Vew. |
+| Daily/Informational | May share ONLY official @v0idai updates via quote-tweet. No independent posts. |
 | Bittensor Ecosystem | May share ONLY official @v0idai updates via quote-tweet. No independent commentary. |
 | DeFi / Cross-Chain | May share ONLY official @v0idai updates via quote-tweet. No independent commentary. |
-| AI x Crypto | SILENT. Resume only after all-clear from Vew. |
-| Meme / Culture | SILENT. No memes, no engagement, no posts. Resume only after all-clear from Vew. |
 
 ## What NEVER To Do During a Crisis
 
@@ -261,3 +260,4 @@ Follow these steps in order. Do not skip steps. Do not rush.
 | 2026-03-15 | Added Technical Kill Switch (EMERGENCY_STOP), activation procedure, recovery procedure, JS code node spec | Vew |
 | 2026-03-13 | Initial crisis protocol extracted from CLAUDE.md (config audit remediation) | Vew |
 | 2026-03-22 | Added Proactive Communication Triggers: SN106 ranking drop, emissions decline, extended quiet period per X Playbook tip 5 | Vew |
+| 2026-03-25 | Lending pivot: added lending crisis triggers (exploit, delay, TVL drop, utilization spike, liquidation cascade), updated per-account behavior for 4 accounts, updated recovery resume order. | Vew |

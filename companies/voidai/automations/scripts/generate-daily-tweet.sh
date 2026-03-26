@@ -163,6 +163,8 @@ fi
 # Build the prompt for claude -p
 PROMPT=$(cat <<'PROMPT_HEADER'
 You are generating a single tweet for the @v0idai X account (VoidAI main account).
+VoidAI is Bittensor DeFi Infrastructure (bridge + staking + lending). The lending platform is the current primary focus.
+VoidAI operates 4 X accounts (1 main + 3 satellites: Daily/Informational, Bittensor Ecosystem, DeFi/Cross-Chain).
 
 TASK: Generate exactly ONE tweet (max 280 characters) based on the daily metrics data below.
 
@@ -189,6 +191,7 @@ FORMATTING RULES:
 - Sound like a builder talking to other builders.
 - Use Bittensor-native terminology: subnet, alpha token, dTAO, SN106, emissions, metagraph.
 - Use DeFi terminology: TVL, bridge volume, liquidity depth.
+- Use lending terminology where relevant: collateral, LTV, borrow rate, supply rate, utilization rate.
 
 $PERFORMANCE_CONTEXT
 

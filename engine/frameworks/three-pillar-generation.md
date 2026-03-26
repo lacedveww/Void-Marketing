@@ -25,12 +25,13 @@ All VoidAI content generation flows through three pillars, each with a distinct 
 - Engagement opportunities (quote-tweets, replies to high-signal threads)
 - Competitor activity requiring a response (new features, partnerships, incidents)
 - Content angles surfaced by monitored builders/analysts
+- Lending ecosystem developments (Sturdy SN10, BitQuant SN15, Aave, Compound, Morpho)
 
-### Account Routing
-- Protocol news, builder updates, ecosystem commentary: @v0idai (main)
-- Technical deep-dives on subnets, decentralized training: Bittensor Ecosystem account
-- DeFi/cross-chain angles: DeFi / Cross-Chain account
-- Meme-worthy community moments: Meme / Culture account
+### Account Routing (4 accounts)
+- Protocol news, builder updates, lending development, ecosystem commentary: @v0idai (main)
+- Daily stats, routine updates, metrics recaps: Daily/Informational account
+- Technical deep-dives on subnets, decentralized training, DeFi/lending ecosystem: Bittensor Ecosystem account
+- DeFi/cross-chain angles, lending market analysis: DeFi / Cross-Chain account
 
 ### Priority Rules
 1. Breaking news gets same-day coverage (within 4 hours of sweep detection)
@@ -49,15 +50,16 @@ All VoidAI content generation flows through three pillars, each with a distinct 
 ### What It Covers
 - AI industry news relevant to Bittensor/decentralized compute narrative
 - Crypto/DeFi trends that intersect with VoidAI's product (bridging, lending, cross-chain)
+- Lending market news (Aave governance, Compound updates, Morpho innovations, new lending protocols)
 - Research papers and technical breakthroughs (via AlphaXiv MCP, arXiv)
 - Product launches and partnership announcements from adjacent ecosystems
 - SEO-aligned content that builds topical authority
 
-### Account Routing
-- AI + crypto intersection pieces: AI x Crypto account
-- DeFi/bridging industry context: DeFi / Cross-Chain account
+### Account Routing (4 accounts)
+- DeFi/bridging/lending industry context: DeFi / Cross-Chain account
 - General AI/tech trends reframed for audience: @v0idai (main)
 - Technical research explainers: Bittensor Ecosystem account
+- Factual news recaps: Daily/Informational account
 
 ### Priority Rules
 1. News with direct VoidAI relevance (Bittensor, Solana, Chainlink) gets same-day treatment
@@ -174,3 +176,4 @@ Pillar C requires live posting data to function. During DRY_RUN and early soft-l
 |------|--------|
 | 2026-03-25 | Initial framework document created. Three-pillar generation system with daily targets, 7-step process, and pre-launch notes for Pillar C. |
 | 2026-03-25 | Updated to reply-gated workflow: Step 2 at 8:30AM (was 9AM), Steps 3-4 are reply-gated (were timed at 10:30AM), Step 7 at Fri 10:30AM (was Fri 12PM). Pillar C weekly calibration reference updated. |
+| 2026-03-25 | Lending pivot: added lending keywords to Pillar A+B coverage and routing. Updated account routing from 6 to 4 accounts. Removed Meme/Culture and AI x Crypto routing. Added Daily/Informational routing. |

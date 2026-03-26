@@ -4,10 +4,11 @@
 
 | Pillar | Weight | Content Types |
 |--------|--------|---------------|
-| Bridge & Build | 40% | Product updates, bridge volume metrics, new chain integrations, SDK releases, lending teasers |
-| Ecosystem Intelligence | 25% | Bittensor network analysis, dTAO insights, emissions trends, cross-chain DeFi commentary |
-| Alpha & Education | 25% | Technical deep-dives, staking guides, LP tutorials, yield comparisons, "how VoidAI works" |
-| Community & Culture | 10% | Memes, community milestones, partner celebrations, Spaces, AMAs |
+| Lending & DeFi Banking | 30% | Lending platform development, collateral models, LTV ratios, borrow/supply rates, utilization metrics, TVL growth, liquidation thresholds, DeFi banking education |
+| Bridge & Infrastructure | 20% | Bridge volume metrics, new chain integrations, SDK releases, staking updates, shipped product maintenance |
+| Ecosystem Intelligence | 25% | Bittensor network analysis, dTAO insights, emissions trends, cross-chain DeFi commentary, lending ecosystem coverage |
+| Alpha & Education | 20% | Technical deep-dives, lending tutorials, staking guides, LP tutorials, yield comparisons, DeFi banking explainers |
+| Community & Culture | 5% | Community milestones, partner celebrations, Spaces, AMAs |
 
 ## Audience Personas
 
@@ -67,20 +68,27 @@ VoidAI's content must speak to specific audiences, not a generic "crypto audienc
 
 | Persona | Primary Account | Secondary Accounts |
 |---------|----------------|-------------------|
-| Validators & Miners | @v0idai (main) | Bittensor Ecosystem satellite |
-| TAO Holders & Delegators | @v0idai (main) | Bittensor Ecosystem, DeFi satellite |
-| DeFi Power Users | DeFi / Cross-Chain satellite | @v0idai (main) |
-| Degens & Speculators | Fanpage satellite, Meme satellite | Bittensor Ecosystem satellite |
-| Builders & Developers | @v0idai (main) | AI x Crypto satellite |
+| Validators & Miners | @v0idai (main) | Bittensor Ecosystem satellite, Daily/Info |
+| TAO Holders & Delegators | @v0idai (main) | Daily/Info, Bittensor Ecosystem, DeFi satellite |
+| DeFi Power Users | DeFi / Cross-Chain satellite | @v0idai (main), Daily/Info |
+| Degens & Speculators | Bittensor Ecosystem satellite | Daily/Info, DeFi satellite |
+| Builders & Developers | @v0idai (main) | Daily/Info |
 
 ## Pillar Descriptions
 
-### Bridge & Build (40%)
+### Lending & DeFi Banking (30%)
 
-The core pillar. Everything VoidAI ships, measured, and announced. This is the builder-credibility register in action. Content here should always include specific data points: volume numbers, chain count, uptime, transaction counts.
+The new core pillar. VoidAI's current primary focus. Everything related to the lending platform: development updates, architecture decisions, market analysis, educational content about DeFi lending. This pillar positions VoidAI as a serious DeFi infrastructure builder, not just a bridge.
+
+**Best formats**: Development update threads, lending market analysis, collateral model explainers, DeFi banking comparison tables
+**Key topics**: Lending platform development milestones, collateral models (TAO, wTAO, subnet alpha tokens), LTV ratios, liquidation thresholds, borrow/supply rates, utilization rates, TVL growth, security audit progress, lending competitor analysis (Sturdy SN10, BitQuant SN15, Aave, Compound, Morpho)
+
+### Bridge & Infrastructure (20%)
+
+Shipped products that prove execution. Bridge and staking are the foundation VoidAI has already delivered. Content here maintains awareness of live products and reinforces the "we ship" narrative.
 
 **Best formats**: Product update threads, data cards, announcement tweets, SDK release notes
-**Key topics**: Bridge volume milestones, new chain integrations, Chainlink CCIP updates, lending platform development, SDK releases, security audits
+**Key topics**: Bridge volume milestones, new chain integrations, Chainlink CCIP updates, SDK releases, security audits, staking performance, uptime metrics
 
 ### Ecosystem Intelligence (25%)
 
@@ -92,30 +100,28 @@ Positioning VoidAI as an informed participant in the Bittensor ecosystem, not ju
 - Covenant-72B: largest decentralized LLM training run (72B params, ~1.1T tokens on SN3). See `research/covenant-72b-decentralized-training.md`
 - On-device AI trend (Qwen3.5 35B on iPhone, Perplexity local AI) and narrative synergy with Bittensor's decentralized approach. See `research/on-device-ai-decentralized-narrative.md`
 
-### Alpha & Education (25%)
+### Alpha & Education (20%)
 
-Making Bittensor DeFi accessible. Technical deep-dives for power users and step-by-step guides for newcomers. The content that earns trust by teaching without gatekeeping.
+Making Bittensor DeFi and lending accessible. Technical deep-dives for power users and step-by-step guides for newcomers. Shifted toward lending education as the platform approaches launch. The content that earns trust by teaching without gatekeeping.
 
 **Best formats**: Tutorial threads, blog posts, explainer videos, comparison tables, step-by-step guides
-**Key topics**: How to bridge TAO, staking mechanics, LP strategies, protocol architecture explainers, DeFi concept education
+**Key topics**: How to bridge TAO, staking mechanics, LP strategies, protocol architecture explainers, DeFi concept education, lending 101 (what is LTV, collateral, liquidation), how VoidAI lending will work, DeFi banking comparisons
 
-### Community & Culture (10%)
+### Community & Culture (5%)
 
-Light touch, high engagement. Memes, polls, community celebrations. This pillar lives primarily on satellite accounts, not the main @v0idai account.
+Minimal touch. Community celebrations and engagement. With no dedicated meme account, this pillar is distributed lightly across all accounts. Keep it organic and infrequent.
 
-**Best formats**: Memes, polls, engagement bait, community milestone celebrations, Spaces/AMAs
-**Key topics**: Community inside jokes, Bittensor culture, partner celebrations, fun data takes
+**Best formats**: Polls, community milestone celebrations, Spaces/AMAs
+**Key topics**: Community milestones, partner celebrations, Bittensor culture moments
 
 ## Pillar-to-Account Mapping
 
-| Account | Bridge & Build | Ecosystem Intel | Alpha & Education | Community & Culture |
-|---------|:-----------:|:-----------:|:-----------:|:-----------:|
-| Main (@v0idai) | 40% | 25% | 25% | 10% |
-| Fanpage Satellite | 60% | 0% | 20% | 20% |
-| Bittensor Ecosystem | 15% | 50% | 25% | 10% |
-| DeFi / Cross-Chain | 20% | 30% | 40% | 10% |
-| AI x Crypto | 20% | 40% | 30% | 10% |
-| Meme / Culture | 10% | 20% | 0% | 70% |
+| Account | Lending & DeFi Banking | Bridge & Infrastructure | Ecosystem Intel | Alpha & Education | Community & Culture |
+|---------|:-----------:|:-----------:|:-----------:|:-----------:|:-----------:|
+| Main (@v0idai) | 30% | 20% | 25% | 20% | 5% |
+| Daily/Informational | 35% | 30% | 20% | 10% | 5% |
+| Bittensor Ecosystem | 15% | 10% | 50% | 20% | 5% |
+| DeFi / Cross-Chain | 30% | 15% | 25% | 25% | 5% |
 
 ## Content Experimentation by Pillar
 
@@ -123,10 +129,11 @@ Each pillar should run at least one A/B experiment per week. The content experim
 
 | Pillar | What to Experiment First | Why |
 |--------|-------------------------|-----|
-| Bridge & Build | Data specificity: vague metrics vs. exact numbers in hooks | Builder credibility depends on perceived precision |
+| Lending & DeFi Banking | Development update format: thread vs. single tweet | Lending updates are new; find what resonates |
+| Bridge & Infrastructure | Data specificity: vague metrics vs. exact numbers in hooks | Builder credibility depends on perceived precision |
 | Ecosystem Intelligence | Thread vs. single tweet for subnet analysis | Some analysis needs depth, but singles may get more impressions |
-| Alpha & Education | Hook style: question ("How does TAO staking work?") vs. data lead ("Staking APY hit X% this week") | Determines whether education or alpha framing resonates more |
-| Community & Culture | Image/meme vs. text-only for engagement bait | Meme accounts live or die on visual content quality |
+| Alpha & Education | Hook style: question ("How does TAO lending work?") vs. data lead ("Borrow rates at X% across DeFi") | Determines whether education or alpha framing resonates more |
+| Community & Culture | Poll frequency and topics | With reduced weight (5%), find the highest-value engagement formats |
 
 Track results in `brand/voice-learnings.md`. After 4+ data points per variant, declare a winner and update the pillar's "Best formats" guidance above.
 
@@ -139,6 +146,9 @@ Always reference these numbers when available (pull latest data from `companies/
 3. Unique wallets served
 4. Bridge uptime (reliability signal)
 5. Chains supported (Bittensor, Solana, Ethereum, Base, + expanding)
+6. Lending TVL (once live)
+7. Borrow/supply utilization rates (once live)
+8. Lending development milestones completed
 
 ---
 
@@ -149,3 +159,4 @@ Always reference these numbers when available (pull latest data from `companies/
 | 2026-03-13 | Initial pillars config extracted from CLAUDE.md | Vew |
 | 2026-03-22 | Added 5 audience personas (validators/miners, TAO holders/delegators, DeFi users, degens, builders) with pillar mapping and account routing per X Playbook tip 7 | Vew |
 | 2026-03-22 | Added high-priority content topics to Ecosystem Intelligence (Covenant-72B, on-device AI), added Content Experimentation by Pillar section with per-pillar A/B test priorities | Claude Code |
+| 2026-03-25 | Lending pivot: reweighted pillars (Lending 30%, Bridge 20%, Ecosystem 25%, Alpha 20%, Culture 5%). Added Lending & DeFi Banking pillar. Updated pillar-to-account mapping for 4 accounts. Added lending anchor metrics. | Vew |

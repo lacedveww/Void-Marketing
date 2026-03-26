@@ -3,9 +3,11 @@
 ## Core Identity
 
 - **Company name**: VoidAI
-- **One-liner**: "The economic infrastructure layer that connects Bittensor's intelligence to the world's liquidity."
+- **One-liner**: "Bittensor DeFi Infrastructure: bridge, stake, lend. We built the bridge. We built staking. Now we're building lending."
 - **Tagline placement**: This one-liner MUST appear in: (1) @v0idai X bio, (2) pinned tweet on @v0idai, (3) @v0idai banner image, (4) the opening line of any major announcement thread, (5) LinkedIn company description. Audit quarterly to ensure consistency across all placements. If the one-liner is ever updated, update ALL placements within 24 hours.
+- **Primary identity**: Bittensor DeFi Infrastructure (bridge + staking + lending)
 - **Industry**: Crypto / DeFi / Bittensor
+- **Narrative**: "We built the bridge. We built staking. Now we're building lending." Bridge and staking are shipped products (past tense, proof of execution). Lending is the current focus and company-defining product.
 - **Org**: github.com/v0idai
 - **Repo count**: 34 total (2 public: SN106, SubnetsBot; 32 private)
 
@@ -13,10 +15,10 @@
 
 | Product | Status | URL | Description |
 |---------|--------|-----|-------------|
-| Cross-chain Bridge | Live | app.voidai.com/bridge-chains | Bittensor <> Solana/EVM bridge via Chainlink CCIP |
-| SN106 Staking | Live | app.voidai.com/stake | Subnet 106 staking and liquidity provisioning |
-| SDK | Live | @voidaisdk/bridge-sdk | Developer SDK for bridge integrations |
-| Lending Platform | Upcoming (target: late April 2026) | TBD | DeFi lending for TAO ecosystem |
+| Cross-chain Bridge | Live (shipped) | app.voidai.com/bridge-chains | Bittensor <> Solana/EVM bridge via Chainlink CCIP |
+| SN106 Staking | Live (shipped) | app.voidai.com/stake | Subnet 106 staking and liquidity provisioning |
+| SDK | Live (shipped) | @voidaisdk/bridge-sdk | Developer SDK for bridge integrations |
+| Lending Platform | In Development (target: late April 2026) | TBD | DeFi lending for TAO ecosystem. CURRENT PRIMARY FOCUS. |
 | Documentation | Live | docs.voidai.com | Developer and user documentation |
 
 ## Token / Asset
@@ -36,7 +38,7 @@
 
 ## Competitor Landscape
 
-- **Primary competitor**: Project Rubicon (@gtaoventures, Base/Coinbase pathway). We differentiate with Solana DeFi access, multi-chain bridge, lending platform (upcoming), and non-custodial architecture.
+- **Primary competitor**: Project Rubicon (@gtaoventures, Base/Coinbase pathway). We differentiate with Solana DeFi access, multi-chain bridge, lending platform (in development), and non-custodial architecture. Lending competitors: Sturdy (SN10), BitQuant (SN15). DeFi benchmarks: Aave, Compound, Morpho.
 - **Category competitors**: Tensorplex Bridge (different approach), TaoFi (USDC bridge via Hyperlane), Wormhole, LayerZero, Axelar (general-purpose bridges)
 
 ## Key People
@@ -66,3 +68,4 @@
 | 2026-03-13 | Initial company config extracted from CLAUDE.md | Vew |
 | 2026-03-13 | Added docs.voidai.com to product table (config audit remediation) | Vew |
 | 2026-03-22 | Added tagline placement requirements (bio, pinned tweet, banner, announcements, LinkedIn) per X Playbook tip 9 | Vew |
+| 2026-03-25 | Lending pivot: updated identity to "Bittensor DeFi Infrastructure", bridge/staking as shipped products, lending as current focus. Updated narrative, tagline, product table, competitor landscape. | Vew |

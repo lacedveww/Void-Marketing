@@ -4,19 +4,20 @@
 
 | Register | Weight | When to Use |
 |----------|--------|-------------|
-| Builder-Credibility | 40% | Lead with what shipped, metrics, benchmarks. "We bridged $X this week." Show, don't tell. |
-| Alpha-Leak / Analyst | 25% | "Here's what most people miss about cross-chain TAO..." Create information advantage, not hype. |
-| Community-Educator | 25% | Accessible explainers for newcomers. "Here's how to bridge TAO to Solana in 3 steps." |
-| Culture / Memes | 10% | Light touch only. Occasional memes, polls, "bridging the gap" visual metaphors. |
+| Builder-Credibility | 40% | Lead with what shipped, metrics, benchmarks. "We bridged $X this week." "Lending contracts deployed to testnet." Reference lending development progress. Show, don't tell. |
+| Alpha-Leak / Analyst | 25% | "Here's what most people miss about cross-chain TAO..." DeFi banking alpha: collateral models, lending rates, utilization analysis. Create information advantage, not hype. |
+| Community-Educator | 25% | Accessible explainers for newcomers. "Here's how to bridge TAO to Solana in 3 steps." Lending education: "What is LTV?", "How collateral works in DeFi lending." |
+| Culture / Memes | 5% | Minimal. Occasional polls or community celebrations. No dedicated meme account. |
 
-Note: The main @v0idai account naturally runs at ~55% Builder-Credibility and ~0% Culture/Memes. The 10% Culture weight applies to OVERALL content output across all 6 accounts, not the main account specifically. Culture content routes to satellite accounts.
+Note: The main @v0idai account naturally runs at ~55% Builder-Credibility and ~0% Culture/Memes. The 5% Culture weight applies to OVERALL content output across all 4 accounts, not the main account specifically.
 
 ## Voice Rules: DO
 
 - Lead with results and data, not promises
 - Use Bittensor-native terminology correctly: subnet, alpha token, dTAO, Taoflow, metagraph, emissions, root network, yuma consensus
-- Frame VoidAI as infrastructure that enables the ecosystem
+- Frame VoidAI as DeFi infrastructure that enables the ecosystem (bridge + staking + lending)
 - Speak the language of DeFi users: TVL, APY, liquidity depth, impermanent loss, slippage
+- Use lending terminology correctly: collateral, LTV (loan-to-value), liquidation threshold, borrow rate, supply rate, utilization rate, over-collateralized, under-collateralized
 - Show technical depth without being inaccessible
 - Acknowledge risks transparently (builds trust in Bittensor community)
 - Every post must answer "so what": why should anyone care
@@ -66,8 +67,8 @@ VoidAI's natural voice is builder-heavy (40% Builder-Credibility). This is a str
 
 **How to do vision content without sounding like hype:**
 - Frame vision as infrastructure roadmap, not moonshot promises: "Here's what Bittensor DeFi looks like when lending goes live" not "We're going to revolutionize DeFi"
-- Attach vision to shipped work: "We built the bridge. We built the staking. Lending is next. Here's the full picture."
-- Use the "what we see" frame: "What we see: a world where TAO moves freely across every major chain. What we shipped this month: [specific thing]."
+- Attach vision to shipped work: "We built the bridge. We built staking. Now we're building lending. Here's the full picture."
+- Use the "what we see" frame: "What we see: a full Bittensor DeFi stack, bridge, staking, lending, all non-custodial. What we shipped this month: [specific thing]."
 - Pair every vision post with a concrete proof point from recent work
 
 **Content ratio guidance**: Aim for no more than 3 consecutive builder-credibility posts without a vision or alpha-leak post in between. The feed should alternate between "here's what we shipped" and "here's where we're going."
@@ -101,7 +102,7 @@ Teasers can build anticipation but reckless teasing destroys credibility. Follow
 Major announcements (lending platform, new chain integrations, partnerships, major milestones) follow a specific structure to maximize impact and clarity.
 
 **Announcement structure (for @v0idai):**
-1. **Hook tweet**: Declarative statement of what shipped/launched. "VoidAI Lending is live." or "TAO is now on [Chain]." No hype words, no "we're excited." State the fact.
+1. **Hook tweet**: Declarative statement of what shipped/launched. "VoidAI Lending is live. Borrow against your TAO." or "TAO is now on [Chain]." No hype words, no "we're excited." State the fact.
 2. **What it is**: One sentence explaining the product/feature in plain terms. What does it do for the user?
 3. **Why it matters**: Connect to the bigger picture. Why does this matter for Bittensor, for DeFi, for the user? Use specific data.
 4. **How to use it**: Link, CTA, or next step. "Try it: [link]" or "Docs: [link]"
@@ -248,3 +249,4 @@ When generating ANY content, Claude MUST read these files in order:
 |------|--------|-------------|
 | 2026-03-13 | Initial voice config extracted from CLAUDE.md | Vew |
 | 2026-03-22 | Added: RT guidelines (tip 3), price/chart ban (tips 14-15), narrative building guidance (tip 11), teasing guidelines (tips 12, 17), announcement framing (tip 13), deadline communication policy (tip 16) per X Playbook | Vew |
+| 2026-03-25 | Lending pivot: updated voice registers with lending references, reduced Culture/Memes to 5%, added lending terminology (collateral, LTV, liquidation threshold, borrow/supply rates, utilization rate), updated 6-account refs to 4, updated narrative and announcement framing with lending examples. | Vew |

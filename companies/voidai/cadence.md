@@ -5,11 +5,9 @@
 | Account | Posts/Day | Peak Windows (UTC) | Thread Frequency | Min Gap Between Posts |
 |---------|-----------|--------------------|--------------------|----------------------|
 | Main (@v0idai) | 1-2 | 14:00-16:00, 20:00-22:00 | 1/week | 3 hours |
-| Fanpage Satellite | 1-2 | 13:00-15:00, 21:00-23:00 | Rare | 2 hours |
-| Bittensor Ecosystem | 1-2 | 14:00-17:00 | 2/week | 3 hours |
-| DeFi / Cross-Chain | 1-2 | 14:00-16:00, 20:00-22:00 | 2/week | 3 hours |
-| AI x Crypto | 1 | 15:00-17:00 | 1/week | N/A |
-| Meme / Culture | 1-2 | 13:00-15:00, 20:00-22:00 | Rare | 2 hours |
+| Daily/Informational | 3-5 | 13:00-17:00, 20:00-23:00 | Rare | 2 hours |
+| Bittensor Ecosystem | ~3 | 14:00-17:00 | 2/week | 2 hours |
+| DeFi / Cross-Chain | ~3 | 14:00-16:00, 20:00-22:00 | 2/week | 2 hours |
 
 ## Daily Pipeline Rhythm
 
@@ -73,3 +71,4 @@ Cross-platform rule: X always gets announcements first. Discord and Telegram fol
 | 2026-03-22 | Added @v0idai daily minimum floor (1 post/day, no exceptions), consistency accountability trigger, and cross-platform presence guidance per X Playbook tips 1, 21 | Vew |
 | 2026-03-25 | Added Daily Pipeline Rhythm table (6-job schedule), updated content calendar rhythm to reference Morning Summary/Draft Review/Health Check times, added 3-5 daily target reference to three-pillar framework | Claude Code |
 | 2026-03-25 | Compacted to 5-job reply-gated schedule: Morning Summary at 8:30AM starts sequential chain, Health Check at 10AM as fallback, Weekly Recap at Fri 10:30AM. Updated pipeline rhythm and calendar rhythm references. | Claude Code |
+| 2026-03-25 | Lending pivot: updated to 4 accounts. Removed Fanpage/AI-Crypto/Meme entries. Added Daily/Info at 3-5/day, updated Bittensor+DeFi to ~3/day. | Vew |

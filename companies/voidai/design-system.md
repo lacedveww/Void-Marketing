@@ -57,7 +57,7 @@ Consistency across all visual touchpoints on X builds recognition. When someone 
 - No laser-eye profile pictures
 - No price chart screenshots or candlestick images
 - No generic stock crypto imagery (gold coins, rocket ships, diamond hands)
-- No memes on the main @v0idai account (route to meme satellite)
+- No memes on the main @v0idai account
 - No walls of emojis in any visual or text content
 - No "announcement" graphics that are just text on a colored background. If it's just text, post it as text
 
@@ -69,3 +69,4 @@ Consistency across all visual touchpoints on X builds recognition. When someone 
 |------|--------|-------------|
 | 2026-03-13 | Initial design system extracted from CLAUDE.md | Vew |
 | 2026-03-22 | Added X-specific visual identity standards: profile consistency rules, post image standards, visual DON'Ts per X Playbook tip 6 | Vew |
+| 2026-03-25 | Lending pivot: removed meme satellite routing reference from visual DON'Ts. 4-account strategy. | Vew |

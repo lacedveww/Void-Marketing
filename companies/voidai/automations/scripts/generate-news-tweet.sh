@@ -152,6 +152,9 @@ SAFE_SUMMARY=$(echo "$NEWS_SUMMARY" | sed -E 's/(ignore previous|system prompt|a
 # Build the prompt
 PROMPT="You are generating a single tweet for the @v0idai X account about a news item.
 
+VoidAI is Bittensor DeFi Infrastructure (bridge + staking + lending). The lending platform is the current primary focus.
+VoidAI operates 4 X accounts (1 main + 3 satellites: Daily/Informational, Bittensor Ecosystem, DeFi/Cross-Chain).
+
 TASK: Generate ONE tweet (max 280 characters) that adds genuine commentary or insight
 about this news from VoidAI's perspective as Bittensor DeFi infrastructure builders.
 

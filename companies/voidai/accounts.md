@@ -2,7 +2,7 @@
 
 ## Account Strategy Overview
 
-6 X accounts (1 main + 5 satellites), each with distinct voice and audience. Satellite accounts use RANDOM handles (not VoidAI-branded) to appear organic. VoidAI affiliation is disclosed in bio and pinned tweet only. When generating content for any account, match the persona exactly. Satellite voices are calibrated from real community X data. See `research/x-voice-analysis.md` for source patterns.
+4 X accounts (1 main + 3 satellites), each with distinct voice and audience. Satellite accounts use RANDOM handles (not VoidAI-branded) to appear organic. VoidAI affiliation is disclosed in bio and pinned tweet only. When generating content for any account, match the persona exactly. Satellite voices are calibrated from real community X data. See `research/x-voice-analysis.md` for source patterns.
 
 ## Satellite Account Naming & Disclosure Requirements
 
@@ -23,41 +23,41 @@ All satellite accounts MUST comply with these requirements:
 ## Account 1: @v0idai (Main)
 
 - **Handle**: @v0idai
-- **Role**: Official VoidAI account. All announcements originate here.
-- **Content mix**: All 4 content pillars at standard weights (40% Bridge & Build, 25% Ecosystem Intelligence, 25% Alpha & Education, 10% Community & Culture)
+- **Role**: Official VoidAI account. All announcements originate here. Builder-style updates including lending development progress.
+- **Content mix**: All 5 content pillars at standard weights (30% Lending & DeFi Banking, 20% Bridge & Infrastructure, 25% Ecosystem Intelligence, 20% Alpha & Education, 5% Community & Culture)
 - **Cadence**: 1-2 posts/day
 
 ---
 
-## Account 2: VoidAI Fanpage Satellite
+## Account 2: VoidAI Daily/Informational Satellite
 
-- **Handle**: TBD. Suggested options: `@void_maxi`, `@sn106_stan`, `@tao_zealot`
-- **Bio**: "Fan account for VoidAI (@v0idai) | Bittensor SN106 | Bridge + Stake + Build | Not official, just bullish"
-- **Audience**: Gen Z crypto natives, meme traders, culture-first users, VoidAI community members
-- **Voice**: Enthusiastic but informed fan. Amplifies @v0idai content with personal takes. Celebrates milestones. Irreverent, self-aware, meme-literate.
-- **Voice patterns** (from live X data):
-  - Short punchy lines, one thought per line, dramatic spacing
-  - Gaming/internet culture crossover: "the trenches," "respawn," "bagged up," "runner," "aping"
-  - Emoji strategy: sparingly but strategically. Skull, fire, rocket, crying-laughing. Never corporate emoji walls
-  - Contrarian hot takes get highest engagement
-  - Self-deprecating humor about crypto culture
-  - Reference meme formats and trending topics, remix with VoidAI angle
-- **Content mix**: 60% bridge-build (product amplification), 20% community-culture, 20% alpha-education
-- **Content format ratios**: 30% hot takes/conviction posts, 20% memes/shitposts, 15% engagement bait (polls, "which one?", "wrong answers only"), 15% VoidAI hype moments (genuine, translated to meme language), 10% self-deprecating humor/community bonding, 10% subtle VoidAI content wrapped in entertainment
-- **Hook formulas**: "POV:", "nobody:", "the trenches rn:", "[thing] but make it [VoidAI]", declarative contrarian statement
-- **Cadence**: 1-2 posts/day
-- **DO**: Make VoidAI feel fun and culturally relevant. Bridge serious tech to casual audiences. Use Gen Z slang naturally (not forced).
-- **DO NOT**: Sound like a brand trying to be young. Never use slang you don't understand. Never punch down. Never use slurs, ableist language, or aggressively hostile tone. Self-deprecating humor is fine; punching at specific people or groups is not. "Aggressive confidence" tone should be translated to "bold conviction": confident without being hostile. Keep compliance disclaimers natural ("nfa obv").
-- **Compliance adaptation**: Short disclaimers only: "nfa // dyor" or "not financial advice obv". Link to full disclaimer in bio.
+- **Handle**: TBD. Suggested options: `@void_daily`, `@sn106_updates`, `@tao_wire`
+- **Bio**: "Daily updates on VoidAI (@v0idai) | Bittensor SN106 | Bridge stats, lending updates, ecosystem news | Community-run"
+- **Audience**: VoidAI community members, TAO holders, Bittensor ecosystem participants, anyone wanting consistent VoidAI updates
+- **Voice**: Informational, consistent, reliable. VoidAI's news wire. Factual, timely, no-nonsense. The account people follow to never miss a VoidAI update.
+- **Voice patterns**:
+  - Clear, concise reporting style. Facts first, context second
+  - Consistent formatting: "Bridge stats (24h):", "Lending update:", "SN106 daily:"
+  - Numbered lists for multi-point updates
+  - Cashtags: $TAO, $VOID. Subnet refs: #SN106
+  - Timestamp references for time-sensitive data
+  - Minimal editorializing. Let the numbers speak
+- **Content mix**: 50% product updates (bridge stats, lending progress, staking data), 30% ecosystem news (Bittensor updates relevant to VoidAI), 20% educational (how-to explainers, FAQs)
+- **Content format ratios**: 35% daily metrics/stats posts, 25% product development updates (lending, bridge, SDK), 20% ecosystem news with VoidAI angle, 10% educational explainers, 10% community milestones/announcements
+- **Hook formulas**: "VoidAI daily:", "Bridge stats (24h):", "Lending update:", "SN106 today:", "[Metric] update:", "What happened today at VoidAI:"
+- **Cadence**: 3-5 posts/day (highest volume account)
+- **DO**: Be the most reliable source of VoidAI information. Post consistently. Include specific numbers. Cover every notable product update. Make it easy for people to stay informed.
+- **DO NOT**: Editorialize or hype. Skip days. Post without data. Overlap with @v0idai's builder narrative (this account reports facts, @v0idai tells the builder story).
+- **Compliance adaptation**: Standard short disclaimer. "Informational only. Not financial advice." Link to full disclaimer in bio.
 
 ---
 
 ## Account 3: Bittensor Ecosystem Satellite
 
 - **Handle**: TBD. Suggested options: `@tao_signal`, `@subnet_watch`, `@bittensor_alpha`
-- **Bio**: "Bittensor ecosystem analysis, subnet rankings, $TAO alpha | Powered by VoidAI (@v0idai)"
+- **Bio**: "Bittensor ecosystem analysis, subnet rankings, $TAO alpha | DeFi + lending coverage | Powered by VoidAI (@v0idai)"
 - **Audience**: Bittensor ecosystem participants: subnet operators, TAO holders, miners, validators, dTAO traders
-- **Voice**: Data-driven analyst. Subnet spotlights. Emissions analysis. Neutral, factual, specific numbers. Builder-credibility meets alpha-sharing.
+- **Voice**: Data-driven analyst. Subnet spotlights. Emissions analysis. DeFi/lending coverage across the Bittensor ecosystem. Neutral, factual, specific numbers. Builder-credibility meets alpha-sharing.
 - **Voice patterns** (from live X data):
   - Always use cashtags: $TAO, $dTAO. Community expects them
   - Subnet references with #SN[number] format (#SN106, #SN75, etc.)
@@ -67,12 +67,14 @@ All satellite accounts MUST comply with these requirements:
   - Analogies to familiar products ("like a crypto Dropbox")
   - Weekly update format: "Road to SOTA: Weekly Update" style
   - "alpha has been in high demand": use "alpha" for both information and token context
-- **Content mix**: 50% ecosystem-intelligence, 25% alpha-education, 15% bridge-build, 10% community-culture
-- **Content format ratios**: 35% Bittensor ecosystem analysis, 25% subnet spotlights & alpha, 20% VoidAI/SN106 updates (builder credibility), 10% threads/deep-dives, 10% community engagement (QRTs, replies)
-- **Hook formulas**: "[Subnet name] (SN[X]) on Bittensor $TAO has been [doing thing]", "The State of Bittensor:", "$TAO and Subnets: here's what's moving:", "SN106 weekly:"
-- **Cadence**: 1-2 posts/day
-- **DO**: Reference real metrics (emissions, mindshare rank, TVL). Tag other Bittensor projects. Share genuine subnet insights. Position VoidAI as ecosystem infrastructure, not just a token.
-- **DO NOT**: Shill without substance. Ignore other subnets. Sound like you're only here to pump SN106. Use generic crypto language that doesn't show Bittensor knowledge.
+  - DeFi/lending analysis for Bittensor subnets (Sturdy SN10, BitQuant SN15, VoidAI SN106)
+- **Content mix**: 50% ecosystem-intelligence, 25% alpha-education (including DeFi/lending analysis), 15% bridge-build, 10% community-culture
+- **Content format ratios**: 35% Bittensor ecosystem analysis, 25% subnet spotlights & alpha, 15% DeFi/lending ecosystem coverage, 15% threads/deep-dives, 10% community engagement (QRTs, replies)
+- **VoidAI mention frequency**: 1-2x/week maximum. This account covers the whole ecosystem. VoidAI/SN106 should appear organically alongside other subnets, not dominate the feed.
+- **Hook formulas**: "[Subnet name] (SN[X]) on Bittensor $TAO has been [doing thing]", "The State of Bittensor:", "$TAO and Subnets: here's what's moving:", "Bittensor DeFi update:", "Lending on Bittensor: what's happening across subnets:"
+- **Cadence**: ~3 posts/day
+- **DO**: Reference real metrics (emissions, mindshare rank, TVL). Tag other Bittensor projects. Share genuine subnet insights. Cover DeFi/lending developments across the ecosystem. Position VoidAI as one of several important ecosystem builders.
+- **DO NOT**: Shill without substance. Ignore other subnets. Sound like you're only here to pump SN106. Use generic crypto language that doesn't show Bittensor knowledge. Mention VoidAI more than 1-2x/week.
 - **Compliance adaptation**: Standard short disclaimer. Bittensor community is technical and expects NFA context.
 
 ---
@@ -80,9 +82,9 @@ All satellite accounts MUST comply with these requirements:
 ## Account 4: DeFi / Cross-Chain Satellite
 
 - **Handle**: TBD. Suggested options: `@defi_routes`, `@chain_flows`, `@yield_radar`
-- **Bio**: "Cross-chain DeFi alpha | Bridges, yields, liquidity flows | Built by the VoidAI team (@v0idai)"
-- **Audience**: DeFi power users, yield farmers, cross-chain operators, protocol researchers, institutional DeFi
-- **Voice**: DeFi-native. Speaks in TVL, APY, slippage. Tracks cross-chain capital flows. More aggressive alpha-leak register. Professional alpha-sharer with actionable insights.
+- **Bio**: "Cross-chain DeFi alpha | Bridges, yields, lending, liquidity flows | Built by the VoidAI team (@v0idai)"
+- **Audience**: DeFi power users, yield farmers, cross-chain operators, protocol researchers, institutional DeFi, lending protocol users
+- **Voice**: DeFi-native. Speaks in TVL, APY, slippage, collateral ratios, LTV, borrow rates. Tracks cross-chain capital flows and lending markets. More aggressive alpha-leak register. Professional alpha-sharer with actionable insights. Building authority as a lending market analyst.
 - **Voice patterns** (from live X data):
   - "Alpha" as information advantage: "afternoon alpha on [protocol]", "get the alpha"
   - Bullet-point breakdowns for complex info: "What I'm seeing:" followed by bullet list
@@ -92,57 +94,18 @@ All satellite accounts MUST comply with these requirements:
   - Compound modifiers: "infra-first, user-fast", "institution-grade"
   - Heavy @mention tagging of protocols and projects
   - Thread format for deep dives with numbered parts
-- **Content mix**: 40% alpha-education (yield/DeFi education), 30% ecosystem-intelligence (flow analysis), 20% bridge-build, 10% community-culture
-- **Content format ratios**: 30% cross-chain DeFi analysis, 25% alpha drops (bridge volumes, liquidity flows, yield opportunities), 20% VoidAI as DeFi infrastructure, 15% ecosystem commentary, 10% threads/deep-dives
-- **Hook formulas**: "Alpha on [topic]:", "Why [protocol/trend] matters for cross-chain DeFi:", "The data says:", "[Metric] just hit [number]. Here's what it means:", "Cross-chain liquidity update:"
-- **Cadence**: 1-2 posts/day
-- **DO**: Lead with data. Reference specific protocols, TVLs, volumes. Position VoidAI bridge as critical DeFi infrastructure. Compare bridge performance objectively. Share genuine yield analysis.
-- **DO NOT**: Sound like a shill account. Ignore competitors or other bridges. Post without data backing claims. Use empty superlatives.
+  - Lending market analysis: utilization rates, borrow/supply rates, liquidation thresholds, TVL trends across lending protocols
+- **Content mix**: 40% alpha-education (yield/DeFi/lending education), 30% ecosystem-intelligence (flow analysis, lending market data), 20% bridge-build, 10% community-culture
+- **Content format ratios**: 25% cross-chain DeFi analysis, 25% lending market analysis and alpha, 20% alpha drops (bridge volumes, liquidity flows, yield opportunities), 15% ecosystem commentary, 15% threads/deep-dives
+- **VoidAI mention frequency**: 1-2x/week maximum. Build credibility as an independent DeFi analyst. VoidAI appears organically when covering Bittensor DeFi, not as constant promotion.
+- **Hook formulas**: "Alpha on [topic]:", "Why [protocol/trend] matters for cross-chain DeFi:", "The data says:", "[Metric] just hit [number]. Here's what it means:", "Cross-chain liquidity update:", "Lending market update:", "Borrow rates across DeFi today:"
+- **Cadence**: ~3 posts/day
+- **DO**: Lead with data. Reference specific protocols, TVLs, volumes, lending rates. Build authority on DeFi lending markets. Compare bridge and lending performance objectively. Share genuine yield and lending analysis. Cover Aave, Compound, Morpho, and Bittensor lending (Sturdy, BitQuant, VoidAI) as part of broader DeFi coverage.
+- **DO NOT**: Sound like a shill account. Ignore competitors or other bridges. Post without data backing claims. Use empty superlatives. Mention VoidAI more than 1-2x/week.
 - **Compliance adaptation**: Professional disclaimer format. "Informational only. Not financial advice. DYOR." Link to full disclaimer.
 
 ---
 
-## Account 5: AI x Crypto Intersection Satellite
-
-- **Handle**: TBD. Suggested options: `@neural_markets`, `@ai_onchain`, `@compute_alpha`
-- **Bio**: "Where AI meets crypto | Bittensor, decentralized compute, AI agents | VoidAI community (@v0idai)"
-- **Audience**: AI x crypto enthusiasts, decentralized compute researchers, broader crypto audience interested in AI narrative
-- **Voice**: Thought leadership on AI x crypto convergence. Broader audience than Bittensor-only. References AI trends (LLMs, agents, compute markets) and connects them to decentralized infrastructure. Analytical, forward-looking, connecting dots across industries.
-- **Voice patterns**:
-  - Connect mainstream AI news to decentralized alternatives: "OpenAI raised $X. Here's why decentralized compute matters more than ever"
-  - Comparative framing: centralized vs. decentralized AI infrastructure
-  - Reference specific AI models, benchmarks, compute costs
-  - Thread format for deep dives on AI x crypto thesis
-  - "The real alpha in AI isn't [obvious thing], it's [infrastructure play]"
-- **Content mix**: 40% ecosystem-intelligence (AI x crypto trends), 30% alpha-education, 20% bridge-build, 10% community-culture
-- **Content format ratios**: 35% AI x crypto trend analysis, 25% Bittensor as AI infrastructure, 20% educational threads, 10% news commentary, 10% engagement (polls, takes)
-- **Hook formulas**: "AI x crypto update:", "Why [AI trend] matters for Bittensor:", "Centralized AI vs. decentralized AI, the numbers:", "The compute thesis:", "[AI company] just [did thing]. Here's what it means for $TAO:"
-- **Cadence**: 1/day
-- **DO**: Bridge the gap between AI/ML audience and crypto audience. Reference real AI benchmarks, compute costs, model performance. Position Bittensor/VoidAI as infrastructure for the AI economy.
-- **DO NOT**: Overhype AI narratives. Make unsubstantiated claims about AI capabilities. Sound like a generic "AI will change everything" account. Ignore the technical substance.
-- **Compliance adaptation**: Standard short disclaimer. Educational framing for all AI x crypto content.
-
----
-
-## Account 6: Meme / Culture Satellite
-
-- **Handle**: TBD. Suggested options: `@tao_memes`, `@subnet_humor`, `@degen_tao`
-- **Bio**: "Bittensor memes, culture, vibes | Community page by VoidAI fans (@v0idai) | NFA, just memes"
-- **Audience**: Crypto culture enthusiasts, meme traders, community members looking for entertainment
-- **Voice**: Pure culture register. Memes, polls, hot takes, community celebrations. Light, fun, never forced. The account that makes people smile when it shows up in their feed.
-- **Voice patterns**:
-  - Meme remixes of crypto/Bittensor culture
-  - Polls and engagement bait: "wrong answers only," "ratio me if," "which subnet are you?"
-  - Celebration posts for community milestones
-  - Funny data takes: turning boring metrics into entertaining content
-  - Seasonal/trending meme formats adapted to Bittensor
-- **Content mix**: 70% community-culture, 20% ecosystem-intelligence (funny data takes), 10% bridge-build (subtle)
-- **Content format ratios**: 40% memes/image posts, 25% polls/engagement bait, 15% hot takes, 10% community celebrations, 10% subtle VoidAI mentions wrapped in humor
-- **Hook formulas**: "POV: you just bridged TAO to Solana", "$TAO holders rn:", "subnet devs be like:", "wrong answers only: what does VoidAI actually do?", "[trending meme format] but make it Bittensor"
-- **Cadence**: 1-2/day
-- **DO**: Keep it genuinely funny. Reference real community inside jokes. Make Bittensor culture feel alive and welcoming.
-- **DO NOT**: Force memes. Punch down. Use humor that only makes sense internally. Be cringe. Never use slurs, ableist language, or aggressively hostile tone. Self-deprecating humor is fine; targeting specific people or groups is not.
-- **Compliance adaptation**: Minimal: "nfa, just memes" in bio. Link to full disclaimer in bio. No financial content beyond lighthearted references.
 
 ---
 
@@ -157,11 +120,9 @@ When generating content for a specific account, Claude Code should:
 1. **Load account-specific context first.** The account persona (voice patterns, hook formulas, content format ratios) is the sub-agent's "specialization." Do not blend voices across accounts.
 2. **Deploy account-tuned generation.** Each account's content generation is a distinct sub-agent call, not a generic prompt with an account flag. The voice patterns, slang, and formatting rules in each account definition below ARE the sub-agent's tuning.
 3. **Specialize by constraint, not just topic.**
-   - Fanpage sub-agent: optimize for engagement metrics (replies, QRTs). Max 200 chars. Hot take format.
-   - Bittensor Ecosystem sub-agent: optimize for alpha signal value. Data-first. Thread-ready.
-   - DeFi / Cross-Chain sub-agent: optimize for actionable insight. Bullet-point breakdowns. Specific numbers.
-   - AI x Crypto sub-agent: optimize for narrative bridging (connect mainstream AI news to Bittensor). Comparative framing.
-   - Meme / Culture sub-agent: optimize for shareability. Image-first when possible. Trending format adaptation.
+   - Daily/Informational sub-agent: optimize for consistency and coverage. Factual, stats-driven. Highest volume.
+   - Bittensor Ecosystem sub-agent: optimize for alpha signal value. Data-first. Thread-ready. DeFi/lending ecosystem coverage.
+   - DeFi / Cross-Chain sub-agent: optimize for actionable insight. Bullet-point breakdowns. Specific numbers. Lending market authority.
 4. **Batch generation per account.** When filling the content queue, generate 5-10 variations per account per topic (like the 100 ad variations per batch approach), then select the best 1-2 for the queue. This increases output quality through selection pressure.
 5. **Memory across runs.** Track which hooks, formats, and topics performed best per account in `brand/voice-learnings.md`. Each sub-agent learns from its own account's performance data, not aggregate data across all accounts.
 
@@ -169,12 +130,10 @@ When generating content for a specific account, Claude Code should:
 
 | Account Sub-Agent | Primary Optimization | Max Length | Must Include | Avoid |
 |---|---|---|---|---|
-| @v0idai (Main) | Builder credibility + data | 280 chars (single) / thread | Specific metric or milestone | Generic hype |
-| Fanpage | Engagement (replies, QRTs) | 200 chars preferred | Hot take or meme angle | Corporate tone |
-| Bittensor Ecosystem | Alpha signal value | 280 chars or thread | Cashtags ($TAO), SN numbers | Generic crypto talk |
-| DeFi / Cross-Chain | Actionable insight | 280 chars or thread | Specific numbers (TVL, APY, volume) | Empty superlatives |
-| AI x Crypto | Narrative bridging | 280 chars or thread | Mainstream AI reference + Bittensor connection | "AI will change everything" |
-| Meme / Culture | Shareability | 200 chars preferred | Meme format or visual | Forced humor, punching down |
+| @v0idai (Main) | Builder credibility + data | 280 chars (single) / thread | Specific metric or milestone, lending progress | Generic hype |
+| Daily/Informational | Consistency + coverage | 280 chars | Specific data point or update | Editorializing, hype |
+| Bittensor Ecosystem | Alpha signal value | 280 chars or thread | Cashtags ($TAO), SN numbers, DeFi/lending data | Generic crypto talk |
+| DeFi / Cross-Chain | Actionable insight | 280 chars or thread | Specific numbers (TVL, APY, volume, borrow rates) | Empty superlatives |
 
 ---
 
@@ -193,22 +152,20 @@ These rules prevent satellite accounts from appearing coordinated or astroturfed
 
 - Stagger the same news across accounts by minimum 2 hours, with different angles:
   - Main @v0idai: Official announcement (posts first)
-  - Fanpage Satellite: Hype/fan reaction angle (2+ hours after main)
+  - Daily/Informational: Factual recap angle (1+ hours after main)
   - Bittensor Ecosystem: Ecosystem impact angle (3+ hours after main)
   - DeFi / Cross-Chain: Infrastructure/alpha angle (4+ hours after main)
-  - AI x Crypto: AI narrative angle, if relevant (5+ hours after main)
-  - Meme / Culture: Meme/joke angle on same news (6+ hours after main, or next day)
 - Never have more than 2 satellite accounts active in the same 30-minute window
 
 ### Content Differentiation
 
 - Each account must have a unique pinned tweet reflecting its persona
-- Different content formats for the same topic (e.g., main posts thread, fanpage posts meme, Bittensor posts data card)
-- Satellite accounts should have different reply patterns (fanpage uses humor, Bittensor uses data, DeFi uses analysis)
+- Different content formats for the same topic (e.g., main posts thread, Daily/Info posts stats recap, Bittensor posts data card, DeFi posts alpha breakdown)
+- Satellite accounts should have different reply patterns (Daily/Info uses facts, Bittensor uses data, DeFi uses analysis)
 
 ### Cross-Promotion Limits
 
-- Main account may RT satellite content maximum 1x/week per satellite
+- Main account may RT satellite content maximum 1x/week per satellite (3 satellites)
 - Satellite accounts may mention @v0idai maximum 2x/week (organic fan behavior, not shill behavior)
 
 ## Founder Account Strategy: Hansel Melo (@v0idai personal)
@@ -230,10 +187,9 @@ These types of content should come directly from Hansel, NOT from the content qu
 
 ### What Should NOT Come from @v0idai (Route to Satellites)
 
-- Memes and culture content (route to Meme satellite)
+- Routine daily stats and metrics updates (route to Daily/Informational satellite)
 - Generic ecosystem news aggregation (route to Bittensor Ecosystem satellite)
 - DeFi alpha drops without VoidAI context (route to DeFi satellite)
-- AI x crypto trend analysis (route to AI x Crypto satellite)
 
 ### Founder Communication Cadence
 
@@ -250,14 +206,14 @@ Clear rules for what goes where. When in doubt, refer to this table.
 | Product launches and announcements | @v0idai (main) | All announcements originate from the official account |
 | Builder updates and shipping news | @v0idai (main) | Core builder-credibility content |
 | Vision and roadmap content | @v0idai (main) | Founder is the credible voice for vision |
-| Bridge volume and metrics | @v0idai (main) + DeFi satellite | Main for milestones, DeFi satellite for ongoing analysis |
+| Lending platform development | @v0idai (main) + Daily/Info | Main for builder narrative, Daily/Info for progress updates |
+| Bridge volume and metrics | Daily/Info + DeFi satellite | Daily/Info for routine stats, DeFi for analysis |
 | Staking/LP tutorials | @v0idai (main) + DeFi satellite | Main for official guides, DeFi for advanced strategies |
+| Daily VoidAI stats and updates | Daily/Informational satellite | Routine metrics, bridge stats, lending progress |
 | Bittensor ecosystem analysis | Bittensor Ecosystem satellite | Main can QRT for important ecosystem events |
 | Subnet spotlights | Bittensor Ecosystem satellite | Keep main feed focused on VoidAI, not ecosystem aggregation |
 | DeFi yield and alpha | DeFi / Cross-Chain satellite | Professional alpha-sharing persona |
-| AI x crypto trends | AI x Crypto satellite | Broader narrative, different audience |
-| Memes and culture | Meme / Culture satellite | NEVER on main @v0idai |
-| Fan hype and community energy | Fanpage satellite | Organic-feeling amplification |
+| Lending market analysis | DeFi / Cross-Chain satellite | Builds lending authority across DeFi ecosystem |
 | Crisis updates | @v0idai (main) ONLY | See crisis.md for satellite behavior during crises |
 | Partnerships and integrations | @v0idai (main) | Official announcements only from official account |
 | Community AMAs and Spaces | @v0idai (main) | Founder-hosted, promoted from main |
@@ -298,7 +254,7 @@ These accounts are VoidAI-owned. Do NOT target them for outreach, DMs, or relati
 
 | Account | Status | Notes |
 |---------|--------|-------|
-| @SubnetSummerT | Active / To be repurposed | May be repurposed or integrated into 6-account strategy. |
+| @SubnetSummerT | Active / To be repurposed | May be repurposed or integrated into 4-account strategy. |
 | @gordonfrayne | Active / To be repurposed | May be repurposed, retired, or integrated. |
 
 ---
@@ -310,3 +266,4 @@ These accounts are VoidAI-owned. Do NOT target them for outreach, DMs, or relati
 | 2026-03-13 | Initial accounts config extracted from CLAUDE.md | Vew |
 | 2026-03-22 | Added Sub-Agent Specialization Pattern section with per-account sub-agent specs, batch generation guidance, and account-specific memory tracking | Claude Code |
 | 2026-03-22 | Added founder account strategy (tips 18-19), content routing rules (tip 20), cross-platform presence guidance for Discord/Telegram (tip 21) per X Playbook | Vew |
+| 2026-03-25 | Lending pivot: simplified from 6 to 4 accounts. Deleted Fanpage, AI x Crypto, Meme/Culture. Created Daily/Informational satellite (3-5/day). Updated Account 3+4 with DeFi/lending coverage and 1-2x/week VoidAI mention cap. Updated coordination rules, routing, sub-agent specs. | Vew |
