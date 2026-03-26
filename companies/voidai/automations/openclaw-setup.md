@@ -243,7 +243,13 @@ Account 1: @v0idai (Main)
 9. For each content slot (1-2 tweet slots + thread slots), run substeps A-F with --account v0idai:
    Tweets: bash generate-daily-tweet.sh --variants 8 --account v0idai <metrics-file>
    Threads: bash generate-weekly-thread.sh --variants 6 --account v0idai <metrics-file>
-10. For approved @v0idai drafts: proceed to scheduling via post-to-x.sh respecting cadence rules (MAX_POSTS_PER_DAY=6, MIN_POST_GAP_MINUTES=180). NOTE: Currently posting to @flowerncoins until @v0idai access granted.
+10. For approved @v0idai drafts, schedule via post-to-x.sh. IMPORTANT: use the correct mode:
+   - Single tweets: bash post-to-x.sh "tweet text"
+   - Threads: Save the approved thread array to a temp JSON file, then: bash post-to-x.sh --thread /path/to/thread.json
+     The thread JSON must be an array: [{"position":1,"tweet":"first"},{"position":2,"tweet":"reply"}...]
+     The script sends the first tweet as the main post, remaining tweets as thread_tweets via OpenTweet's is_thread API.
+     Do NOT post each tweet individually — that creates separate unlinked posts instead of a thread.
+   Respect cadence rules (MAX_POSTS_PER_DAY=6, MIN_POST_GAP_MINUTES=180). NOTE: Currently posting to @flowerncoins until @v0idai access granted.
 11. Show full @v0idai schedule for today. Then say: 'Moving to Daily/Info account drafts. Ready?'
 12. Wait for Vew's response.
 
@@ -271,6 +277,7 @@ KEY RULES:
 - Bittensor account: enforce 1-2x/week VoidAI mention cap.
 - Variant counts: tweets = 8 generated / top 4 presented. Threads = 6 generated / top 3 presented. Articles = 4 generated / top 2 presented.
 - For ALL content options (tweets, threads, articles), ALWAYS publish to Telegraph and include the link. This keeps the review clean and compact.
+- THREAD POSTING: Always use post-to-x.sh --thread <file.json> for threads. NEVER post thread tweets as individual posts. The --thread flag uses OpenTweet's is_thread API to chain tweets as replies.
 - ALWAYS log ALL variants (presented and filtered) with full scores to the preference log. This data trains the system.
 
 STEP 3 - HEALTH CHECK (after all accounts reviewed):
