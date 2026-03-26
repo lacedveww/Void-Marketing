@@ -153,40 +153,40 @@ STEP 1 - MORNING SUMMARY:
 3. Read yesterday's engagement data from companies/voidai/automations/data/performance-summary.json (Pillar C feedback for Message 6)
 4. Combine data from BOTH sweeps (evening + morning) to get full overnight coverage. The morning summary must reflect everything that happened since yesterday's morning summary.
 5. Read the latest daily-metrics JSON for current market context
-4. Generate a structured brief with these sections:
+6. Generate a structured brief with these sections:
    A. MARKET SNAPSHOT: TAO price, SN106 emissions, bridge volume (1 line each)
    B. TOP STORIES (max 5): Priority-ranked news/posts from sweep, with suggested content angle and target account
    C. ENGAGEMENT OPPORTUNITIES (max 3): High-signal threads where a VoidAI reply/QT adds value, with draft hook
    D. COMPETITOR ACTIVITY: Any notable moves from gTAO/Tensorplex/TaoFi (or 'Nothing notable')
    E. CONTENT SUGGESTIONS: 3-5 draft post ideas across Pillars A+B with pillar tag, target account, and hook
    F. PERFORMANCE NOTE: Yesterday's engagement highlights from Pillar C (or 'Insufficient data' if pre-launch)
-5. Deliver the brief to Telegram (5-6 messages).
-6. PAUSE - wait for Vew's response before continuing.
+7. Deliver the brief to Telegram (5-6 messages).
+8. PAUSE - wait for Vew's response before continuing.
 
 STEP 2 - DRAFT REVIEW (on Vew's response):
-7. Generate 3-5 draft posts across Pillars A and B:
+9. Generate 3-5 draft posts across Pillars A and B:
    - Pillar A (X Intelligence): 2-3 posts from sweep data (news, QTs, narrative threads)
    - Pillar B (SEO/News): 1-2 posts from news feeds and research pipeline
    - Each draft includes: text, target account, pillar tag, suggested post time, hook type
-8. Run: bash companies/voidai/automations/scripts/generate-daily-tweet.sh with today's metrics
-9. Present all drafts for Vew's review with approve/edit/reject options
-10. Wait for Vew's approval.
+10. Run: bash companies/voidai/automations/scripts/generate-daily-tweet.sh with today's metrics
+11. Present all drafts for Vew's review with approve/edit/reject options
+12. Wait for Vew's approval.
 
 STEP 3 - SCHEDULING (on Vew's approval):
-11. Ask Vew for preferred posting times.
-12. Wait for Vew's response with times.
+13. Ask Vew for preferred posting times.
+14. Wait for Vew's response with times.
 
 STEP 4 - CONTENT SCHEDULER (on Vew's time preferences):
-13. For approved drafts:
+15. For approved drafts:
     - Move to queue/approved/
     - If DRY_RUN is not 'true', schedule via post-to-x.sh respecting cadence rules (MAX_POSTS_PER_DAY=6, MIN_POST_GAP_MINUTES=180)
-14. Show full day schedule to Vew for confirmation.
-15. Wait for Vew's confirmation.
+16. Show full day schedule to Vew for confirmation.
+17. Wait for Vew's confirmation.
 
 STEP 5 - HEALTH CHECK (on Vew's confirmation):
-16. Run system health check (API connectivity, cron status, queue audit, posting status).
-17. Log rejected drafts with reason for voice calibration learning.
-18. Report: drafts generated, approved, rejected, scheduled, system status." \
+18. Run system health check (API connectivity, cron status, queue audit, posting status).
+19. Log rejected drafts with reason for voice calibration learning.
+20. Report: drafts generated, approved, rejected, scheduled, system status." \
   --announce \
   --channel telegram \
   --to "channel:YOUR_CHANNEL_ID"
