@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>void. - Simply earn.</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        steel: { 50: '#F8FAFC', 100: '#F1F5F9', 200: '#E2E8F0', 300: '#CBD5E1', 400: '#94A3B8', 500: '#475569', 600: '#334155', 700: '#1E293B', 800: '#0F172A' },
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+      }
+    }
+  }
+}
+</script>
+<style>
+  .font-tabular { font-variant-numeric: tabular-nums lining-nums; }
+  .animate-fade { animation: fadeUp 1s ease-out; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Mesh gradient hero background */
+  .mesh-gradient-bg { position: relative; overflow: hidden; }
+  @keyframes meshDrift {
+    0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    33% { transform: translate(2%, -3%) rotate(1deg) scale(1.02); }
+    66% { transform: translate(-1%, 2%) rotate(-0.5deg) scale(0.98); }
+    100% { transform: translate(1%, -1%) rotate(0.5deg) scale(1.01); }
+  }
+
+  /* Dot grid pattern */
+
+  
+  /* Glass card styling */
+  .glass-card {
+    background: rgba(56, 89, 138, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(56, 89, 138, 0.18);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 30px rgba(56, 89, 138, 0.06);
+  }
+  .glass-card-subtle {
+    background: rgba(56, 89, 138, 0.06);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(56, 89, 138, 0.14);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+
+  /* Scroll animations */
+  .animate-on-scroll {
+    opacity: 0; transform: translateY(24px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .animate-on-scroll.is-visible { opacity: 1; transform: translateY(0); }
+  .animate-on-scroll[data-delay="1"] { transition-delay: 0.1s; }
+  .animate-on-scroll[data-delay="2"] { transition-delay: 0.2s; }
+  .animate-on-scroll[data-delay="3"] { transition-delay: 0.3s; }
+  .animate-on-scroll[data-delay="4"] { transition-delay: 0.4s; }
+
+  /* Card hover */
+  .card-hover {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+  }
+  .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.06); }
+
+  /* Button shine */
+  .btn-shine { position: relative; overflow: hidden; }
+  .btn-shine::after {
+    content: ''; position: absolute; top: -50%; left: -60%; width: 40%; height: 200%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    transform: skewX(-20deg); transition: left 0.6s ease; pointer-events: none;
+  }
+  .btn-shine:hover::after { left: 120%; }
+
+  /* Gradient line separator */
+  .gradient-line-animated {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(71, 85, 105, 0.2), rgba(71, 85, 105, 0.2), transparent);
+    background-size: 200% 100%; animation: lineShimmer 3s ease-in-out infinite;
+  }
+  @keyframes lineShimmer { 0%, 100% { background-position: 200% 0; } 50% { background-position: -200% 0; } }
+
+  /* Full-page background effects */
+  .cursor-spotlight {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  body:hover .cursor-spotlight {
+    opacity: 1;
+  }
+</style>
+</head>
+<body class="bg-white text-steel-700 font-sans antialiased">
+
+  <!-- FULL-PAGE BACKGROUND EFFECTS -->
+  <canvas id="bgParticles" style="position:fixed;inset:0;pointer-events:none;z-index:10;"></canvas>
+  <div class="cursor-spotlight" id="cursorSpotlight"></div>
+
+  <!-- NAVIGATION -->
+  <nav class="fixed top-0 w-full bg-white/95 backdrop-blur-sm z-50">
+    <div class="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
+      <span class="text-xl font-semibold text-steel-700 tracking-tight">void<span class="text-steel-500">.</span></span>
+      <div class="flex items-center gap-6">
+        <a href="#" class="text-sm text-steel-700 hover:text-steel-800 transition hidden sm:block">How it works</a>
+        <a href="#" class="text-sm text-steel-700 hover:text-steel-800 transition hidden sm:block">Security</a>
+        <a href="#" class="inline-flex items-center px-4 py-2 bg-steel-500 text-white text-sm font-medium rounded-md hover:bg-steel-600 transition btn-shine">
+          Start Earning
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="min-h-[90vh] flex items-center justify-center px-6 mesh-gradient-bg">
+    
+    <div class="text-center animate-fade max-w-2xl relative z-10">
+      <h1 class="text-6xl md:text-7xl lg:text-8xl font-bold text-steel-800 tracking-tight mb-6">
+        Simply earn<span class="text-steel-500">.</span>
+      </h1>
+      <p class="text-xl text-steel-700 mb-12 font-light">
+        Deposit crypto. Earn interest. That's it.
+      </p>
+      <a href="#" class="inline-flex items-center px-8 py-4 bg-steel-500 text-white font-medium rounded-md hover:bg-steel-600 transition text-lg btn-shine">
+        Start Earning
+      </a>
+    </div>
+  </section>
+
+  <!-- RATE COMPARISON -->
+  <section class="py-24 px-6">
+    <div class="max-w-3xl mx-auto animate-on-scroll glass-card">
+      <div class="grid grid-cols-3 items-center">
+        <div class="text-center p-6">
+          <div class="text-xs text-steel-800 uppercase tracking-widest mb-3 font-bold">Your bank</div>
+          <div class="font-tabular text-5xl md:text-6xl font-bold text-steel-400">0.5<span class="text-3xl">%</span></div>
+        </div>
+        <div class="flex items-center justify-center">
+          <svg class="w-8 h-8 text-steel-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </div>
+        <div class="text-center p-6">
+          <div class="text-xs text-steel-800 uppercase tracking-widest mb-3 font-bold">void.</div>
+          <div class="font-tabular text-5xl md:text-6xl font-bold text-steel-800">8.2<span class="text-3xl">%</span></div>
+        </div>
+      </div>
+      <div class="text-center mt-8">
+        <p class="text-steel-700 text-sm">$80 per $1,000 per year. Your bank gives you $5.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DIVIDER -->
+  <div class="max-w-4xl mx-auto px-6"><div class="gradient-line-animated"></div></div>
+
+  <!-- HOW IT WORKS -->
+  <section class="py-24 px-6">
+    <div class="max-w-4xl mx-auto glass-card">
+      <div class="text-center mb-16 animate-on-scroll">
+        <div class="text-sm text-steel-800 uppercase tracking-[0.25em] mb-4 font-bold">How it works</div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+        <div class="text-center animate-on-scroll card-hover" data-delay="1">
+          <div class="font-tabular text-5xl font-light text-steel-500 mb-4">1</div>
+          <div class="font-semibold text-steel-800 mb-2">Connect</div>
+          <p class="text-sm text-steel-700">Link your wallet. No KYC. No paperwork. Under 30 seconds.</p>
+        </div>
+        <div class="text-center animate-on-scroll card-hover" data-delay="2">
+          <div class="font-tabular text-5xl font-light text-steel-500 mb-4">2</div>
+          <div class="font-semibold text-steel-800 mb-2">Deposit</div>
+          <p class="text-sm text-steel-700">Choose your asset. Set your amount. One click to confirm.</p>
+        </div>
+        <div class="text-center animate-on-scroll card-hover" data-delay="3">
+          <div class="font-tabular text-5xl font-light text-steel-500 mb-4">3</div>
+          <div class="font-semibold text-steel-800 mb-2">Earn</div>
+          <p class="text-sm text-steel-700">Watch your yield accrue in real time. Withdraw anytime. No lock-ups.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DIVIDER -->
+  <div class="max-w-4xl mx-auto px-6"><div class="gradient-line-animated"></div></div>
+
+  <!-- WHY YIELDS ARE HIGHER -->
+  <section class="py-24 px-6">
+    <div class="max-w-2xl mx-auto text-center animate-on-scroll">
+      <div class="text-sm text-steel-800 uppercase tracking-[0.25em] mb-6 font-bold">Why the difference?</div>
+      <h2 class="text-2xl md:text-3xl font-semibold text-steel-800 mb-6">Banks earn 8% on your money.<br>They give you 0.5%.</h2>
+      <p class="text-steel-700 leading-relaxed mb-4">
+        We cut out the middleman. When you deposit, borrowers pay interest directly to you through transparent smart contracts. No bank taking 93% of your yield.
+      </p>
+      <p class="text-steel-700 leading-relaxed text-sm">
+        Variable rates. Non-custodial. Withdraw anytime. Audited.
+      </p>
+    </div>
+  </section>
+
+  <!-- TRUST STRIP -->
+  <section class="py-12 px-6">
+    <div class="max-w-4xl mx-auto glass-card">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        <div class="animate-on-scroll" data-delay="1">
+          <div class="font-tabular text-lg font-semibold text-steel-800">12,847</div>
+          <div class="text-xs text-steel-700 mt-1">Depositors</div>
+        </div>
+        <div class="animate-on-scroll" data-delay="2">
+          <div class="font-tabular text-lg font-semibold text-steel-800">$127M</div>
+          <div class="text-xs text-steel-700 mt-1">Secured</div>
+        </div>
+        <div class="animate-on-scroll" data-delay="3">
+          <div class="font-tabular text-lg font-semibold text-steel-800">2+ years</div>
+          <div class="text-xs text-steel-700 mt-1">Operating</div>
+        </div>
+        <div class="animate-on-scroll" data-delay="4">
+          <div class="font-tabular text-lg font-semibold text-steel-800">SOC 2</div>
+          <div class="text-xs text-steel-700 mt-1">Certified</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- YIELD CALCULATOR (LIVE) -->
+  <section class="py-24 px-6">
+    <div class="max-w-md mx-auto text-center animate-on-scroll">
+      <div class="text-sm text-steel-800 uppercase tracking-[0.25em] mb-6 font-bold">Yield calculator</div>
+      <div class="glass-card">
+        <div class="text-sm text-steel-700 mb-3">If you deposit</div>
+        <div class="relative inline-block">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 font-tabular text-2xl font-bold text-steel-800">$</span>
+          <input
+            id="deposit-input"
+            type="text"
+            value="10,000"
+            class="font-tabular text-3xl font-bold text-steel-800 text-center bg-steel-50 border border-steel-200 rounded-lg px-8 py-3 w-64 focus:outline-none focus:border-steel-500 focus:ring-1 focus:ring-steel-500 transition"
+            oninput="updateCalc()"
+          >
+        </div>
+        <div class="border-t border-steel-100 my-6"></div>
+        <div class="text-sm text-steel-700 mb-1">You'd earn approximately</div>
+        <div class="font-tabular text-3xl font-bold text-steel-500 mb-1" id="yearly-return">$820</div>
+        <div class="text-xs text-steel-700">per year at current rates</div>
+        <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-steel-100">
+          <div>
+            <div class="font-tabular text-lg font-semibold text-steel-800" id="monthly-return">$68.33</div>
+            <div class="text-xs text-steel-700">per month</div>
+          </div>
+          <div>
+            <div class="font-tabular text-lg font-semibold text-steel-800" id="daily-return">$2.25</div>
+            <div class="text-xs text-steel-700">per day</div>
+          </div>
+        </div>
+        <div class="mt-6">
+          <a href="#" class="inline-flex items-center px-6 py-3 bg-steel-500 text-white font-medium rounded-md hover:bg-steel-600 transition text-sm w-full justify-center btn-shine">
+            Start Earning
+          </a>
+        </div>
+      </div>
+      <p class="text-xs text-steel-700 mt-4">Variable rate. Currently 8.2% APY. Not financial advice.</p>
+    </div>
+  </section>
+
+  <script>
+    const APY = 0.082;
+    function updateCalc() {
+      const raw = document.getElementById('deposit-input').value.replace(/[^0-9.]/g, '');
+      const amount = parseFloat(raw) || 0;
+      const yearly = amount * APY;
+      const monthly = yearly / 12;
+      const daily = yearly / 365;
+      document.getElementById('yearly-return').textContent = '$' + yearly.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+      document.getElementById('monthly-return').textContent = '$' + monthly.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('daily-return').textContent = '$' + daily.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      // Format input with commas
+      if (raw) {
+        const parts = raw.split('.');
+        parts[0] = parseInt(parts[0]).toLocaleString('en-US');
+        document.getElementById('deposit-input').value = parts.join('.');
+      }
+    }
+  </script>
+
+  <!-- FINAL CTA -->
+  <section class="py-24 px-6">
+    <div class="max-w-2xl mx-auto text-center animate-on-scroll">
+      <h2 class="text-3xl md:text-4xl font-bold text-steel-800 mb-4">Your crypto should be earning<span class="text-steel-500">.</span></h2>
+      <p class="text-steel-700 mb-10">Every day without yield is money left on the table.</p>
+      <a href="#" class="inline-flex items-center px-8 py-4 bg-steel-500 text-white font-medium rounded-md hover:bg-steel-600 transition text-lg btn-shine">
+        Start Earning
+      </a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="py-8 px-6 border-t border-steel-100">
+    <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <span class="text-lg font-semibold text-steel-700 tracking-tight">void<span class="text-steel-500">.</span></span>
+      <div class="flex items-center gap-6 text-xs text-steel-700">
+        <a href="#" class="hover:text-steel-800 transition">Terms</a>
+        <a href="#" class="hover:text-steel-800 transition">Privacy</a>
+        <a href="#" class="hover:text-steel-800 transition">Security</a>
+        <a href="#" class="hover:text-steel-800 transition">Docs</a>
+      </div>
+      <div class="text-xs text-steel-700">Simply earn.</div>
+    </div>
+  </footer>
+
+  <!-- Cursor spotlight -->
+  <script>
+    (function() {
+      const spotlight = document.getElementById('cursorSpotlight');
+      let ticking = false;
+      document.addEventListener('mousemove', (e) => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          spotlight.style.background = `radial-gradient(600px circle at ${e.clientX}px ${e.clientY}px, rgba(71, 85, 105, 0.09), transparent 60%)`;
+          ticking = false;
+        });
+      });
+    })();
+  </script>
+
+  <!-- Navy blue connected dots network -->
+  <script>
+    (function() {
+      const c = document.getElementById('bgParticles');
+      const ctx = c.getContext('2d');
+      let w, h, pts = [];
+      function resize() { w = c.width = window.innerWidth; h = c.height = window.innerHeight; }
+      function init() {
+        resize();
+        pts = Array.from({ length: 100 }, () => ({
+          x: Math.random() * w, y: Math.random() * h,
+          r: Math.random() * 2.5 + 1,
+          dx: (Math.random() - 0.5) * 0.35,
+          dy: (Math.random() - 0.5) * 0.35,
+          o: Math.random() * 0.2 + 0.12
+        }));
+      }
+      function draw() {
+        ctx.clearRect(0, 0, w, h);
+        for (let i = 0; i < pts.length; i++) {
+          for (let j = i + 1; j < pts.length; j++) {
+            const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
+            const d = Math.sqrt(dx*dx + dy*dy);
+            if (d < 140) {
+              ctx.beginPath();
+              ctx.moveTo(pts[i].x, pts[i].y);
+              ctx.lineTo(pts[j].x, pts[j].y);
+              ctx.strokeStyle = `rgba(15, 23, 42, ${(1 - d/140) * 0.1})`;
+              ctx.lineWidth = 0.6;
+              ctx.stroke();
+            }
+          }
+        }
+        pts.forEach(p => {
+          p.x += p.dx; p.y += p.dy;
+          if (p.x < -10) p.x = w + 10; if (p.x > w + 10) p.x = -10;
+          if (p.y < -10) p.y = h + 10; if (p.y > h + 10) p.y = -10;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(15, 23, 42, ${p.o})`;
+          ctx.fill();
+        });
+        requestAnimationFrame(draw);
+      }
+      window.addEventListener('resize', resize);
+      init(); draw();
+    })();
+  </script>
+
+  <!-- Scroll animation observer -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target); }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+      document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+    });
+  </script>
+
+</body>
+</html>
