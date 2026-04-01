@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Void Rebrand Strategy Summary</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: #1a1a2e;
+    background: #ffffff;
+    line-height: 1.6;
+    font-size: 11pt;
+  }
+
+  .cover {
+    page-break-after: always;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #0F1B2D 0%, #1C1C2E 50%, #0D4F4F 100%);
+    color: white;
+    text-align: center;
+    padding: 60px;
+  }
+
+  .cover h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 48pt;
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+  }
+
+  .cover .subtitle {
+    font-size: 16pt;
+    font-weight: 300;
+    color: #C9A96E;
+    margin-bottom: 40px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .cover .meta {
+    font-size: 10pt;
+    color: rgba(255,255,255,0.6);
+    margin-top: 60px;
+  }
+
+  .cover .divider {
+    width: 80px;
+    height: 2px;
+    background: #C9A96E;
+    margin: 20px auto;
+  }
+
+  .page {
+    padding: 50px 60px;
+    page-break-after: always;
+  }
+
+  .page:last-child { page-break-after: avoid; }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22pt;
+    color: #0F1B2D;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #C9A96E;
+  }
+
+  h3 {
+    font-size: 13pt;
+    font-weight: 700;
+    color: #1C1C2E;
+    margin-top: 22px;
+    margin-bottom: 8px;
+  }
+
+  h4 {
+    font-size: 11pt;
+    font-weight: 600;
+    color: #0D4F4F;
+    margin-top: 16px;
+    margin-bottom: 6px;
+  }
+
+  p { margin-bottom: 10px; }
+
+  .section-intro {
+    font-size: 12pt;
+    color: #475569;
+    font-weight: 300;
+    margin-bottom: 20px;
+    border-left: 3px solid #C9A96E;
+    padding-left: 16px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 9.5pt;
+  }
+
+  th {
+    background: #0F1B2D;
+    color: white;
+    padding: 8px 10px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 9pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  td {
+    padding: 7px 10px;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: top;
+  }
+
+  tr:nth-child(even) { background: #f8fafc; }
+
+  .highlight-box {
+    background: linear-gradient(135deg, #f0fdf4 0%, #f0f9ff 100%);
+    border: 1px solid #00B8A9;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+
+  .highlight-box h4 {
+    color: #0D4F4F;
+    margin-top: 0;
+  }
+
+  .warning-box {
+    background: #fffbeb;
+    border: 1px solid #f59e0b;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0;
+  }
+
+  .stat-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+  }
+
+  .stat-card .number {
+    font-size: 20pt;
+    font-weight: 800;
+    color: #0F1B2D;
+  }
+
+  .stat-card .label {
+    font-size: 8pt;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+
+  .color-row {
+    display: flex;
+    gap: 8px;
+    margin: 8px 0;
+    align-items: center;
+  }
+
+  .color-swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.1);
+    flex-shrink: 0;
+  }
+
+  .color-info {
+    font-size: 9pt;
+  }
+
+  .color-info .hex {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    font-size: 9pt;
+  }
+
+  .package-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 18px;
+    margin: 14px 0;
+    page-break-inside: avoid;
+  }
+
+  .package-card.recommended {
+    border: 2px solid #C9A96E;
+    background: linear-gradient(135deg, #fefce8 0%, #ffffff 100%);
+  }
+
+  .package-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+
+  .package-name {
+    font-size: 14pt;
+    font-weight: 700;
+    color: #0F1B2D;
+  }
+
+  .package-tag {
+    font-size: 8pt;
+    background: #0F1B2D;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .package-tag.gold {
+    background: #C9A96E;
+    color: #0F1B2D;
+  }
+
+  .package-tagline {
+    font-style: italic;
+    color: #475569;
+    font-size: 11pt;
+    margin-bottom: 8px;
+  }
+
+  .package-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    font-size: 9.5pt;
+  }
+
+  .package-detail-label {
+    font-weight: 600;
+    color: #64748b;
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  ul {
+    margin: 8px 0 12px 20px;
+  }
+
+  li {
+    margin-bottom: 4px;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .toc {
+    margin: 30px 0;
+  }
+
+  .toc-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dotted #cbd5e1;
+    font-size: 11pt;
+  }
+
+  .toc-item .page-num {
+    color: #C9A96E;
+    font-weight: 600;
+  }
+
+  .footer-note {
+    font-size: 8pt;
+    color: #94a3b8;
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 12px;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .psychology-principle {
+    background: #f5f3ff;
+    border-left: 3px solid #7C6FFF;
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-size: 10pt;
+    page-break-inside: avoid;
+  }
+
+  .psychology-principle strong {
+    color: #1E1B4B;
+  }
+
+  .roadmap-week {
+    border-left: 3px solid #00B8A9;
+    padding-left: 16px;
+    margin: 16px 0;
+    page-break-inside: avoid;
+  }
+
+  .roadmap-week h4 {
+    color: #0D4F4F;
+  }
+
+  .quick-win {
+    display: flex;
+    gap: 10px;
+    margin: 8px 0;
+    align-items: flex-start;
+    font-size: 10pt;
+    page-break-inside: avoid;
+  }
+
+  .quick-win-num {
+    background: #0F1B2D;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9pt;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover">
+  <h1>VOID</h1>
+  <div class="divider"></div>
+  <div class="subtitle">Rebrand Strategy Summary</div>
+  <p style="font-size: 13pt; max-width: 500px; color: rgba(255,255,255,0.8); line-height: 1.8;">
+    From VoidAI to Void: Building a DeFi banking identity through research-backed design, psychology, and strategic positioning.
+  </p>
+  <div class="meta">
+    March 30, 2026 | Prepared for Vew<br>
+    Based on deep-dive research across traditional banks, DeFi platforms, industry trends & human psychology
+  </div>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<div class="page">
+  <h2>Contents</h2>
+  <div class="toc">
+    <div class="toc-item"><span>1. The Opportunity</span><span class="page-num">3</span></div>
+    <div class="toc-item"><span>2. Bank Research: What We Learned</span><span class="page-num">3</span></div>
+    <div class="toc-item"><span>3. DeFi Research: What Aave & Coinbase Did Right</span><span class="page-num">4</span></div>
+    <div class="toc-item"><span>4. Psychology: The Science Behind Trust</span><span class="page-num">5</span></div>
+    <div class="toc-item"><span>5. Why "Void" Works as a Name</span><span class="page-num">7</span></div>
+    <div class="toc-item"><span>6. The 12 Rebrand Packages (Overview)</span><span class="page-num">8</span></div>
+    <div class="toc-item"><span>7. All 20 Tagline Options</span><span class="page-num">8</span></div>
+    <div class="toc-item"><span>8. 30-Day Implementation Roadmap</span><span class="page-num">10</span></div>
+    <div class="toc-item"><span>9. Psychology Quick Wins (Do These First)</span><span class="page-num">11</span></div>
+    <div class="toc-item"><span>10. OpenClaw Automation Shifts</span><span class="page-num">12</span></div>
+    <div class="toc-item"><span>11. Full Color Palettes</span><span class="page-num">13</span></div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="number">4</div>
+      <div class="label">Research Agents</div>
+    </div>
+    <div class="stat-card">
+      <div class="number">12</div>
+      <div class="label">Complete Packages</div>
+    </div>
+    <div class="stat-card">
+      <div class="number">40+</div>
+      <div class="label">Sources Cited</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 1: THE OPPORTUNITY -->
+<div class="page">
+  <h2>1. The Opportunity</h2>
+  <p class="section-intro">
+    VoidAI is dropping "AI" and repositioning from "Bittensor DeFi Infrastructure" to a DeFi banking platform. The lending platform launch (late April 2026) is the catalyst. The goal: look, feel, and operate like a trusted financial institution while retaining DeFi's transparency and yield advantages.
+  </p>
+
+  <h3>The Core Tension</h3>
+  <p>How do you earn the trust of a bank while keeping the soul of a protocol? Research across all four domains points to one answer:</p>
+
+  <div class="highlight-box">
+    <h4>Institutional aesthetics. Insurgent substance.</h4>
+    <p style="margin:0"><strong>Look like a bank</strong> (design, color, typography, language). <strong>Act like a DeFi protocol</strong> (transparency, governance, on-chain verification). <strong>Communicate like neither</strong> (not stuffy bank language, not hype-driven crypto language -- clear, confident, modern).</p>
+  </div>
+
+  <h3>The Formula</h3>
+  <p><strong>80% familiar</strong> (banking patterns, conservative palette, clean typography) + <strong>20% novel</strong> (on-chain verification, real-time yield counters, wallet-first interaction). This is the "Goldilocks zone of innovation" -- too familiar is boring, too novel is threatening, but moderate incongruity is optimal.</p>
+
+  <h2 style="margin-top:30px">2. Bank Research: What We Learned</h2>
+  <p class="section-intro">Deep analysis of Bank of America, Chase, TD Bank, and Citizens Bank revealed consistent patterns that define "financial trust" in design.</p>
+
+  <table>
+    <tr>
+      <th>Bank</th>
+      <th>Primary Color</th>
+      <th>Tagline</th>
+      <th>Key Signal</th>
+    </tr>
+    <tr>
+      <td><strong>Bank of America</strong></td>
+      <td>Navy #012169 + Red #E31837</td>
+      <td>"What would you like the power to do?"</td>
+      <td>Empowerment + education</td>
+    </tr>
+    <tr>
+      <td><strong>Chase</strong></td>
+      <td>Blue #005EB8</td>
+      <td>"What matters most"</td>
+      <td>Scale + premium ($19.5B brand value)</td>
+    </tr>
+    <tr>
+      <td><strong>TD Bank</strong></td>
+      <td>Green #003F2D + #54B848</td>
+      <td>"More Human"</td>
+      <td>Warmth + convenience</td>
+    </tr>
+    <tr>
+      <td><strong>Citizens</strong></td>
+      <td>Green #008555</td>
+      <td>"Made Ready"</td>
+      <td>Personal journey enablement</td>
+    </tr>
+  </table>
+
+  <h3>7 Universal Banking Brand Rules</h3>
+  <ol>
+    <li><strong>Blue = trust</strong> (3 of 4 banks use it). Green = strongest differentiator.</li>
+    <li><strong>Custom typography is non-negotiable.</strong> All four use proprietary or modified fonts.</li>
+    <li><strong>Taglines should be conversations, not claims.</strong> Questions and invitations outperform declarations.</li>
+    <li><strong>Financial education is table stakes.</strong> All four invest heavily in it.</li>
+    <li><strong>The trend is toward "human" positioning.</strong> TD's "More Human" and Citizens' "Made Ready" reflect a market-wide pivot.</li>
+    <li><strong>Logo simplicity scales.</strong> The most iconic (Chase octagon) is the most abstract and simple.</li>
+    <li><strong>Mobile is the front door.</strong> All four design mobile-first.</li>
+  </ol>
+</div>
+
+<!-- SECTION 3: DEFI RESEARCH -->
+<div class="page">
+  <h2>3. DeFi Research: Aave & Coinbase</h2>
+  <p class="section-intro">These two platforms have done the most to bridge DeFi with traditional finance trust. Their strategies provide the playbook.</p>
+
+  <table>
+    <tr>
+      <th>Platform</th>
+      <th>Primary Color</th>
+      <th>Tagline</th>
+      <th>Defining Move</th>
+    </tr>
+    <tr>
+      <td><strong>Aave</strong></td>
+      <td>Purple #9896FF + Teal #00827B</td>
+      <td>"Savings for Everyone"</td>
+      <td>Shifted from dark to light mode; SOC 2 certified; 3-tier product (App/Pro/Institutional)</td>
+    </tr>
+    <tr>
+      <td><strong>Coinbase</strong></td>
+      <td>Blue #0052FF</td>
+      <td>"Update the system"</td>
+      <td>36-style custom typeface; 3-color system; publicly traded for trust</td>
+    </tr>
+  </table>
+
+  <h3>8 Key Takeaways for Void</h3>
+
+  <div class="two-col">
+    <div>
+      <h4>Visual Identity</h4>
+      <ul>
+        <li><strong>Light mode = trust.</strong> Both shifted to light mode for consumer materials. Dark mode is now "crypto-native"; light is "financial institution."</li>
+        <li><strong>3-4 colors maximum.</strong> Coinbase uses just 3 (blue, white, dark). Fewer colors = more authority.</li>
+        <li><strong>Custom typography</strong> is the single biggest brand maturity signal. Coinbase invested in a 36-style, 29,000-glyph custom typeface.</li>
+        <li><strong>Typography hierarchy over color.</strong> Use weight, size, and spacing to create hierarchy.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Strategy & Language</h4>
+      <ul>
+        <li><strong>Banking vocabulary</strong> for consumers: "savings," "deposits," "interest" -- not "yield farming" or "LPs."</li>
+        <li><strong>Three-tier product architecture</strong>: Consumer (simple) / Pro (advanced) / Institutional (compliance-first).</li>
+        <li><strong>Statistics-led trust</strong>: TVL, years operational, audit results, user counts prominently displayed.</li>
+        <li><strong>Education-first marketing</strong> drives 35% higher 6-month retention (Coinbase data).</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Successful Rebrand Case Studies</h3>
+  <table>
+    <tr>
+      <th>Rebrand</th>
+      <th>What Worked</th>
+      <th>Key Lesson</th>
+    </tr>
+    <tr>
+      <td><strong>ETHLend to Aave</strong></td>
+      <td>Accompanied genuine product evolution (P2P to pooled). Short, memorable, globally pronounceable name.</td>
+      <td>Rebrand when product has genuinely evolved beyond what the old name contains.</td>
+    </tr>
+    <tr>
+      <td><strong>MakerDAO to Sky</strong></td>
+      <td>Strategically sound for mainstream. Banking terms (USDS, "Savings Rate").</td>
+      <td>Bring the community along. Alienation creates headwinds.</td>
+    </tr>
+    <tr>
+      <td><strong>Matic to Polygon</strong></td>
+      <td>Name perfectly matched multi-product vision. Clean break.</td>
+      <td>New name should be MORE expansive than old name, not limiting.</td>
+    </tr>
+  </table>
+
+  <h3>The "Banking-ification" Terminology Shift</h3>
+  <table>
+    <tr><th>Old DeFi Term</th><th>New Banking Term</th></tr>
+    <tr><td>Liquidity Pool</td><td>Savings Vault / Account</td></tr>
+    <tr><td>Yield Farming</td><td>Earning Interest</td></tr>
+    <tr><td>TVL (Total Value Locked)</td><td>Total Deposits / AUM</td></tr>
+    <tr><td>Supplying Liquidity</td><td>Depositing / Saving</td></tr>
+    <tr><td>Liquidation</td><td>Margin Call</td></tr>
+    <tr><td>Governance Token</td><td>Voting Rights</td></tr>
+  </table>
+</div>
+
+<!-- SECTION 4: PSYCHOLOGY -->
+<div class="page">
+  <h2>4. Psychology: The Science Behind Trust</h2>
+  <p class="section-intro">Research across trust psychology, color neuroscience, behavioral economics, and conversion science -- with named researchers and studies -- that directly informs every design and marketing decision.</p>
+
+  <h3>Trust Psychology</h3>
+
+  <div class="psychology-principle">
+    <strong>46.1% of users judge a website's credibility by visual design alone</strong> (Stanford Web Credibility Project, Fogg et al. 2003). This makes design the single most influential trust factor. A well-designed landing page makes users assume the smart contracts are also well-engineered (halo effect).
+  </div>
+
+  <div class="psychology-principle">
+    <strong>The Three Pillars of Trust</strong> (Mayer/Davis/Schoorman 1995): <em>Ability</em> (can you do it? = audit badges, uptime), <em>Benevolence</em> (do you care? = education, transparent fees), <em>Integrity</em> (are you consistent? = uniform brand across every touchpoint). Your rebrand must address all three.
+  </div>
+
+  <div class="psychology-principle">
+    <strong>Mere Exposure Effect</strong> (Zajonc 1968): Repeated exposure to a stimulus increases preference, even subconsciously. Your multi-account X strategy already creates multiple exposure touchpoints. Consistent brand mark across all accounts compounds trust over time.
+  </div>
+
+  <div class="psychology-principle">
+    <strong>The "Lab Coat Effect"</strong> (Adam & Galinsky 2012): Wearing a lab coat increases perceived competence. Professional design is software's lab coat. Audit badges = stethoscope. Team page with real photos = medical degree on the wall. Each signal independently builds perceived ability.
+  </div>
+
+  <h3>Color Psychology</h3>
+
+  <div class="psychology-principle">
+    <strong>Blue triggers trust in ~100 milliseconds</strong> -- before conscious thought. It activates the parasympathetic nervous system, encouraging calm and stimulating the prefrontal cortex (rational decision-making). Blue increases trustworthiness perception by 42% in professional service contexts.
+  </div>
+
+  <div class="psychology-principle">
+    <strong>55% of users prefer light mode for financial apps</strong> (2025 research). Light mode projects trust, reliability, and professionalism. Dark mode projects modernity and sophistication. Defaulting to light mode immediately separates Void from 90%+ of DeFi protocols.
+  </div>
+
+  <h4>The Banker's Palette</h4>
+  <div class="color-row">
+    <div class="color-swatch" style="background:#1B2A4A"></div>
+    <div class="color-info"><span class="hex">Navy</span> -- Authority, stability, depth (Goldman, Chase, Citi)</div>
+  </div>
+  <div class="color-row">
+    <div class="color-swatch" style="background:#2D5F3E"></div>
+    <div class="color-info"><span class="hex">Forest Green</span> -- Growth, money, prosperity (TD, Citizens, Fidelity)</div>
+  </div>
+  <div class="color-row">
+    <div class="color-swatch" style="background:#F8F9FA"></div>
+    <div class="color-info"><span class="hex">White/Off-White</span> -- Transparency, cleanliness, "nothing to hide"</div>
+  </div>
+  <div class="color-row">
+    <div class="color-swatch" style="background:#C5A47E"></div>
+    <div class="color-info"><span class="hex">Gold</span> -- Wealth, prestige, premium (use sparingly as accent)</div>
+  </div>
+  <div class="color-row">
+    <div class="color-swatch" style="background:#2C2C2C"></div>
+    <div class="color-info"><span class="hex">Charcoal</span> -- Sophistication, modernity (BlackRock, Vanguard, Square)</div>
+  </div>
+
+  <div class="warning-box">
+    <h4 style="color:#92400e; margin-top:0">Colors That HURT Financial Trust</h4>
+    <p style="margin:0">Neon anything, hot pink, electric purple, bright orange. These signal "crypto project" not "financial institution." Many DeFi protocols use these colors, which is precisely why they don't feel trustworthy.</p>
+  </div>
+
+  <h3>Behavioral Economics</h3>
+
+  <div class="psychology-principle">
+    <strong>Loss Aversion</strong> (Kahneman & Tversky 1979): Losses feel 2x more painful than equivalent gains. Frame: "Your savings lose 3% to inflation every year. Void fixes that." This validates anxiety (loss), then resolves it (gain), creating relief-driven conversion.
+  </div>
+
+  <div class="psychology-principle">
+    <strong>Anchoring Effect</strong> (Tversky & Kahneman 1974): The first number users see becomes their reference point. Show TVL first ($127M secured), then APY (8%). The APY now feels conservative relative to the massive TVL anchor -- trustworthy, not suspicious.
+  </div>
+
+  <div class="psychology-principle">
+    <strong>Present Bias</strong>: Humans disproportionately value immediate rewards. A <strong>real-time yield counter</strong> ticking up every second transforms a future reward (monthly interest) into a present reward (visible now). This is possibly the single highest-impact UX feature for DeFi retention.
+  </div>
+
+  <div class="psychology-principle">
+    <strong>Concrete Framing</strong>: "$80 per $1,000 per year" converts 40%+ better than "8% APY" (Slovic's psychic numbing research). People process specific, human-scale numbers as more real and trustworthy than abstract percentages.
+  </div>
+
+  <div class="psychology-principle">
+    <strong>Default Effect</strong> (Johnson & Goldstein 2003): Organ donation rates vary from 4% to 99% across countries based entirely on whether it's opt-in vs. opt-out. Pre-select recommended markets, auto-compound ON, and suggested deposit amounts. Each default removes a decision point.
+  </div>
+</div>
+
+<!-- SECTION 5: NAME ANALYSIS -->
+<div class="page">
+  <h2>5. Why "Void" Works as a Name</h2>
+  <p class="section-intro">Phonetic analysis, processing fluency research, and linguistic psychology all support "Void" as a strong financial brand name -- with one semantic challenge that's easily overcome.</p>
+
+  <h3>Phonetic Breakdown</h3>
+  <table>
+    <tr>
+      <th>Phoneme</th>
+      <th>Type</th>
+      <th>Conveys</th>
+      <th>Used By</th>
+    </tr>
+    <tr>
+      <td><strong>/v/</strong></td>
+      <td>Voiced fricative</td>
+      <td>Speed, smoothness, modernity, technology</td>
+      <td>Visa, Venmo, Vanguard</td>
+    </tr>
+    <tr>
+      <td><strong>/oi/</strong></td>
+      <td>Diphthong</td>
+      <td>Dynamic movement, transformation</td>
+      <td>--</td>
+    </tr>
+    <tr>
+      <td><strong>/d/</strong></td>
+      <td>Voiced plosive</td>
+      <td>Decisiveness, authority, finality</td>
+      <td>--</td>
+    </tr>
+  </table>
+
+  <p><strong>Overall arc:</strong> "Welcoming entry, definitive conclusion" -- easy to start, reliable to finish. This maps perfectly to financial trust.</p>
+
+  <h3>Processing Fluency</h3>
+  <ul>
+    <li><strong>1 syllable</strong> = maximum processing fluency</li>
+    <li><strong>4 characters</strong> = optimal range (same as Meta, Uber, Zoom, Aave)</li>
+    <li><strong>Common English word</strong> = pre-existing mental representation</li>
+    <li><strong>CVC structure</strong> (consonant-vowel-consonant) = most natural English syllable</li>
+    <li>Easy to spell from hearing alone. No unusual letter combinations.</li>
+  </ul>
+
+  <div class="psychology-principle">
+    <strong>Key study:</strong> Alter & Oppenheimer (2006, PNAS) found that stocks with easier-to-pronounce ticker symbols outperform those with harder-to-pronounce symbols. Easy-to-say = trusted more.
+  </div>
+
+  <h3>The Semantic Challenge (and How to Solve It)</h3>
+  <p>"Void" in English carries negative connotations: emptiness, nullification. "Null and void" means invalid. This creates tension with financial trust.</p>
+
+  <div class="highlight-box">
+    <h4>The Reframe</h4>
+    <p style="margin:0">In physics, a "void" is the space between structures -- the essential infrastructure that connects everything. Void is the invisible layer that makes everything else work. <strong>"The space between your assets and their potential."</strong> This turns a weakness into the brand story: Void is the infrastructure you don't see but can't live without.</p>
+  </div>
+
+  <h3>Name Variation Analysis</h3>
+  <table>
+    <tr>
+      <th>Name</th>
+      <th>Length</th>
+      <th>Feel</th>
+      <th>Best For</th>
+    </tr>
+    <tr>
+      <td><strong>Void</strong></td>
+      <td>4 chars</td>
+      <td>Tech, powerful, modern</td>
+      <td>Consumer brand (recommended)</td>
+    </tr>
+    <tr>
+      <td><strong>Void Finance</strong></td>
+      <td>12 chars</td>
+      <td>Fintech, clear</td>
+      <td>If domain/SEO needs clarity</td>
+    </tr>
+    <tr>
+      <td><strong>Void Protocol</strong></td>
+      <td>13 chars</td>
+      <td>DeFi-native, technical</td>
+      <td>Developer/technical contexts</td>
+    </tr>
+    <tr>
+      <td><strong>Void Bank</strong></td>
+      <td>8 chars</td>
+      <td>Direct, banking</td>
+      <td>Aggressive bank-challenger positioning</td>
+    </tr>
+    <tr>
+      <td><strong>Void Capital</strong></td>
+      <td>12 chars</td>
+      <td>Institutional, premium</td>
+      <td>Institutional/treasury product tier</td>
+    </tr>
+    <tr>
+      <td><strong>Void Labs</strong></td>
+      <td>8 chars</td>
+      <td>Builder, R&D</td>
+      <td>Corporate entity (Avara model)</td>
+    </tr>
+  </table>
+
+  <div class="highlight-box">
+    <h4>Recommendation</h4>
+    <p style="margin:0">Use <strong>"Void"</strong> as the primary consumer brand. Use <strong>"Void Protocol"</strong> or <strong>"Void Labs"</strong> for developer/technical contexts. The single word has the strongest phonetics, highest fluency, and maximum memorability.</p>
+  </div>
+</div>
+
+<!-- SECTION 6: ALL 12 PACKAGES OVERVIEW -->
+<div class="page">
+  <h2>6. The 12 Rebrand Packages</h2>
+  <p class="section-intro">Each package is a complete identity system: name variation, color palette, typography, tagline, logo concept, landing page approach, and marketing angle. Mix and match elements across packages.</p>
+
+  <table>
+    <tr>
+      <th>#</th>
+      <th>Name</th>
+      <th>Tagline</th>
+      <th>Colors</th>
+      <th>Inspiration</th>
+      <th>Feel</th>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td><strong>Void</strong></td>
+      <td>"Banking without boundaries"</td>
+      <td>Navy + Gold</td>
+      <td>Chase + Coinbase</td>
+      <td>Institutional</td>
+    </tr>
+    <tr style="background:#fefce8">
+      <td>2</td>
+      <td><strong>Void Finance</strong></td>
+      <td>"Your money, amplified"</td>
+      <td>Blue + Cyan</td>
+      <td>Coinbase + Stripe</td>
+      <td>Modern fintech</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><strong>Void Protocol</strong></td>
+      <td>"DeFi Banking"</td>
+      <td>Charcoal + Teal</td>
+      <td>Aave + Morpho</td>
+      <td>DeFi-forward</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td><strong>Void</strong></td>
+      <td>"Built to grow with you"</td>
+      <td>Forest Green</td>
+      <td>TD + Citizens</td>
+      <td>Community bank</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td><strong>Void</strong></td>
+      <td>"The standard in DeFi"</td>
+      <td>Black + Gold</td>
+      <td>AmEx + Goldman</td>
+      <td>Luxury/premium</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td><strong>Void Bank</strong></td>
+      <td>"Earn more. Bank better."</td>
+      <td>Blue + Coral</td>
+      <td>Revolut + Chime</td>
+      <td>Neobank challenger</td>
+    </tr>
+    <tr style="background:#fefce8">
+      <td>7</td>
+      <td><strong>Void</strong></td>
+      <td>"Where trust meets yield"</td>
+      <td>Midnight + Amber</td>
+      <td>Chase + Aave hybrid</td>
+      <td>Trust bridge</td>
+    </tr>
+    <tr style="background:#fefce8">
+      <td>8</td>
+      <td><strong>Void Capital</strong></td>
+      <td>"Institutional-grade DeFi"</td>
+      <td>Slate + Steel</td>
+      <td>Goldman + JPM</td>
+      <td>Institutional</td>
+    </tr>
+    <tr style="background:#fefce8">
+      <td>9</td>
+      <td><strong>Void</strong></td>
+      <td>"More than a protocol"</td>
+      <td>Teal + Coral</td>
+      <td>TD "More Human"</td>
+      <td>Community-first</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td><strong>Void</strong></td>
+      <td>"Simply earn"</td>
+      <td>B&W + Blue</td>
+      <td>Stripe + Compound</td>
+      <td>Radical minimalism</td>
+    </tr>
+    <tr>
+      <td>11</td>
+      <td><strong>Void Labs</strong></td>
+      <td>"We build. You earn."</td>
+      <td>Indigo + Cyan</td>
+      <td>Paradigm + a16z</td>
+      <td>Builder/R&D</td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td><strong>Void</strong></td>
+      <td>"Finance, evolved"</td>
+      <td>Blue-Green + Gold</td>
+      <td>Your actual journey</td>
+      <td>Evolution story</td>
+    </tr>
+  </table>
+
+  <p><em>Highlighted rows (2, 7, 8, 9) = top picks under consideration.</em></p>
+</div>
+
+<!-- LOGO GALLERY PAGE 1 -->
+<div class="page">
+  <h2>6b. Logo Concepts (1-6)</h2>
+  <p class="section-intro">AI-generated logo concepts for each package. These are directional starting points for professional refinement.</p>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+    <div style="border:1px solid #e2e8f0; border-radius:10px; padding:12px; text-align:center; page-break-inside:avoid;">
+      <img src="logos/pkg01-institutional.jpeg" style="max-width:100%; max-height:180px; object-fit:contain; margin-bottom:8px;">
+      <div style="font-weight:700; font-size:10pt;">#1 Institutional</div>
+      <div style="font-size:8pt; color:#64748b;">"Banking without boundaries" | Navy + Gold</div>
+    </div>
+    <div style="border:2px solid #C9A96E; border-radius:10px; padding:12px; text-align:center; background:linear-gradient(135deg, #fefce8 0%, #ffffff 100%); page-break-inside:avoid;">
+      <img src="logos/pkg02-fintech.jpeg" style="max-width:100%; max-height:180px; object-fit:contain; margin-bottom:8px;">
+      <div style="font-weight:700; font-size:10pt;">#2 Modern Fintech</div>
+      <div style="font-size:8pt; color:#64748b;">"Your money, amplified" | Blue + Cyan</div>
+    </div>
+    <div style="border:1px solid #e2e8f0; border-radius:10px; padding:12px; text-align:center; page-break-inside:avoid;">
+      <img src="logos/pkg03-defi-forward.jpeg" style="max-width:100%; max-height:180px; object-fit:contain; margin-bottom:8px;">
+      <div style="font-weight:700; font-size:10pt;">#3 DeFi-Forward</div>
+      <div style="font-size:8pt; color:#64748b;">"DeFi Banking" | Charcoal + Teal</div>
+    </div>
+    <div style="border:1px solid #e2e8f0; border-radius:10px; padding:12px; text-align:center; page-break-inside:avoid;">
+      <img src="logos/pkg04-green-bank.jpeg" style="max-width:100%; max-height:180px; object-fit:contain; margin-bottom:8px;">
+      <div style="font-weight:700; font-size:10pt;">#4 Green Bank</div>
+      <div style="font-size:8pt; color:#64748b;">"Built to grow with you" | Forest Green</div>
+    </div>
+    <div style="border:1px solid #e2e8f0; border-radius:10px; padding:12px; text-align:center; page-break-inside:avoid;">
+      <img src="logos/pkg05-luxury.jpeg" style="max-width:100%; max-height:180px; object-fit:contain; margin-bottom:8px;">
+      <div style="font-weight:700; font-size:10pt;">#5 Luxury Standard</div>
+      <div style="font-size:8pt; color:#64748b;">"The standard in DeFi" | Black + Gold</div>
+    </div>
+    <div style="border:1px solid #e2e8f0; border-radius:10px; padding:12px; text-align:center; page-break-inside:avoid;">
+      <img src="logos/pkg06-challenger.jpeg" style="max-width:100%; max-height:180px; object-fit:contain; margin-bottom:8px;">
+      <div style="font-weight:700; font-size:10pt;">#6 Direct Challenger</div>
+      <div style="font-size:8pt; color:#64748b;">"Earn more. Bank better." | Blue + Coral</div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGO GALLERY PAGE 2 -->
+<div class="page">
+  <h2>6c. Logo Concepts (7-12)</h2>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+    <div style="border:2px solid #C9A96E; border-radius:10px; padding:12px; text-align:center; background:linear-gradient(135deg, #fefce8 0%, #ffffff 100%); page-break-inside:avoid;">
+      <img src="logos/pkg07-trust-bridge.jpeg" style="max-width:100%; max-height:180px; object-fit:contain; margin-bottom:8px;">
+      <div style="font-weight:700; font-size:10pt;">#7 Trust Bridge</div>
+      <div style="font-size:8pt; color:#64748b;">"Where trust meets yield" | Midnight + Amber</div>
+    </div>
+    <div style="border:2px solid #C9A96E; border-radius:10px; padding:12px; text-align:center; background:linear-gradient(135deg, #fefce8 0%, #ffffff 100%); page-break-inside:avoid;">
+      <img src="logos/pkg08-institutional-grade.jpeg" style="max-width:100%; max-height:180px; object-fit:contain; margin-bottom:8px;">
+      <div style="font-weight:700; font-size:10pt;">#8 Institutional Grade</div>
+      <div style="font-size:8pt; color:#64748b;">"Institutional-grade DeFi" | Slate + Steel</div>
+    </div>
+    <div style="border:2px solid #C9A96E; border-radius:10px; padding:12px; text-align:center; background:linear-gradient(135deg, #fefce8 0%, #ffffff 100%); page-break-inside:avoid;">
+      <img src="logos/pkg09-community.jpeg" style="max-width:100%; max-height:180px; object-fit:contain; margin-bottom:8px;">
+      <div style="font-weight:700; font-size:10pt;">#9 Community Bank</div>
+      <div style="font-size:8pt; color:#64748b;">"More than a protocol" | Teal + Coral</div>
+    </div>
+    <div style="border:1px solid #e2e8f0; border-radius:10px; padding:12px; text-align:center; page-break-inside:avoid;">
+      <img src="logos/pkg10-minimal.jpeg" style="max-width:100%; max-height:180px; object-fit:contain; margin-bottom:8px;">
+      <div style="font-weight:700; font-size:10pt;">#10 Minimal Modern</div>
+      <div style="font-size:8pt; color:#64748b;">"Simply earn" | Black + White + Blue</div>
+    </div>
+    <div style="border:1px solid #e2e8f0; border-radius:10px; padding:12px; text-align:center; page-break-inside:avoid;">
+      <img src="logos/pkg11-builder.png" style="max-width:100%; max-height:180px; object-fit:contain; margin-bottom:8px;">
+      <div style="font-weight:700; font-size:10pt;">#11 Builder Brand</div>
+      <div style="font-size:8pt; color:#64748b;">"We build. You earn." | Indigo + Cyan</div>
+    </div>
+    <div style="border:1px solid #e2e8f0; border-radius:10px; padding:12px; text-align:center; page-break-inside:avoid;">
+      <img src="logos/pkg12-evolution.jpeg" style="max-width:100%; max-height:180px; object-fit:contain; margin-bottom:8px;">
+      <div style="font-weight:700; font-size:10pt;">#12 Evolution Brand</div>
+      <div style="font-size:8pt; color:#64748b;">"Finance, evolved" | Blue-Green + Gold</div>
+    </div>
+  </div>
+
+  <p style="margin-top:16px;"><em>Gold-bordered cards (2, 7, 8, 9) = top picks under consideration. All logos are AI-generated concepts for directional reference.</em></p>
+</div>
+
+<!-- SECTION 7: TAGLINES -->
+<div class="page">
+  <h2>7. All 20 Tagline Options</h2>
+
+  <table>
+    <tr><th>#</th><th>Tagline</th><th>Style</th><th>Best For</th></tr>
+    <tr><td>1</td><td>"Banking without boundaries"</td><td>Institutional</td><td>Broad trust appeal</td></tr>
+    <tr><td>2</td><td>"Your money, amplified"</td><td>Fintech</td><td>Tech-savvy retail</td></tr>
+    <tr><td>3</td><td>"DeFi Banking"</td><td>Category creation</td><td>Owning a new category</td></tr>
+    <tr><td>4</td><td>"Built to grow with you"</td><td>Community</td><td>Community-first positioning</td></tr>
+    <tr><td>5</td><td>"The standard in DeFi"</td><td>Luxury</td><td>Premium/institutional</td></tr>
+    <tr><td>6</td><td>"Earn more. Bank better."</td><td>Challenger</td><td>Direct bank comparison</td></tr>
+    <tr><td>7</td><td>"Where trust meets yield"</td><td>Bridge</td><td>TradFi-to-DeFi users</td></tr>
+    <tr><td>8</td><td>"Institutional-grade DeFi"</td><td>Corporate</td><td>Institutional/treasury</td></tr>
+    <tr><td>9</td><td>"More than a protocol"</td><td>Human</td><td>Community governance</td></tr>
+    <tr><td>10</td><td>"Simply earn"</td><td>Minimal</td><td>Simplicity positioning</td></tr>
+    <tr><td>11</td><td>"We build. You earn."</td><td>Builder</td><td>Developer credibility</td></tr>
+    <tr><td>12</td><td>"Finance, evolved"</td><td>Evolution</td><td>Story-driven marketing</td></tr>
+    <tr><td>13</td><td>"The yield your bank won't give you"</td><td>Provocative</td><td>Comparison marketing</td></tr>
+    <tr><td>14</td><td>"Your assets. Your yield. Your terms."</td><td>Ownership</td><td>DeFi-native audience</td></tr>
+    <tr><td>15</td><td>"DeFi that feels like banking"</td><td>Accessible</td><td>Mainstream onboarding</td></tr>
+    <tr><td>16</td><td>"Earn like a bank. Own like DeFi."</td><td>Hybrid</td><td>Bridge positioning</td></tr>
+    <tr><td>17</td><td>"The new standard for yield"</td><td>Authority</td><td>Market leadership claim</td></tr>
+    <tr><td>18</td><td>"Banking, rebuilt on-chain"</td><td>Technical</td><td>Crypto-native audience</td></tr>
+    <tr><td>19</td><td>"Where your crypto earns its keep"</td><td>Conversational</td><td>Social media / casual</td></tr>
+    <tr><td>20</td><td>"The financial layer of Bittensor"</td><td>Ecosystem</td><td>Bittensor community</td></tr>
+  </table>
+
+  <h2 style="margin-top:30px">8. 30-Day Implementation Roadmap</h2>
+  <p class="section-intro">Week-by-week execution plan for rolling out the rebrand in April 2026, timed around the lending platform launch.</p>
+
+  <div class="roadmap-week">
+    <h4>Week 1: Foundation (March 31 - April 6)</h4>
+    <ul>
+      <li>Select package (or hybrid), finalize name, lock color palette + typography</li>
+      <li>Write tagline and positioning statement</li>
+      <li>Commission/design logo mark + wordmark, favicon, social media assets</li>
+      <li>Secure domain(s), update X bios and pinned tweets</li>
+      <li>Build basic brand kit (logo, colors, fonts, usage guidelines)</li>
+    </ul>
+  </div>
+
+  <div class="roadmap-week">
+    <h4>Week 2: Design System & Content (April 7 - April 13)</h4>
+    <ul>
+      <li>Build full design system (templates for data cards, announcements, thread headers)</li>
+      <li>Rewrite all config files: company.md, voice.md, pillars.md, accounts.md, design-system.md</li>
+      <li>Draft new content batch (10-15 posts) in new brand voice</li>
+      <li>Wireframe and design landing page (desktop + mobile mockups)</li>
+      <li>Write all landing page copy</li>
+    </ul>
+  </div>
+
+  <div class="roadmap-week">
+    <h4>Week 3: Build & Test (April 14 - April 20)</h4>
+    <ul>
+      <li>Build/update landing page with live data (TVL counter, APY display, yield calculator)</li>
+      <li>Update all social media profiles simultaneously (pics, banners, bios)</li>
+      <li>Post rebrand announcement thread on @v0idai, satellites follow staggered</li>
+      <li>Update Discord, Telegram, LinkedIn branding</li>
+      <li>Retrain OpenClaw with new voice.md, generate first week of new-brand content</li>
+    </ul>
+  </div>
+
+  <div class="roadmap-week">
+    <h4>Week 4: Launch & Amplify (April 21 - April 27)</h4>
+    <ul>
+      <li>Publish rebrand blog post, launch new landing page</li>
+      <li>Execute coordinated announcement across all platforms</li>
+      <li>Begin new-brand content cadence on all accounts</li>
+      <li>Run first engagement content (poll, AMA, or Space)</li>
+      <li>Begin comparison content series ("Void vs. traditional savings")</li>
+      <li>Track metrics: follower growth, engagement, website traffic, brand mentions</li>
+    </ul>
+  </div>
+</div>
+
+<!-- SECTION 10: QUICK WINS -->
+<div class="page">
+  <h2>9. Psychology Quick Wins</h2>
+  <p class="section-intro">High-impact, low-effort marketing shifts backed by named psychology research. Implement these regardless of which package you choose.</p>
+
+  <div class="quick-win">
+    <div class="quick-win-num">1</div>
+    <div><strong>Concrete Number Framing</strong> -- Say "$80 per $1,000 per year" instead of "8% APY." Concrete numbers convert 40%+ better. (Slovic, psychic numbing)</div>
+  </div>
+
+  <div class="quick-win">
+    <div class="quick-win-num">2</div>
+    <div><strong>Loss-Then-Gain Framing</strong> -- "Your savings lose 3% to inflation every year. Void fixes that." Validates anxiety, then resolves it. (Kahneman, prospect theory)</div>
+  </div>
+
+  <div class="quick-win">
+    <div class="quick-win-num">3</div>
+    <div><strong>Anchoring Sequence</strong> -- Show TVL first (biggest number), then APY. "$127M secured" makes "8% APY" feel conservative. (Tversky & Kahneman)</div>
+  </div>
+
+  <div class="quick-win">
+    <div class="quick-win-num">4</div>
+    <div><strong>Live Social Proof Counter</strong> -- "12,847 depositors trust Void with $127M" above the fold. Specificity + herd behavior. (Cialdini)</div>
+  </div>
+
+  <div class="quick-win">
+    <div class="quick-win-num">5</div>
+    <div><strong>Yield Explainer</strong> -- "Banks earn 8% on your money and give you 0.5%. We cut out the middleman." Overcomes "too good to be true." (Representativeness heuristic)</div>
+  </div>
+
+  <div class="quick-win">
+    <div class="quick-win-num">6</div>
+    <div><strong>Progress Bar Onboarding</strong> -- Show "Step 2 of 4" during deposit flow. Start at step 2 (visiting = step 1). Drives 40% completion increase. (Zeigarnik effect)</div>
+  </div>
+
+  <div class="quick-win">
+    <div class="quick-win-num">7</div>
+    <div><strong>Real-Time Yield Counter</strong> -- Live-ticking "$0.0023 earned" on dashboard. Single highest-impact retention feature. (Present bias, dopamine)</div>
+  </div>
+
+  <div class="quick-win">
+    <div class="quick-win-num">8</div>
+    <div><strong>"16x Your Bank" Comparison</strong> -- "Void pays 16x what your bank does." Specific multipliers > percentage comparisons. (Anchoring + concrete framing)</div>
+  </div>
+
+  <div class="quick-win">
+    <div class="quick-win-num">9</div>
+    <div><strong>Default Market Pre-Selection</strong> -- Pre-select USDC as recommended. Defaults drive 95%+ of behavior in Johnson & Goldstein's research.</div>
+  </div>
+
+  <div class="quick-win">
+    <div class="quick-win-num">10</div>
+    <div><strong>Try Before You Connect</strong> -- Full dashboard access without wallet connection. Users feel ownership of projected earnings before committing. (Endowment effect)</div>
+  </div>
+
+  <h2 style="margin-top:30px">10. OpenClaw Automation Shifts</h2>
+  <p class="section-intro">Key changes to the marketing automation pipeline to support the rebrand.</p>
+
+  <table>
+    <tr><th>Area</th><th>Change</th></tr>
+    <tr>
+      <td><strong>Voice Registers</strong></td>
+      <td>Builder-Credibility 35% / Banking-Authority 30% (NEW) / Alpha-Education 25% / Community 10% (up from 5%)</td>
+    </tr>
+    <tr>
+      <td><strong>Content Pillars</strong></td>
+      <td>DeFi Banking 35% / Trust & Security 20% (NEW) / Bridge 15% (down) / Alpha 20% / Community 10%</td>
+    </tr>
+    <tr>
+      <td><strong>Morning Chain</strong></td>
+      <td>Lead with banking-authority register. Daily/Info uses banking vocabulary ("deposits report" not "TVL update")</td>
+    </tr>
+    <tr>
+      <td><strong>Intelligence Sweep</strong></td>
+      <td>Add keywords: "DeFi bank," "crypto banking," "yield account." Monitor: @AaveAave, @MorphoLabs, @SkyEcosystem</td>
+    </tr>
+    <tr>
+      <td><strong>Satellite Voices</strong></td>
+      <td>Daily/Info becomes "Void Daily." Bittensor Ecosystem positions Void as "the DeFi bank of Bittensor."</td>
+    </tr>
+    <tr>
+      <td><strong>Transition Safety</strong></td>
+      <td>Keep DRY_RUN=true. Generate 20+ new-brand posts before going live. Manual review first 5 posts. Then resume automation.</td>
+    </tr>
+  </table>
+</div>
+
+<!-- SECTION 12: COLOR PALETTES -->
+<div class="page">
+  <h2>11. Full Color Palettes</h2>
+  <p class="section-intro">All 12 packages with exact hex codes. Ready for Figma, Canva, or CSS implementation.</p>
+
+  <table>
+    <tr><th>#</th><th>Package</th><th>Primary</th><th>Secondary</th><th>Accent</th><th>Surface</th><th>Success</th></tr>
+    <tr>
+      <td>1</td><td>Institutional</td>
+      <td><span style="background:#0A1628;color:white;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#0A1628</span></td>
+      <td><span style="background:#FFFFFF;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#FFFFFF</span></td>
+      <td><span style="background:#C9A96E;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#C9A96E</span></td>
+      <td><span style="background:#F8F9FA;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#F8F9FA</span></td>
+      <td><span style="background:#2D8F5E;color:white;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#2D8F5E</span></td>
+    </tr>
+    <tr style="background:#fefce8">
+      <td>2</td><td>Fintech</td>
+      <td><span style="background:#0052FF;color:white;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#0052FF</span></td>
+      <td><span style="background:#FFFFFF;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#FFFFFF</span></td>
+      <td><span style="background:#00D4FF;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#00D4FF</span></td>
+      <td><span style="background:#F5F7FA;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#F5F7FA</span></td>
+      <td><span style="background:#00C853;color:white;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#00C853</span></td>
+    </tr>
+    <tr>
+      <td>3</td><td>DeFi-Forward</td>
+      <td><span style="background:#1C1C2E;color:white;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#1C1C2E</span></td>
+      <td><span style="background:#FAFBFC;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#FAFBFC</span></td>
+      <td><span style="background:#00B8A9;color:white;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#00B8A9</span></td>
+      <td><span style="background:#F4F4F8;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#F4F4F8</span></td>
+      <td><span style="background:#00D68F;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#00D68F</span></td>
+    </tr>
+    <tr>
+      <td>4</td><td>Green Bank</td>
+      <td><span style="background:#0D4D2B;color:white;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#0D4D2B</span></td>
+      <td><span style="background:#FFFFFF;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#FFFFFF</span></td>
+      <td><span style="background:#34C759;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#34C759</span></td>
+      <td><span style="background:#F5F1EB;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#F5F1EB</span></td>
+      <td><span style="background:#34C759;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#34C759</span></td>
+    </tr>
+    <tr>
+      <td>5</td><td>Luxury</td>
+      <td><span style="background:#0D0D0D;color:white;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#0D0D0D</span></td>
+      <td><span style="background:#FAF9F6;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#FAF9F6</span></td>
+      <td><span style="background:#C9A96E;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#C9A96E</span></td>
+      <td><span style="background:#F5F5F0;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#F5F5F0</span></td>
+      <td><span style="background:#2E7D52;color:white;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#2E7D52</span></td>
+    </tr>
+    <tr>
+      <td>6</td><td>Challenger</td>
+      <td><span style="background:#1A3A5C;color:white;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#1A3A5C</span></td>
+      <td><span style="background:#FFFFFF;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#FFFFFF</span></td>
+      <td><span style="background:#FF6B6B;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#FF6B6B</span></td>
+      <td><span style="background:#F0F2F5;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#F0F2F5</span></td>
+      <td><span style="background:#22C55E;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#22C55E</span></td>
+    </tr>
+    <tr style="background:#fefce8">
+      <td>7</td><td>Trust Bridge</td>
+      <td><span style="background:#0F1B2D;color:white;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#0F1B2D</span></td>
+      <td><span style="background:#FFFFFF;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#FFFFFF</span></td>
+      <td><span style="background:#2563EB;color:white;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#2563EB</span></td>
+      <td><span style="background:#F1F5F9;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#F1F5F9</span></td>
+      <td><span style="background:#F59E0B;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#F59E0B</span></td>
+    </tr>
+    <tr style="background:#fefce8">
+      <td>8</td><td>Institutional</td>
+      <td><span style="background:#0F172A;color:white;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#0F172A</span></td>
+      <td><span style="background:#FFFFFF;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#FFFFFF</span></td>
+      <td><span style="background:#475569;color:white;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#475569</span></td>
+      <td><span style="background:#F8FAFC;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#F8FAFC</span></td>
+      <td><span style="background:#3B82F6;color:white;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#3B82F6</span></td>
+    </tr>
+    <tr style="background:#fefce8">
+      <td>9</td><td>Community</td>
+      <td><span style="background:#0D4F4F;color:white;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#0D4F4F</span></td>
+      <td><span style="background:#FFFDF7;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#FFFDF7</span></td>
+      <td><span style="background:#E8684A;color:white;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#E8684A</span></td>
+      <td><span style="background:#FFF8F0;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#FFF8F0</span></td>
+      <td><span style="background:#0D4F4F;color:white;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#0D4F4F</span></td>
+    </tr>
+    <tr>
+      <td>10</td><td>Minimal</td>
+      <td><span style="background:#000000;color:white;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#000000</span></td>
+      <td><span style="background:#FFFFFF;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#FFFFFF</span></td>
+      <td><span style="background:#0066FF;color:white;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#0066FF</span></td>
+      <td><span style="background:#FAFAFA;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#FAFAFA</span></td>
+      <td><span style="background:#00C48C;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#00C48C</span></td>
+    </tr>
+    <tr>
+      <td>11</td><td>Builder</td>
+      <td><span style="background:#1E1B4B;color:white;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#1E1B4B</span></td>
+      <td><span style="background:#FFFFFF;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#FFFFFF</span></td>
+      <td><span style="background:#06B6D4;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#06B6D4</span></td>
+      <td><span style="background:#F5F3FF;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#F5F3FF</span></td>
+      <td><span style="background:#06B6D4;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#06B6D4</span></td>
+    </tr>
+    <tr>
+      <td>12</td><td>Evolution</td>
+      <td><span style="background:#064E3B;color:white;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#064E3B</span></td>
+      <td><span style="background:#FFFFFF;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#FFFFFF</span></td>
+      <td><span style="background:#14B8A6;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#14B8A6</span></td>
+      <td><span style="background:#F0FDF4;padding:2px 6px;border-radius:3px;border:1px solid #ddd;font-family:monospace;font-size:8pt">#F0FDF4</span></td>
+      <td><span style="background:#D4A853;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:8pt">#D4A853</span></td>
+    </tr>
+  </table>
+
+  <div class="footer-note">
+    Void Rebrand Strategy Summary | March 30, 2026 | Full details in REBRAND-STRATEGY-2026.md<br>
+    Research sources: Bank Brand Analysis, DeFi Rebrand Research (Aave & Coinbase), Psychology Research (40+ citations)<br>
+    All files located in: companies/voidai/research/
+  </div>
+</div>
+
+</body>
+</html>
