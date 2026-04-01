@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Void Rebrand V2 - Final Shortlist</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; color: #1a1a2e; background: #fff; line-height: 1.6; font-size: 11pt; }
+
+  .cover { page-break-after: always; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(135deg, #0F172A 0%, #1E293B 40%, #475569 100%); color: white; text-align: center; padding: 60px; }
+  .cover h1 { font-family: 'Playfair Display', serif; font-size: 52pt; font-weight: 700; letter-spacing: -1px; margin-bottom: 12px; }
+  .cover .subtitle { font-size: 14pt; font-weight: 300; color: #94A3B8; margin-bottom: 8px; letter-spacing: 3px; text-transform: uppercase; }
+  .cover .divider { width: 80px; height: 2px; background: #475569; margin: 24px auto; }
+  .cover .desc { font-size: 12pt; max-width: 520px; color: rgba(255,255,255,0.7); line-height: 1.8; }
+  .cover .meta { font-size: 9pt; color: rgba(255,255,255,0.4); margin-top: 50px; }
+
+  .page { padding: 45px 55px; page-break-after: always; }
+  .page:last-child { page-break-after: avoid; }
+
+  h2 { font-family: 'Playfair Display', serif; font-size: 22pt; color: #0F172A; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 2px solid #475569; }
+  h3 { font-size: 13pt; font-weight: 700; color: #1E293B; margin-top: 22px; margin-bottom: 8px; }
+  h4 { font-size: 11pt; font-weight: 600; color: #475569; margin-top: 16px; margin-bottom: 6px; }
+  p { margin-bottom: 10px; }
+
+  .section-intro { font-size: 12pt; color: #64748B; font-weight: 300; margin-bottom: 20px; border-left: 3px solid #475569; padding-left: 16px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 9.5pt; }
+  th { background: #0F172A; color: white; padding: 8px 10px; text-align: left; font-weight: 600; font-size: 9pt; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 7px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+  tr:nth-child(even) { background: #f8fafc; }
+
+  .logo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
+  .logo-card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; text-align: center; page-break-inside: avoid; background: #fafbfc; }
+  .logo-card.alt { border-style: dashed; background: #f8fafc; }
+  .logo-card img { max-width: 100%; max-height: 140px; object-fit: contain; margin-bottom: 6px; }
+  .logo-card .label { font-weight: 600; font-size: 9pt; color: #1E293B; }
+  .logo-card .sublabel { font-size: 8pt; color: #64748B; }
+
+  .color-row { display: flex; gap: 8px; margin: 4px 0; align-items: center; }
+  .swatch { width: 24px; height: 24px; border-radius: 5px; border: 1px solid rgba(0,0,0,0.1); flex-shrink: 0; }
+  .color-hex { font-family: 'Courier New', monospace; font-size: 9pt; font-weight: 600; }
+  .color-name { font-size: 8.5pt; color: #64748B; }
+
+  .palette-block { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin: 8px 0; }
+  .palette-block h4 { margin-top: 0; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .motto-tag { display: inline-block; background: #0F172A; color: white; padding: 4px 12px; border-radius: 20px; font-size: 9pt; font-weight: 600; letter-spacing: 0.5px; margin: 3px 2px; }
+  .motto-tag.secondary { background: #475569; }
+  .motto-tag.tertiary { background: #94A3B8; color: #0F172A; }
+
+  .spec-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dotted #e2e8f0; font-size: 9.5pt; }
+  .spec-label { color: #64748B; font-weight: 500; }
+  .spec-value { color: #1E293B; font-weight: 600; }
+
+  .footer-note { font-size: 8pt; color: #94a3b8; text-align: center; margin-top: 30px; padding-top: 12px; border-top: 1px solid #e2e8f0; }
+
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 16px 0; }
+  .stat-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; text-align: center; }
+  .stat-card .number { font-size: 22pt; font-weight: 800; color: #0F172A; }
+  .stat-card .slabel { font-size: 7.5pt; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+  .pick-card { border: 2px solid #C9A96E; border-radius: 10px; padding: 14px; text-align: center; background: linear-gradient(135deg, #fefce8 0%, #ffffff 100%); page-break-inside: avoid; }
+  .pick-card img { max-width: 100%; max-height: 140px; object-fit: contain; margin-bottom: 8px; }
+  .pick-card .label { font-weight: 700; font-size: 10pt; color: #1E293B; }
+  .pick-card .sublabel { font-size: 8pt; color: #64748B; }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: COVER -->
+<div class="cover">
+  <h1>VOID</h1>
+  <div class="subtitle">V2 Shortlist</div>
+  <div class="divider"></div>
+  <div class="desc">
+    Three brand directions. Five variations each. Eighteen logo concepts.<br>
+    Steel blue palettes. Distinct typography and design systems.
+  </div>
+  <div class="meta">
+    April 1, 2026 | Prepared for Vew + Team<br>
+    Void Capital | void. | Void Labs
+  </div>
+</div>
+
+<!-- PAGE 2: OVERVIEW -->
+<div class="page">
+  <h2>Overview</h2>
+  <p class="section-intro">The team narrowed to three brand directions from the original 12 packages. Each direction now has 5 distinct variations with unique typography, layout, design elements, and color palettes anchored around steel blue #475569.</p>
+
+  <div class="stat-grid">
+    <div class="stat-card"><div class="number">3</div><div class="slabel">Brand Directions</div></div>
+    <div class="stat-card"><div class="number">15</div><div class="slabel">Variations</div></div>
+    <div class="stat-card"><div class="number">18</div><div class="slabel">Logo Concepts</div></div>
+  </div>
+
+  <table>
+    <tr><th>Direction</th><th>Name</th><th>Positioning</th><th>Best For</th></tr>
+    <tr><td><strong>Void Capital</strong></td><td>Institutional Grade</td><td>"Institutional-grade DeFi" -- for treasuries, funds, and serious allocators</td><td>Trust, authority, institutional buyers</td></tr>
+    <tr><td><strong>void.</strong></td><td>Minimal Modern</td><td>"Simply earn" -- radically simple, no clutter, no jargon</td><td>Simplicity, broad appeal, consumer-first</td></tr>
+    <tr><td><strong>Void Labs</strong></td><td>Builder Brand</td><td>"We build. You earn." -- the R&D lab behind the protocol</td><td>Developer credibility, technical trust</td></tr>
+  </table>
+
+  <h3>Color Philosophy</h3>
+  <p>All 15 variations use muted, neutral blues in the steel/slate/petrol range. No royal blue, no cobalt, no Coinbase/Chainlink/Venmo blue. The anchor color across all variations:</p>
+  <div class="color-row" style="margin:10px 0;">
+    <div class="swatch" style="background:#475569; width:40px; height:40px;"></div>
+    <div><span class="color-hex">#475569</span> <span class="color-name">Steel Blue -- the team's preferred tone. Used in at least 2 variations per direction.</span></div>
+  </div>
+
+  <h3>Suggested Taglines by Direction</h3>
+  <div style="margin:8px 0;"><strong>Void Capital:</strong> <span class="motto-tag">Institutional-grade DeFi</span> <span class="motto-tag secondary">The standard in DeFi</span> <span class="motto-tag tertiary">Where capital works harder</span></div>
+  <div style="margin:8px 0;"><strong>void.:</strong> <span class="motto-tag">Simply earn</span> <span class="motto-tag secondary">Earn more. Think less.</span> <span class="motto-tag tertiary">Your money, amplified</span></div>
+  <div style="margin:8px 0;"><strong>Void Labs:</strong> <span class="motto-tag">We build. You earn.</span> <span class="motto-tag secondary">Built different. Built to last.</span> <span class="motto-tag tertiary">The infrastructure behind DeFi banking</span></div>
+</div>
+
+<!-- PAGES 3-4: VOID CAPITAL -->
+<div class="page">
+  <h2>Void Capital -- Variations</h2>
+  <p class="section-intro">Institutional-grade identity. Pure typography, zero decoration, authority through restraint. Five distinct typographic and layout approaches.</p>
+
+  <div class="logo-grid">
+    <div class="logo-card"><img src="logos/v2/8a-serif-monogram.jpeg"><div class="label">8A: Serif Monogram + Stacked</div><div class="sublabel">Steel Blue #475569 + Charcoal #1E293B</div></div>
+    <div class="logo-card"><img src="logos/v2/8b-horizontal-divider.jpeg"><div class="label">8B: Horizontal with Divider</div><div class="sublabel">Steel Blue #475569 + Warm Charcoal #292524</div></div>
+    <div class="logo-card"><img src="logos/v2/8c-bold-block.jpeg"><div class="label">8C: Bold Block + Underline</div><div class="sublabel">Slate Teal #3D5A6E + Silver #94A3B8</div></div>
+    <div class="logo-card"><img src="logos/v2/8d-mixed-serif.jpeg"><div class="label">8D: V Mark + Mixed Serif-Sans</div><div class="sublabel">Petrol Blue #2C4A5E + Deep Ink #1A2332</div></div>
+    <div class="logo-card"><img src="logos/v2/8e-bracket.jpeg"><div class="label">8E: Wide Spaced + Bracket Frame</div><div class="sublabel">Dusty Blue #5B7B95 + Graphite #374151</div></div>
+  </div>
+
+  <h3>Color Palettes</h3>
+  <div class="two-col">
+    <div class="palette-block">
+      <h4>8A / 8B (Steel Blue anchor)</h4>
+      <div class="color-row"><div class="swatch" style="background:#475569"></div><span class="color-hex">#475569</span> <span class="color-name">Steel Blue</span></div>
+      <div class="color-row"><div class="swatch" style="background:#1E293B"></div><span class="color-hex">#1E293B</span> <span class="color-name">Charcoal</span></div>
+      <div class="color-row"><div class="swatch" style="background:#0F172A"></div><span class="color-hex">#0F172A</span> <span class="color-name">Dark Slate</span></div>
+      <div class="color-row"><div class="swatch" style="background:#F8FAFC"></div><span class="color-hex">#F8FAFC</span> <span class="color-name">Near White</span></div>
+    </div>
+    <div class="palette-block">
+      <h4>8C / 8D / 8E (Complementary blues)</h4>
+      <div class="color-row"><div class="swatch" style="background:#3D5A6E"></div><span class="color-hex">#3D5A6E</span> <span class="color-name">Slate Teal</span></div>
+      <div class="color-row"><div class="swatch" style="background:#2C4A5E"></div><span class="color-hex">#2C4A5E</span> <span class="color-name">Petrol Blue</span></div>
+      <div class="color-row"><div class="swatch" style="background:#5B7B95"></div><span class="color-hex">#5B7B95</span> <span class="color-name">Dusty Blue</span></div>
+      <div class="color-row"><div class="swatch" style="background:#94A3B8"></div><span class="color-hex">#94A3B8</span> <span class="color-name">Silver</span></div>
+    </div>
+  </div>
+
+  <h3>Specifications</h3>
+  <div class="spec-row"><span class="spec-label">Typography (8A)</span><span class="spec-value">Serif monogram (Garamond/Times) + Sans wordmark</span></div>
+  <div class="spec-row"><span class="spec-label">Typography (8B)</span><span class="spec-value">Geometric sans-serif, single family, weight contrast</span></div>
+  <div class="spec-row"><span class="spec-label">Typography (8C)</span><span class="spec-value">Bold condensed + ultra-thin light, strong weight contrast</span></div>
+  <div class="spec-row"><span class="spec-label">Typography (8D)</span><span class="spec-value">Mixed serif (VOID) + sans-serif (CAPITAL), JPMorgan-inspired</span></div>
+  <div class="spec-row"><span class="spec-label">Typography (8E)</span><span class="spec-value">Geometric sans, extreme letter spacing, editorial</span></div>
+  <div class="spec-row"><span class="spec-label">Mode</span><span class="spec-value">Light mode default (institutional transparency)</span></div>
+  <div class="spec-row"><span class="spec-label">Target</span><span class="spec-value">Treasuries, funds, institutional allocators, serious DeFi capital</span></div>
+</div>
+
+<!-- PAGES 5-6: VOID. -->
+<div class="page">
+  <h2>void. -- Variations</h2>
+  <p class="section-intro">Radical minimalism. The word IS the logo. Typographic and portal motif variations.</p>
+
+  <div class="logo-grid">
+    <div class="logo-card"><img src="logos/v2/10c-monospaced-cursor.jpeg"><div class="label">10C: Monospaced + Cursor Line</div><div class="sublabel">Cool Ink #2D3748 + Silver Blue #94A3B8</div></div>
+    <div class="logo-card"><img src="logos/v2/10e-stencil-cuts.jpeg"><div class="label">10E: Bold Stencil + Negative Space</div><div class="sublabel">Stone Blue #4A5E73 + Ash Grey #6B7280</div></div>
+    <div class="logo-card alt"><img src="logos/v2/10e-alt-stencil.png"><div class="label">10E Alt: Stencil Variant</div><div class="sublabel">Stone Blue #4A5E73 + Silver #94A3B8</div></div>
+    <div class="logo-card"><img src="logos/v2/10f-void-iris.png"><div class="label">10F: Iris Portal</div><div class="sublabel">Charcoal #1E293B + Navy Blue iris in "o"</div></div>
+    <div class="logo-card"><img src="logos/v2/10g-void-vortex.png"><div class="label">10G: Blue Vortex</div><div class="sublabel">Charcoal #1E293B + Blue swirl vortex in "o"</div></div>
+    <div class="logo-card"><img src="logos/v2/10h-void-tunnel.png"><div class="label">10H: Dark Tunnel</div><div class="sublabel">Charcoal #1E293B + Blue-black tunnel in "o"</div></div>
+    <div class="logo-card"><img src="logos/v2/10i-void-swirl.png"><div class="label">10I: Twisted Portal</div><div class="sublabel">Charcoal #1E293B + Blue twisted ring in "o"</div></div>
+  </div>
+
+  <h3>Color Palettes</h3>
+  <div class="two-col">
+    <div class="palette-block">
+      <h4>10C / 10E (Typographic)</h4>
+      <div class="color-row"><div class="swatch" style="background:#2D3748"></div><span class="color-hex">#2D3748</span> <span class="color-name">Cool Ink</span></div>
+      <div class="color-row"><div class="swatch" style="background:#4A5E73"></div><span class="color-hex">#4A5E73</span> <span class="color-name">Stone Blue</span></div>
+      <div class="color-row"><div class="swatch" style="background:#6B7280"></div><span class="color-hex">#6B7280</span> <span class="color-name">Ash Grey</span></div>
+    </div>
+    <div class="palette-block">
+      <h4>10F-I (Portal motifs)</h4>
+      <div class="color-row"><div class="swatch" style="background:#1E293B"></div><span class="color-hex">#1E293B</span> <span class="color-name">Charcoal</span></div>
+      <div class="color-row"><div class="swatch" style="background:#475569"></div><span class="color-hex">#475569</span> <span class="color-name">Steel Blue</span></div>
+      <div class="color-row"><div class="swatch" style="background:#0F172A"></div><span class="color-hex">#0F172A</span> <span class="color-name">Navy</span></div>
+    </div>
+  </div>
+
+  <h3>Specifications</h3>
+  <div class="spec-row"><span class="spec-label">Typography (10C)</span><span class="spec-value">Monospaced (JetBrains/IBM Plex Mono), terminal cursor</span></div>
+  <div class="spec-row"><span class="spec-label">Typography (10E)</span><span class="spec-value">Bold condensed, stencil cuts, negative space in letterforms</span></div>
+  <div class="spec-row"><span class="spec-label">Typography (10F-I)</span><span class="spec-value">Geometric sans-serif with abstract portal/void motif replacing the "o"</span></div>
+  <div class="spec-row"><span class="spec-label">Mode</span><span class="spec-value">Light mode only (maximum cognitive fluency)</span></div>
+  <div class="spec-row"><span class="spec-label">Target</span><span class="spec-value">Broad consumer appeal, simplicity-seekers, first-time DeFi users</span></div>
+</div>
+
+<!-- PAGES 7-8: VOID LABS -->
+<div class="page">
+  <h2>Void Labs -- Variations</h2>
+  <p class="section-intro">The builder brand. Scientific precision meets technical credibility. Five distinct icon + typography systems, each with a different approach to conveying R&D authority.</p>
+
+  <div class="logo-grid">
+    <div class="logo-card"><img src="logos/v2/11a-circuit-horizontal.jpeg"><div class="label">11A: Circuit Icon + Horizontal Text</div><div class="sublabel">Charcoal #1E293B + Steel Blue #475569</div></div>
+    <div class="logo-card"><img src="logos/v2/11b-atom-stacked.png"><div class="label">11B: Atom Mark + Stacked Text</div><div class="sublabel">Steel Blue #475569 + Dark Slate #0F172A</div></div>
+    <div class="logo-card"><img src="logos/v2/11c-hexagon.jpeg"><div class="label">11C: Hexagon Badge + Monospaced</div><div class="sublabel">Cadet Blue #4B6B82 + Graphite #374151</div></div>
+    <div class="logo-card alt"><img src="logos/v2/11c-alt-hexagon.png"><div class="label">11C Alt: Hex Badge Variant</div><div class="sublabel">Cadet Blue #4B6B82 + Light Blue-Grey #7B98B4</div></div>
+    <div class="logo-card"><img src="logos/v2/11d-dot-separator.png"><div class="label">11D: Square Dot Separator</div><div class="sublabel">Warm Dark #44403C + Petrol #2C4A5E</div></div>
+    <div class="logo-card alt"><img src="logos/v2/11d-alt-warm.png"><div class="label">11D Alt: Warm Tone Variant</div><div class="sublabel">Warm Dark #44403C + Petrol #2C4A5E (warm shift)</div></div>
+    <div class="logo-card"><img src="logos/v2/11e-vl-monogram.png"><div class="label">11E: VL Outlined Monogram</div><div class="sublabel">Slate Teal #3D5A6E + Charcoal #1E293B</div></div>
+  </div>
+
+  <h3>Color Palettes</h3>
+  <div class="two-col">
+    <div class="palette-block">
+      <h4>11A / 11B (Steel Blue anchor)</h4>
+      <div class="color-row"><div class="swatch" style="background:#475569"></div><span class="color-hex">#475569</span> <span class="color-name">Steel Blue</span></div>
+      <div class="color-row"><div class="swatch" style="background:#1E293B"></div><span class="color-hex">#1E293B</span> <span class="color-name">Charcoal</span></div>
+      <div class="color-row"><div class="swatch" style="background:#94A3B8"></div><span class="color-hex">#94A3B8</span> <span class="color-name">Silver (icon)</span></div>
+      <div class="color-row"><div class="swatch" style="background:#FFFFFF"></div><span class="color-hex">#FFFFFF</span> <span class="color-name">White</span></div>
+    </div>
+    <div class="palette-block">
+      <h4>11C / 11D / 11E (Complementary)</h4>
+      <div class="color-row"><div class="swatch" style="background:#4B6B82"></div><span class="color-hex">#4B6B82</span> <span class="color-name">Cadet Blue</span></div>
+      <div class="color-row"><div class="swatch" style="background:#3D5A6E"></div><span class="color-hex">#3D5A6E</span> <span class="color-name">Slate Teal</span></div>
+      <div class="color-row"><div class="swatch" style="background:#44403C"></div><span class="color-hex">#44403C</span> <span class="color-name">Warm Dark</span></div>
+      <div class="color-row"><div class="swatch" style="background:#78909C"></div><span class="color-hex">#78909C</span> <span class="color-name">Blue-Grey</span></div>
+    </div>
+  </div>
+
+  <h3>Specifications</h3>
+  <div class="spec-row"><span class="spec-label">Typography (11A)</span><span class="spec-value">Bold + regular sans pair, circuit-node icon with blue highlight</span></div>
+  <div class="spec-row"><span class="spec-label">Typography (11B)</span><span class="spec-value">Geometric sans, weight hierarchy, atom/orbital icon above</span></div>
+  <div class="spec-row"><span class="spec-label">Typography (11C)</span><span class="spec-value">Monospaced (IBM Plex Mono), hexagon badge around "V"</span></div>
+  <div class="spec-row"><span class="spec-label">Typography (11D)</span><span class="spec-value">Rounded geometric sans, square dot separator between words</span></div>
+  <div class="spec-row"><span class="spec-label">Typography (11E)</span><span class="spec-value">Thin outlined geometric VL monogram + tracked wordmark below</span></div>
+  <div class="spec-row"><span class="spec-label">Mode</span><span class="spec-value">Light mode consumer, dark mode developer/technical</span></div>
+  <div class="spec-row"><span class="spec-label">Target</span><span class="spec-value">Developers, protocol builders, technical credibility seekers</span></div>
+</div>
+
+<!-- PAGES 9-10: COMPARISON -->
+<div class="page">
+  <h2>Side-by-Side Comparison</h2>
+  <p class="section-intro">How each direction maps to different contexts, audiences, and use cases.</p>
+
+  <table>
+    <tr><th>Attribute</th><th>Void Capital</th><th>void.</th><th>Void Labs</th></tr>
+    <tr><td><strong>Primary Audience</strong></td><td>Institutional, funds, treasuries</td><td>Retail consumers, first-time DeFi</td><td>Developers, builders, technical users</td></tr>
+    <tr><td><strong>Brand Personality</strong></td><td>Authoritative, serious, premium</td><td>Simple, clean, approachable</td><td>Technical, scientific, builder-credible</td></tr>
+    <tr><td><strong>Trust Signal</strong></td><td>Typography = authority (Goldman model)</td><td>Simplicity = nothing to hide (Stripe model)</td><td>Technical depth = competence (Lab coat effect)</td></tr>
+    <tr><td><strong>Landing Page CTA</strong></td><td>"Schedule a Consultation"</td><td>"Start Earning"</td><td>"Explore the Protocol"</td></tr>
+    <tr><td><strong>X/Social Tone</strong></td><td>Thought leadership, market analysis</td><td>Clean, punchy, single-insight posts</td><td>Technical updates, dev content, shipped features</td></tr>
+    <tr><td><strong>Best Tagline</strong></td><td>"Institutional-grade DeFi"</td><td>"Simply earn"</td><td>"We build. You earn."</td></tr>
+    <tr><td><strong>Typography Feel</strong></td><td>Serif + sans-serif mix, traditional authority</td><td>Pure geometric sans, maximum readability</td><td>Sans + monospace, technical precision</td></tr>
+    <tr><td><strong>Anchor Color</strong></td><td>#475569 Steel Blue</td><td>#475569 Steel Blue</td><td>#475569 Steel Blue</td></tr>
+    <tr><td><strong>Psychology Leverage</strong></td><td>Authority bias, lab coat effect</td><td>Cognitive fluency, Hick's Law</td><td>Ability trust (Mayer model), builder narrative</td></tr>
+    <tr><td><strong>Risk</strong></td><td>Too narrow (excludes retail)</td><td>Too generic (no personality)</td><td>Too technical (alienates mainstream)</td></tr>
+  </table>
+
+  <h3>The Hybrid Option</h3>
+  <p>These three directions don't have to be mutually exclusive. The strongest approach may be a <strong>tiered brand architecture</strong>:</p>
+  <table>
+    <tr><th>Tier</th><th>Brand</th><th>Audience</th><th>Usage</th></tr>
+    <tr><td>Consumer Product</td><td><strong>void.</strong></td><td>Retail depositors</td><td>Landing page, app, social media</td></tr>
+    <tr><td>Institutional Product</td><td><strong>Void Capital</strong></td><td>Funds, treasuries</td><td>Institutional landing page, whitepapers</td></tr>
+    <tr><td>Corporate / Dev</td><td><strong>Void Labs</strong></td><td>Developers, partners</td><td>GitHub, docs, technical blog, corporate</td></tr>
+  </table>
+  <p>This mirrors what Aave (App / Pro / Institutional) and Coinbase (Coinbase / Advanced / Prime) do. One brand family, three faces.</p>
+
+  <div class="footer-note">
+    Void Rebrand V2 Shortlist | April 1, 2026 | 3 Directions, 19 Logo Concepts<br>
+    All logos are AI-generated concepts for directional reference. Files: companies/voidai/research/logos/v2/
+  </div>
+</div>
+
+<!-- PAGE 11: PERSONAL PICKS -->
+<div class="page">
+  <h2>Personal Picks</h2>
+  <p class="section-intro">Vew's final selections across the three brand directions.</p>
+
+  <h3>Void Capital</h3>
+  <div style="max-width:420px; margin:10px 0;">
+    <div class="pick-card"><img src="logos/v2/8b-horizontal-divider.jpeg"><div class="label">8B: Horizontal with Divider</div><div class="sublabel">Steel Blue #475569 + Warm Charcoal #292524</div></div>
+  </div>
+
+  <h3>void.</h3>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:10px 0;">
+    <div class="pick-card"><img src="logos/v2/10e-stencil-cuts.jpeg"><div class="label">10E: Bold Stencil + Negative Space</div><div class="sublabel">Stone Blue #4A5E73 + Ash Grey #6B7280</div></div>
+    <div class="pick-card"><img src="logos/v2/10e-alt-stencil.png"><div class="label">10E Alt: Stencil Variant</div><div class="sublabel">Stone Blue #4A5E73 + Silver #94A3B8</div></div>
+  </div>
+
+  <h3>Void Labs</h3>
+  <div style="max-width:420px; margin:10px 0;">
+    <div class="pick-card"><img src="logos/v2/11a-circuit-horizontal.jpeg"><div class="label">11A: Circuit Icon + Horizontal</div><div class="sublabel">Charcoal #1E293B + Steel Blue #475569</div></div>
+  </div>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:10px 0;">
+    <div class="pick-card"><img src="logos/v2/11d-dot-separator.png"><div class="label">11D: Square Dot Separator</div><div class="sublabel">Warm Dark #44403C + Petrol #2C4A5E</div></div>
+    <div class="pick-card"><img src="logos/v2/11d-alt-warm.png"><div class="label">11D Alt: Warm Tone Variant</div><div class="sublabel">Warm Dark #44403C + Petrol #2C4A5E</div></div>
+  </div>
+
+  <div class="footer-note" style="margin-top:40px;">
+    Personal Picks | Vew | April 1, 2026
+  </div>
+</div>
+
+</body>
+</html>
