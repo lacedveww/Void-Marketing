@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Void Protocol - Final Logo Set</title>
+<title>Void Protocol - Vortex Pattern Variants</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -11,22 +11,18 @@
   .header { text-align: center; padding: 50px 40px 30px; }
   .header h1 { font-size: 26pt; font-weight: 800; letter-spacing: -1px; margin-bottom: 6px; }
   .header h1 span { background: linear-gradient(135deg, #534AB7, #718AFC); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .header p { color: #8F8BA8; font-size: 12px; max-width: 420px; margin: 8px auto 0; line-height: 1.6; }
+  .header p { color: #8F8BA8; font-size: 12px; max-width: 520px; margin: 8px auto 0; line-height: 1.6; }
 
   .grid { max-width: 1100px; margin: 0 auto; padding: 0 40px 50px; display: flex; flex-direction: column; gap: 20px; }
 
   .card { border-radius: 12px; overflow: hidden; border: 1px solid rgba(83,74,183,0.2); }
   .card-header { padding: 10px 18px; display: flex; justify-content: space-between; align-items: center; background: rgba(83,74,183,0.08); border-bottom: 1px solid rgba(83,74,183,0.15); }
   .card-header h3 { font-size: 12px; font-weight: 600; color: #BAC3FE; }
-  .card-header .desc { font-size: 10px; color: #6B6784; }
   .card-header .tag { font-size: 10px; color: #8F8BA8; background: rgba(83,74,183,0.15); padding: 2px 9px; border-radius: 20px; }
-  .card-header .tag.pri { background: rgba(83,74,183,0.3); color: #DDE1FF; }
+  .card-header .tag.ref { background: rgba(113,138,252,0.15); color: #718AFC; }
 
-  .card-body { display: flex; align-items: center; justify-content: center; padding: 24px; }
-  .card-body.light { background: #f5f5f7; }
-  .card-body.dark { background: #120F2E; }
-  .card-body.checker { background-image: linear-gradient(45deg, #eee 25%, transparent 25%), linear-gradient(-45deg, #eee 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #eee 75%), linear-gradient(-45deg, transparent 75%, #eee 75%); background-size: 16px 16px; background-position: 0 0, 0 8px, 8px -8px, -8px 0; background-color: #fff; }
-  .card-body img { max-width: 100%; height: auto; max-height: 200px; object-fit: contain; }
+  .card-body { display: flex; align-items: center; justify-content: center; padding: 24px; background: #f5f5f7; }
+  .card-body img { max-width: 100%; height: auto; max-height: 220px; object-fit: contain; }
 
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
@@ -44,62 +40,53 @@
 <body>
 
   <div class="header">
-    <h1><span>Void Protocol</span> - Final Logo Set</h1>
-    <p>5 variants for different contexts. Clean vortex, no distortions, vector-ready.</p>
+    <h1><span>Void Protocol</span> - Vortex Pattern Variants</h1>
+    <p>Same logo, same purple color, same text. Only the vortex spiral pattern is modified in each variant.</p>
   </div>
 
   <div class="grid">
 
-    <!-- PRIMARY: Full color on light -->
+    <!-- BASE -->
     <div class="card">
-      <div class="card-header">
-        <h3>Full Color on Light</h3>
-        <span class="tag pri">Primary</span>
-      </div>
-      <div class="card-body light"><img src="10g-v3-purple.png"></div>
+      <div class="card-header"><h3>Base (Original Vortex)</h3><span class="tag ref">Reference</span></div>
+      <div class="card-body"><img src="10g-v3-base.png"></div>
     </div>
 
-    <!-- DARK + BLACK DOT -->
+    <!-- TIGHTER + LOOSER -->
     <div class="two-col">
       <div class="card">
-        <div class="card-header">
-          <h3>Full Color on Dark</h3>
-          <span class="tag">Dark backgrounds</span>
-        </div>
-        <div class="card-body dark"><img src="10g-v3-dark.png"></div>
+        <div class="card-header"><h3>Tighter Swirl</h3><span class="tag">Arms wound inward</span></div>
+        <div class="card-body"><img src="10g-v3-tighter.png"></div>
       </div>
       <div class="card">
-        <div class="card-header">
-          <h3>Black Dot Variant</h3>
-          <span class="tag">Banking / formal</span>
-        </div>
-        <div class="card-body light"><img src="10g-v3-purple-blackdot.png"></div>
+        <div class="card-header"><h3>Looser Swirl</h3><span class="tag">Arms unwound outward</span></div>
+        <div class="card-body"><img src="10g-v3-looser.png"></div>
       </div>
     </div>
 
-    <!-- MONO VERSIONS -->
+    <!-- REVERSED + RINGS -->
     <div class="two-col">
       <div class="card">
-        <div class="card-header">
-          <h3>Monochrome Black</h3>
-          <span class="tag">Print / watermark</span>
-        </div>
-        <div class="card-body light"><img src="10g-v3-mono.png"></div>
+        <div class="card-header"><h3>Reversed Spiral</h3><span class="tag">Direction flipped</span></div>
+        <div class="card-body"><img src="10g-v3-reversed.png"></div>
       </div>
       <div class="card">
-        <div class="card-header">
-          <h3>Monochrome White</h3>
-          <span class="tag">Dark print / merch</span>
-        </div>
-        <div class="card-body dark"><img src="10g-v3-mono-white.png"></div>
+        <div class="card-header"><h3>Concentric Rings</h3><span class="tag">Ring pattern, no spiral</span></div>
+        <div class="card-body"><img src="10g-v3-rings.png"></div>
       </div>
+    </div>
+
+    <!-- BLACK DOT VARIANT -->
+    <div class="card">
+      <div class="card-header"><h3>Base + Black i-dot</h3><span class="tag">Alternative styling</span></div>
+      <div class="card-body"><img src="10g-v3-purple-blackdot.png"></div>
     </div>
 
   </div>
 
   <!-- PALETTE -->
   <div class="palette">
-    <h2>Color Palette</h2>
+    <h2>Color Palette (same across all variants)</h2>
     <div class="swatches">
       <div class="sw l" style="background:#120F2E;"><span>#120F2E</span></div>
       <div class="sw l" style="background:#1E1A4B;"><span>#1E1A4B</span></div>
@@ -114,7 +101,7 @@
     </div>
   </div>
 
-  <div class="footer">Void Protocol | April 2026 | Logo 10G Vortex | #534AB7 + #718AFC</div>
+  <div class="footer">Void Protocol | April 2026 | 5 vortex pattern variants + black dot option</div>
 
 </body>
 </html>
